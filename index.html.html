@@ -281,7 +281,9 @@
 
 
         const observationCache = new Map();
-        let currentErrorRetryCallback = null; 
+        let currentErrorRetryCallback = null;
+        let fetchQueue = Promise.resolve();
+        let lastFetchTimestamp = 0;
 
         function switchScreen(screenName) {
             startScreen.classList.remove('active'); loadingScreen.classList.remove('active');
@@ -294,88 +296,93 @@
         }
         
         async function fetchMushroomObservations(taxonId, excludeObservationId = null) {
-            const requestedSpeciesInfo = mushroomSpecies.find(s => s.id === taxonId);
-            let apiUrl = `https://api.inaturalist.org/v1/observations?taxon_id=${taxonId}&iconic_taxa=Fungi&quality_grade=research&photos=true&photo_license=cc-by,cc-by-nc,cc-by-sa,cc-by-nc-sa,cc0&per_page=50&order_by=votes&locale=en`;
-            if (excludeObservationId) {
-                apiUrl += `&not_id=${excludeObservationId}`;
-            }
+            fetchQueue = fetchQueue.then(async () => {
+                const now = Date.now();
+                const wait = Math.max(0, 1000 - (now - lastFetchTimestamp));
+                if (wait > 0) await new Promise(r => setTimeout(r, wait));
+                lastFetchTimestamp = Date.now();
 
-            const cacheKey = taxonId + (excludeObservationId || '');
-            if (observationCache.has(cacheKey)) {
-                const cached = observationCache.get(cacheKey);
-                if (cached.timestamp > Date.now() - 3600000 * 24) { 
-                    return {...cached.data}; 
+                const requestedSpeciesInfo = mushroomSpecies.find(s => s.id === taxonId);
+                let apiUrl = `https://api.inaturalist.org/v1/observations?taxon_id=${taxonId}&iconic_taxa=Fungi&quality_grade=research&photos=true&photo_license=cc-by,cc-by-nc,cc-by-sa,cc-by-nc-sa,cc0&per_page=50&order_by=votes&locale=en`;
+                if (excludeObservationId) {
+                    apiUrl += `&not_id=${excludeObservationId}`;
                 }
-            }
-            
-            try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error(`API ${response.status} for taxon ${taxonId}`);
-                
-                let data = await response.json();
-                // Filter for observations with at least 1 photo
-                let observationsWithPhotos = data.results.filter(obs => obs.photos && obs.photos.length >= 1 && obs.taxon);
-                
-                if (observationsWithPhotos.length === 0) {
-                    console.warn(`No observations with photos found for taxon ${taxonId} (intended: ${requestedSpeciesInfo?.name})${excludeObservationId ? ` (excluding obs ID ${excludeObservationId})` : ''}.`);
-                    return { photos: [], attribution: "Not enough quality photos found.", observationUrl: null, error: true, speciesId: taxonId, observationId: null };
-                }
-                
-                observationsWithPhotos.sort(() => 0.5 - Math.random()); 
 
-                let suitableObservation = null;
-                for (const obs of observationsWithPhotos) {
-                    const obsTaxon = obs.taxon; 
-                    if (obsTaxon.id === taxonId || (obsTaxon.ancestor_ids && obsTaxon.ancestor_ids.includes(taxonId))) {
-                        suitableObservation = obs;
-                        break; 
-                    } else {
-                         console.warn(`[STRICT CHECK FAILED OBS DURING ITERATION] Req: ${taxonId} (${requestedSpeciesInfo?.name}). ObsID ${obs.id} is Taxon: ${obsTaxon.id} (${obsTaxon.name}). Skipping.`);
+                const cacheKey = taxonId + (excludeObservationId || '');
+                if (observationCache.has(cacheKey)) {
+                    const cached = observationCache.get(cacheKey);
+                    if (cached.timestamp > Date.now() - 3600000 * 24) {
+                        return { ...cached.data };
                     }
                 }
 
-                if (!suitableObservation) { 
-                     console.error(`[NO STRICT MATCH] No observation for taxon ${taxonId} (${requestedSpeciesInfo?.name}) passed strict ID check from ${observationsWithPhotos.length} candidates.`);
-                    return { photos: [], attribution: "Could not find accurately matched photos.", error: true, speciesId: taxonId, observationId: null };
-                }
-                
-                const selectedObservation = suitableObservation; 
-                const finalObsTaxon = selectedObservation.taxon; 
+                try {
+                    const response = await fetch(apiUrl);
+                    if (!response.ok) throw new Error(`API ${response.status} for taxon ${taxonId}`);
 
-                // Get first 3 photos, or duplicate the first if needed to make 4
-                const availablePhotos = selectedObservation.photos.slice(0, 3);
-                let gamePhotos = availablePhotos.map((photo, index) => ({
-                    url: photo.url.replace('square', 'medium'),
-                    attribution: photo.attribution || "iNaturalist contributor"
-                }));
-                
-                // If we have fewer than 4 photos, duplicate the first photo to fill the 4th slot
-                while (gamePhotos.length < 4) {
-                    if (gamePhotos.length > 0) {
-                        gamePhotos.push({
-                            url: gamePhotos[0].url,
-                            attribution: gamePhotos[0].attribution
-                        });
-                    } else {
-                        break; // Shouldn't happen, but safety check
+                    let data = await response.json();
+                    let observationsWithPhotos = data.results.filter(obs => obs.photos && obs.photos.length >= 1 && obs.taxon);
+
+                    if (observationsWithPhotos.length === 0) {
+                        console.warn(`No observations with photos found for taxon ${taxonId} (intended: ${requestedSpeciesInfo?.name})${excludeObservationId ? ` (excluding obs ID ${excludeObservationId})` : ''}.`);
+                        return { photos: [], attribution: "Not enough quality photos found.", observationUrl: null, error: true, speciesId: taxonId, observationId: null };
                     }
+
+                    observationsWithPhotos.sort(() => 0.5 - Math.random());
+
+                    let suitableObservation = null;
+                    for (const obs of observationsWithPhotos) {
+                        const obsTaxon = obs.taxon;
+                        if (obsTaxon.id === taxonId || (obsTaxon.ancestor_ids && obsTaxon.ancestor_ids.includes(taxonId))) {
+                            suitableObservation = obs;
+                            break;
+                        } else {
+                            console.warn(`[STRICT CHECK FAILED OBS DURING ITERATION] Req: ${taxonId} (${requestedSpeciesInfo?.name}). ObsID ${obs.id} is Taxon: ${obsTaxon.id} (${obsTaxon.name}). Skipping.`);
+                        }
+                    }
+
+                    if (!suitableObservation) {
+                        console.error(`[NO STRICT MATCH] No observation for taxon ${taxonId} (${requestedSpeciesInfo?.name}) passed strict ID check from ${observationsWithPhotos.length} candidates.`);
+                        return { photos: [], attribution: "Could not find accurately matched photos.", error: true, speciesId: taxonId, observationId: null };
+                    }
+
+                    const selectedObservation = suitableObservation;
+
+                    const availablePhotos = selectedObservation.photos.slice(0, 3);
+                    let gamePhotos = availablePhotos.map((photo, index) => ({
+                        url: photo.url.replace('square', 'medium'),
+                        attribution: photo.attribution || "iNaturalist contributor"
+                    }));
+
+                    while (gamePhotos.length < 4) {
+                        if (gamePhotos.length > 0) {
+                            gamePhotos.push({
+                                url: gamePhotos[0].url,
+                                attribution: gamePhotos[0].attribution
+                            });
+                        } else {
+                            break;
+                        }
+                    }
+
+                    const result = {
+                        photos: gamePhotos,
+                        attribution: `Photos by ${selectedObservation.user?.login || 'Unknown User'} via iNaturalist (${availablePhotos[0]?.license_code || 'License N/A'})`,
+                        observationUrl: selectedObservation.uri,
+                        observationId: selectedObservation.id,
+                        error: false,
+                        speciesId: taxonId
+                    };
+
+                    observationCache.set(cacheKey, { data: { ...result }, timestamp: Date.now() });
+                    return result;
+
+                } catch (error) {
+                    console.error(`API Error in fetchMushroomObservations for taxon ${taxonId} (intended: ${requestedSpeciesInfo?.name}):`, error);
+                    return { photos: [], attribution: "Error fetching species data.", error: true, speciesId: taxonId, observationId: null };
                 }
-                
-                const result = {
-                    photos: gamePhotos,
-                    attribution: `Photos by ${selectedObservation.user?.login || 'Unknown User'} via iNaturalist (${availablePhotos[0]?.license_code || 'License N/A'})`,
-                    observationUrl: selectedObservation.uri,
-                    observationId: selectedObservation.id,
-                    error: false, speciesId: taxonId 
-                };
-                
-                observationCache.set(cacheKey, { data: {...result}, timestamp: Date.now() }); 
-                return result;
-                
-            } catch (error) {
-                console.error(`API Error in fetchMushroomObservations for taxon ${taxonId} (intended: ${requestedSpeciesInfo?.name}):`, error);
-                return { photos: [], attribution: "Error fetching species data.", error: true, speciesId: taxonId, observationId: null };
-            }
+            });
+            return fetchQueue;
         }
 
         async function startGame() {
