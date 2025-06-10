@@ -281,7 +281,38 @@
 
 
         const observationCache = new Map();
-        let currentErrorRetryCallback = null; 
+        const LOCAL_STORAGE_KEY = 'observationCache';
+
+        function saveCacheToLocalStorage() {
+            try {
+                const obj = {};
+                for (const [key, value] of observationCache.entries()) {
+                    obj[key] = value;
+                }
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(obj));
+            } catch (e) {
+                console.warn('Failed to save cache to localStorage', e);
+            }
+        }
+
+        function loadCacheFromLocalStorage() {
+            try {
+                const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+                if (!stored) return;
+                const parsed = JSON.parse(stored);
+                const now = Date.now();
+                for (const key in parsed) {
+                    const entry = parsed[key];
+                    if (entry.timestamp && entry.timestamp > now - 86400000 && entry.data) {
+                        observationCache.set(key, entry);
+                    }
+                }
+            } catch (e) {
+                console.warn('Failed to load cache from localStorage', e);
+            }
+        }
+
+        let currentErrorRetryCallback = null;
 
         function switchScreen(screenName) {
             startScreen.classList.remove('active'); loadingScreen.classList.remove('active');
@@ -369,7 +400,8 @@
                     error: false, speciesId: taxonId 
                 };
                 
-                observationCache.set(cacheKey, { data: {...result}, timestamp: Date.now() }); 
+                observationCache.set(cacheKey, { data: {...result}, timestamp: Date.now() });
+                saveCacheToLocalStorage();
                 return result;
                 
             } catch (error) {
@@ -641,9 +673,10 @@
             }
         });
         window.addEventListener('load', () => {
+            loadCacheFromLocalStorage();
             checkAPIStatus();
             questionCounterDisplay.textContent = `0 / ${gameState.questionsTarget}`;
-            switchScreen('start'); 
+            switchScreen('start');
         });
     </script>
 </body>
