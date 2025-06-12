@@ -227,58 +227,132 @@
         };
 
         const mushroomSpecies = [
-            { id: 48715, name: "Fly Agaric", scientific: "Amanita muscaria", genus: "Amanita" },
-            { id: 48350, name: "Oyster Mushroom", scientific: "Pleurotus ostreatus", genus: "Pleurotus" },
-            { id: 53715, name: "Lion's Mane", scientific: "Hericium erinaceus", genus: "Hericium" },
-            { id: 47392, name: "Turkey Tail", scientific: "Trametes versicolor", genus: "Trametes" }, 
-            { id: 55265, name: "Chicken of the Woods", scientific: "Laetiporus sulphureus", genus: "Laetiporus" }, 
-            { id: 48431, name: "King Bolete", scientific: "Boletus edulis", genus: "Boletus" },
-            { id: 67747, name: "Golden Chanterelle", scientific: "Cantharellus cibarius", genus: "Cantharellus" },
-            { id: 54026, name: "Shaggy Mane", scientific: "Coprinus comatus", genus: "Coprinus" },
-            { id: 47652, name: "Common Puffball", scientific: "Lycoperdon perlatum", genus: "Lycoperdon" },
-            { id: 56021, name: "Velvet Shank", scientific: "Flammulina velutipes", genus: "Flammulina" },
-            { id: 117556, name: "Wood Ear", scientific: "Auricularia auricula-judae", genus: "Auricularia" },
-            { id: 54844, name: "Honey Mushroom", scientific: "Armillaria mellea", genus: "Armillaria" },
-            { id: 125434, name: "Artist's Conk", scientific: "Ganoderma applanatum", genus: "Ganoderma" }, 
-            { id: 55646, name: "Field Mushroom", scientific: "Agaricus campestris", genus: "Agaricus" },
-            { id: 118394, name: "Yellow Stainer", scientific: "Agaricus xanthodermus", genus: "Agaricus" },
-            { id: 70737, name: "Horse Mushroom", scientific: "Agaricus arvensis", genus: "Agaricus" },
-            { id: 58691, name: "Pavement Mushroom", scientific: "Agaricus bitorquis", genus: "Agaricus" },
-            { id: 60506, name: "Scaly Wood Mushroom", scientific: "Agaricus silvaticus", genus: "Agaricus" }, 
-            { id: 55245, name: "Scarlet Waxcap", scientific: "Hygrocybe coccinea", genus: "Hygrocybe" },
-            { id: 51869, name: "Crimson Waxcap", scientific: "Hygrocybe punicea", genus: "Hygrocybe" },
-            { id: 128868, name: "Blackening Waxcap", scientific: "Hygrocybe conica", genus: "Hygrocybe" }, 
-            { id: 63475, name: "Parrot Waxcap", scientific: "Gliophorus psittacinus", genus: "Gliophorus" }, 
-            { id: 55240, name: "Meadow Waxcap", scientific: "Cuphophyllus pratensis", genus: "Cuphophyllus" }, 
-            { id: 120469, name: "Pale Oyster", scientific: "Pleurotus pulmonarius", genus: "Pleurotus" },
-            { id: 334340, name: "Veiled Oyster", scientific: "Pleurotus dryinus", genus: "Pleurotus" },
-            { id: 125683, name: "Golden Oyster", scientific: "Pleurotus citrinopileatus", genus: "Pleurotus" },
-            { id: 48538, name: "Branched Oyster", scientific: "Pleurotus cornucopiae", genus: "Pleurotus" },
-            { id: 53778, name: "Death Cap", scientific: "Amanita phalloides", genus: "Amanita" },
-            { id: 67661, name: "The Blusher", scientific: "Amanita rubescens", genus: "Amanita" },
-            { id: 49917, name: "Panther Cap", scientific: "Amanita pantherina", genus: "Amanita" },
-            { id: 63271, name: "False Death Cap", scientific: "Amanita citrina", genus: "Amanita" },
-            { id: 124459, name: "Red-belted Polypore", scientific: "Fomitopsis pinicola", genus: "Fomitopsis" },
-            { id: 83490, name: "Birch Polypore", scientific: "Fomitopsis betulina", genus: "Fomitopsis" },
-            { id: 58000, name: "Lumpy Bracket", scientific: "Trametes gibbosa", genus: "Trametes" },
-            { id: 55244, name: "Reishi Mushroom", scientific: "Ganoderma lucidum", genus: "Ganoderma" }, 
-            { id: 120041, name: "Dryad's Saddle", scientific: "Polyporus squamosus", genus: "Polyporus" },
-            { id: 57343, name: "Giant Puffball", scientific: "Calvatia gigantea", genus: "Calvatia" },
-            { id: 48526, name: "Common Inkcap", scientific: "Coprinopsis atramentaria", genus: "Coprinopsis" },
-            { id: 55453, name: "Magpie Inkcap", scientific: "Coprinopsis picacea", genus: "Coprinopsis" },
-            { id: 54025, name: "Liberty Cap", scientific: "Psilocybe semilanceata", genus: "Psilocybe" },
-            { id: 53903, name: "Bay Bolete", scientific: "Imleria badia", genus: "Imleria" },
-            { id: 53478, name: "Slippery Jack", scientific: "Suillus luteus", genus: "Suillus" },
-            { id: 63232, name: "Birch Bolete", scientific: "Leccinum scabrum", genus: "Leccinum" },
-            { id: 54163, name: "Red Cracking Bolete", scientific: "Xerocomellus chrysenteron", genus: "Xerocomellus" },
-            { id: 63211, name: "Bitter Beech Bolete", scientific: "Caloboletus calopus", genus: "Caloboletus" },
-            { id: 63460, name: "Bleeding Bonnet", scientific: "Mycena haematopus", genus: "Mycena" },
-            { id: 63446, name: "Common Bonnet", scientific: "Mycena galericulata", genus: "Mycena" },
-            { id: 63471, name: "Clustered Bonnet", scientific: "Mycena inclinata", genus: "Mycena" },
-            { id: 63478, name: "Lilac Bonnet", scientific: "Mycena pura", genus: "Mycena" },
-            { id: 130195, name: "Saffrondrop Bonnet", scientific: "Mycena crocata", genus: "Mycena" }
-        ];
-
+    // Amanita (7 species)
+    { id: 48715, name: "Fly Agaric", scientific: "Amanita muscaria", genus: "Amanita", category: "Amanita" },
+    { id: 53778, name: "Death Cap", scientific: "Amanita phalloides", genus: "Amanita", category: "Amanita" },
+    { id: 67661, name: "The Blusher", scientific: "Amanita rubescens", genus: "Amanita", category: "Amanita" },
+    { id: 49917, name: "Panther Cap", scientific: "Amanita pantherina", genus: "Amanita", category: "Amanita" },
+    { id: 63271, name: "False Death Cap", scientific: "Amanita citrina", genus: "Amanita", category: "Amanita" },
+    { id: 63058, name: "Destroying Angel", scientific: "Amanita virosa", genus: "Amanita", category: "Amanita" },
+    { id: 63269, name: "Orange Grisette", scientific: "Amanita crocea", genus: "Amanita", category: "Amanita" },
+    
+    // Agaricus (6 species)
+    { id: 55646, name: "Field Mushroom", scientific: "Agaricus campestris", genus: "Agaricus", category: "Agaricus" },
+    { id: 118394, name: "Yellow Stainer", scientific: "Agaricus xanthodermus", genus: "Agaricus", category: "Agaricus" },
+    { id: 70737, name: "Horse Mushroom", scientific: "Agaricus arvensis", genus: "Agaricus", category: "Agaricus" },
+    { id: 58691, name: "Pavement Mushroom", scientific: "Agaricus bitorquis", genus: "Agaricus", category: "Agaricus" },
+    { id: 60506, name: "Scaly Wood Mushroom", scientific: "Agaricus silvaticus", genus: "Agaricus", category: "Agaricus" },
+    { id: 58646, name: "The Prince", scientific: "Agaricus augustus", genus: "Agaricus", category: "Agaricus" },
+    
+    // Pleurotus (5 species)
+    { id: 48350, name: "Oyster Mushroom", scientific: "Pleurotus ostreatus", genus: "Pleurotus", category: "Pleurotus" },
+    { id: 120469, name: "Pale Oyster", scientific: "Pleurotus pulmonarius", genus: "Pleurotus", category: "Pleurotus" },
+    { id: 334340, name: "Veiled Oyster", scientific: "Pleurotus dryinus", genus: "Pleurotus", category: "Pleurotus" },
+    { id: 125683, name: "Golden Oyster", scientific: "Pleurotus citrinopileatus", genus: "Pleurotus", category: "Pleurotus" },
+    { id: 48538, name: "Branched Oyster", scientific: "Pleurotus cornucopiae", genus: "Pleurotus", category: "Pleurotus" },
+    
+    // Waxcaps (6 species)
+    { id: 55245, name: "Scarlet Waxcap", scientific: "Hygrocybe coccinea", genus: "Hygrocybe", category: "Waxcaps" },
+    { id: 51869, name: "Crimson Waxcap", scientific: "Hygrocybe punicea", genus: "Hygrocybe", category: "Waxcaps" },
+    { id: 128868, name: "Blackening Waxcap", scientific: "Hygrocybe conica", genus: "Hygrocybe", category: "Waxcaps" },
+    { id: 63475, name: "Parrot Waxcap", scientific: "Gliophorus psittacinus", genus: "Gliophorus", category: "Waxcaps" },
+    { id: 55240, name: "Meadow Waxcap", scientific: "Cuphophyllus pratensis", genus: "Cuphophyllus", category: "Waxcaps" },
+    { id: 1218024, name: "Heath Waxcap", scientific: "Gliophorus laetus", genus: "Gliophorus", category: "Waxcaps" },
+    
+    // Boletes (6 species)
+    { id: 48431, name: "King Bolete", scientific: "Boletus edulis", genus: "Boletus", category: "Boletes" },
+    { id: 53903, name: "Bay Bolete", scientific: "Imleria badia", genus: "Imleria", category: "Boletes" },
+    { id: 53478, name: "Slippery Jack", scientific: "Suillus luteus", genus: "Suillus", category: "Boletes" },
+    { id: 63232, name: "Birch Bolete", scientific: "Leccinum scabrum", genus: "Leccinum", category: "Boletes" },
+    { id: 54163, name: "Red Cracking Bolete", scientific: "Xerocomellus chrysenteron", genus: "Xerocomellus", category: "Boletes" },
+    { id: 63211, name: "Bitter Beech Bolete", scientific: "Caloboletus calopus", genus: "Caloboletus", category: "Boletes" },
+    
+    // Mycena (5 species)
+    { id: 63460, name: "Bleeding Bonnet", scientific: "Mycena haematopus", genus: "Mycena", category: "Mycena" },
+    { id: 63446, name: "Common Bonnet", scientific: "Mycena galericulata", genus: "Mycena", category: "Mycena" },
+    { id: 63471, name: "Clustered Bonnet", scientific: "Mycena inclinata", genus: "Mycena", category: "Mycena" },
+    { id: 63478, name: "Lilac Bonnet", scientific: "Mycena pura", genus: "Mycena", category: "Mycena" },
+    { id: 130195, name: "Saffrondrop Bonnet", scientific: "Mycena crocata", genus: "Mycena", category: "Mycena" },
+    
+    // Russula (8 species)
+    { id: 125619, name: "Charcoal Burner", scientific: "Russula cyanoxantha", genus: "Russula", category: "Russula" },
+    { id: 56079, name: "The Sickener", scientific: "Russula emetica", genus: "Russula", category: "Russula" },
+    { id: 355673, name: "Beechwood Sickener", scientific: "Russula nobilis", genus: "Russula", category: "Russula" },
+    { id: 63188, name: "Ochre Brittlegill", scientific: "Russula ochroleuca", genus: "Russula", category: "Russula" },
+    { id: 176754, name: "Purple Brittlegill", scientific: "Russula undulata", genus: "Russula", category: "Russula" },
+    { id: 56081, name: "Greencracked Brittlegill", scientific: "Russula virescens", genus: "Russula", category: "Russula" },
+    { id: 125576, name: "Powdery Brittlegill", scientific: "Russula parazurea", genus: "Russula", category: "Russula" },
+    { id: 416072, name: "Stinking Brittlegill", scientific: "Russula foetens", genus: "Russula", category: "Russula" },
+    
+    // Brackets & Polypores (10 species)
+    { id: 47392, name: "Turkey Tail", scientific: "Trametes versicolor", genus: "Trametes", category: "Brackets & Polypores" },
+    { id: 125434, name: "Artist's Conk", scientific: "Ganoderma applanatum", genus: "Ganoderma", category: "Brackets & Polypores" },
+    { id: 55244, name: "Reishi Mushroom", scientific: "Ganoderma lucidum", genus: "Ganoderma", category: "Brackets & Polypores" },
+    { id: 124459, name: "Red-belted Polypore", scientific: "Fomitopsis pinicola", genus: "Fomitopsis", category: "Brackets & Polypores" },
+    { id: 83490, name: "Birch Polypore", scientific: "Fomitopsis betulina", genus: "Fomitopsis", category: "Brackets & Polypores" },
+    { id: 58000, name: "Lumpy Bracket", scientific: "Trametes gibbosa", genus: "Trametes", category: "Brackets & Polypores" },
+    { id: 120041, name: "Dryad's Saddle", scientific: "Polyporus squamosus", genus: "Polyporus", category: "Brackets & Polypores" },
+    { id: 130039, name: "Smoky Bracket", scientific: "Bjerkandera adusta", genus: "Bjerkandera", category: "Brackets & Polypores" },
+    { id: 47923, name: "Hoof Fungus", scientific: "Fomes fomentarius", genus: "Fomes", category: "Brackets & Polypores" },
+    { id: 55653, name: "Beefsteak Fungus", scientific: "Fistulina hepatica", genus: "Fistulina", category: "Brackets & Polypores" },
+    
+    // Chanterelles & Allies (6 species)
+    { id: 67747, name: "Golden Chanterelle", scientific: "Cantharellus cibarius", genus: "Cantharellus", category: "Chanterelles & Allies" },
+    { id: 1196307, name: "Amethyst Chanterelle", scientific: "Cantharellus amethysteus", genus: "Cantharellus", category: "Chanterelles & Allies" },
+    { id: 175283, name: "Horn of Plenty", scientific: "Craterellus cornucopioides", genus: "Craterellus", category: "Chanterelles & Allies" },
+    { id: 130209, name: "Winter Chanterelle", scientific: "Craterellus tubaeformis", genus: "Craterellus", category: "Chanterelles & Allies" },
+    { id: 127394, name: "False Chanterelle", scientific: "Hygrophoropsis aurantiaca", genus: "Hygrophoropsis", category: "Chanterelles & Allies" },
+    { id: 58857, name: "Hedgehog Fungus", scientific: "Hydnum repandum", genus: "Hydnum", category: "Chanterelles & Allies" },
+    
+    // Funnels & Grassland (13 species)
+    { id: 123623, name: "Clouded Funnel", scientific: "Clitocybe nebularis", genus: "Clitocybe", category: "Funnels & Grassland" },
+    { id: 119227, name: "Trooping Funnel", scientific: "Infundibulicybe geotropa", genus: "Infundibulicybe", category: "Funnels & Grassland" },
+    { id: 125952, name: "Fool's Funnel", scientific: "Clitocybe rivulosa", genus: "Clitocybe", category: "Funnels & Grassland" },
+    { id: 55239, name: "Fairy Ring Champignon", scientific: "Marasmius oreades", genus: "Marasmius", category: "Funnels & Grassland" },
+    { id: 120230, name: "St. George's Mushroom", scientific: "Calocybe gambosa", genus: "Calocybe", category: "Funnels & Grassland" },
+    { id: 125429, name: "Brown Mottlegill", scientific: "Panaeolina foenisecii", genus: "Panaeolina", category: "Funnels & Grassland" },
+    { id: 47652, name: "Common Puffball", scientific: "Lycoperdon perlatum", genus: "Lycoperdon", category: "Funnels & Grassland" },
+    { id: 54026, name: "Shaggy Mane", scientific: "Coprinus comatus", genus: "Coprinus", category: "Funnels & Grassland" },
+    { id: 48526, name: "Common Inkcap", scientific: "Coprinopsis atramentaria", genus: "Coprinopsis", category: "Funnels & Grassland" },
+    { id: 55453, name: "Magpie Inkcap", scientific: "Coprinopsis picacea", genus: "Coprinopsis", category: "Funnels & Grassland" },
+    { id: 127636, name: "Shaggy Parasol", scientific: "Chlorophyllum rhacodes", genus: "Chlorophyllum", category: "Funnels & Grassland" },
+    { id: 47468, name: "The Parasol", scientific: "Macrolepiota procera", genus: "Macrolepiota", category: "Funnels & Grassland" },
+    { id: 54025, name: "Liberty Cap", scientific: "Psilocybe semilanceata", genus: "Psilocybe", category: "Funnels & Grassland" }
+    
+    // Cup & other Saprotrophs (6 species)
+    { id: 119945, name: "Orange Peel Fungus", scientific: "Aleuria aurantia", genus: "Aleuria", category: "Cup & other Saprotrophs" },
+    { id: 119224, name: "King Alfred's Cakes", scientific: "Daldinia concentrica", genus: "Daldinia", category: "Cup & other Saprotrophs" },
+    { id: 84740, name: "Scarlet Elfcup", scientific: "Sarcoscypha austriaca", genus: "Sarcoscypha", category: "Cup & other Saprotrophs" },
+    { id: 55655, name: "Yellow Stagshorn", scientific: "Calocera viscosa", genus: "Calocera", category: "Cup & other Saprotrophs" },
+    { id: 117556, name: "Jelly Ear", scientific: "Auricularia auricula-judae", genus: "Auricularia", category: "Cup & other Saprotrophs" },
+    { id: 54743, name: "Yellow Brain", scientific: "Tremella mesenterica", genus: "Tremella", category: "Cup & other Saprotrophs" },
+    
+    // Woodland Fungi (8 species)
+    { id: 47346, name: "Funeral Bell", scientific: "Galerina marginata", genus: "Galerina", category: "Woodland Fungi" },
+    { id: 56086, name: "False Morel", scientific: "Gyromitra esculenta", genus: "Gyromitra", category: "Woodland Fungi" },
+    { id: 54844, name: "Honey Mushroom", scientific: "Armillaria mellea", genus: "Armillaria", category: "Woodland Fungi" },
+    { id: 60448, name: "Sheathed Woodtuft", scientific: "Kuehneromyces mutabilis", genus: "Kuehneromyces", category: "Woodland Fungi" },
+    { id: 417180, name: "Common Rustgill", scientific: "Gymnopilus penetrans", genus: "Gymnopilus", category: "Woodland Fungi" },
+    { id: 56021, name: "Velvet Shank", scientific: "Flammulina velutipes", genus: "Flammulina", category: "Woodland Fungi" },
+    { id: 206920, name: "Wrinkled Peach", scientific: "Rhodotus palmatus", genus: "Rhodotus", category: "Woodland Fungi" },
+    { id: 63433, name: "Golden Scalycap", scientific: "Pholiota aurivella", genus: "Pholiota", category: "Woodland Fungi" },
+    
+    // Distinctive Oddballs (6 species)
+    { id: 53715, name: "Lion's Mane", scientific: "Hericium erinaceus", genus: "Hericium", category: "Distinctive Oddballs" },
+    { id: 55265, name: "Chicken of the Woods", scientific: "Laetiporus sulphureus", genus: "Laetiporus", category: "Distinctive Oddballs" },
+    { id: 84613, name: "Hen of the Woods", scientific: "Grifola frondosa", genus: "Grifola", category: "Distinctive Oddballs" },
+    { id: 57343, name: "Giant Puffball", scientific: "Calvatia gigantea", genus: "Calvatia", category: "Distinctive Oddballs" },
+    { id: 469901, name: "Devil's Fingers", scientific: "Clathrus archeri", genus: "Clathrus", category: "Distinctive Oddballs" },
+    { id: 53764, name: "Dead Man's Fingers", scientific: "Xylaria polymorpha", genus: "Xylaria", category: "Distinctive Oddballs" },
+    
+    // Blewits & Lookalikes (5 species)
+    { id: 119152, name: "Wood Blewit", scientific: "Lepista nuda", genus: "Lepista", category: "Blewits & Lookalikes" },
+    { id: 1039723, name: "Field Blewit", scientific: "Lepista personata", genus: "Lepista", category: "Blewits & Lookalikes" },
+    { id: 417492, name: "Lilac Fibrecap", scientific: "Inocybe lilacina", genus: "Inocybe", category: "Blewits & Lookalikes" },
+    { id: 63509, name: "Amethyst Deceiver", scientific: "Laccaria amethystina", genus: "Laccaria", category: "Blewits & Lookalikes" },
+    { id: 55254, name: "Bruising Webcap", scientific: "Cortinarius purpurascens", genus: "Cortinarius", category: "Blewits & Lookalikes" },
+        
+];
 
         const observationCache = new Map();
         let currentErrorRetryCallback = null; 
