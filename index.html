@@ -74,7 +74,16 @@
         .start-button:hover, .retry-button:hover, .play-again-button:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(139, 90, 43, 0.3); }
         .modal-content .start-button { margin: 20px auto 0; }
 
-        .image-grid { 
+        .difficulty-select { text-align: center; margin-bottom: 20px; }
+        .difficulty-button {
+            background: #d4c8b8; color: #5d4e37; border: 1px solid #bcaea0;
+            padding: 10px 20px; margin: 0 5px; border-radius: 25px; cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .difficulty-button.active { background: #8b6f47; color: #fff8f0; border-color: #6b5637; }
+        .difficulty-button:hover { background: #c8bbae; }
+
+        .image-grid {
             display: grid; 
             grid-template-columns: repeat(2, 1fr);
             gap: 20px; 
@@ -153,6 +162,11 @@
                 You will be shown 30 mushroom species to identify.<br>
                 Each round shows 4 photos of the same species.
             </p>
+            <div class="difficulty-select" id="difficultySelect">
+                <button class="difficulty-button active" data-difficulty="beginner">Beginner</button>
+                <button class="difficulty-button" data-difficulty="intermediate">Intermediate</button>
+                <button class="difficulty-button" data-difficulty="expert">Expert</button>
+            </div>
             <button class="start-button" id="startGameBtn">Start Game</button>
         </div>
 
@@ -218,12 +232,22 @@
         
         const startGameBtn = document.getElementById('startGameBtn');
         const playAgainBtn = document.getElementById('playAgainBtn');
+        const difficultyButtons = document.querySelectorAll('.difficulty-button');
 
         let gameState = {
-            score: 0, questionsTarget: 30, questionsAnswered: 0, currentStreak: 0, bestStreak: 0,
-            correctAnswersCount: 0, currentQuestion: null, preloadedQuestionData: null,
-            activeScreen: 'start', isGameActive: false, seenSpeciesIdsThisGame: new Set(),
-            newPhotosUsedThisQuestion: false
+            score: 0,
+            questionsTarget: 30,
+            questionsAnswered: 0,
+            currentStreak: 0,
+            bestStreak: 0,
+            correctAnswersCount: 0,
+            currentQuestion: null,
+            preloadedQuestionData: null,
+            activeScreen: 'start',
+            isGameActive: false,
+            seenSpeciesIdsThisGame: new Set(),
+            newPhotosUsedThisQuestion: false,
+            difficulty: 'beginner'
         };
 
         const mushroomSpecies = [
@@ -542,26 +566,37 @@
             newPhotosBtn.style.display = 'block'; newPhotosBtn.disabled = false; newPhotosBtn.textContent = "New Photos (1 use)";
 
             const correctSpeciesForOptions = currentSelectedCorrectSpecies;
-            const options = [correctSpeciesForOptions]; const correctGenus = correctSpeciesForOptions.genus;
-            let sameGenusOptions = mushroomSpecies.filter(s => s.genus === correctGenus && s.id !== correctSpeciesForOptions.id).sort(() => 0.5 - Math.random());
-            for (let i = 0; i < 2 && sameGenusOptions.length > 0; i++) {
-                if (options.length < 4) {
-                    const speciesToAdd = sameGenusOptions.shift();
-                    if (!options.some(opt => opt.id === speciesToAdd.id)) options.push(speciesToAdd); else i--;
+            const options = [correctSpeciesForOptions];
+            const correctCategory = correctSpeciesForOptions.category;
+
+            function shuffle(arr) { return arr.sort(() => 0.5 - Math.random()); }
+
+            if (gameState.difficulty === 'expert') {
+                let sameCat = shuffle(mushroomSpecies.filter(s => s.category === correctCategory && s.id !== correctSpeciesForOptions.id));
+                while (options.length < 4 && sameCat.length > 0) options.push(sameCat.shift());
+            } else if (gameState.difficulty === 'intermediate') {
+                let sameCat = shuffle(mushroomSpecies.filter(s => s.category === correctCategory && s.id !== correctSpeciesForOptions.id));
+                if (sameCat.length > 0) options.push(sameCat.shift());
+                let categoriesUsed = new Set(options.map(o => o.category));
+                let others = shuffle(mushroomSpecies.filter(s => s.category !== correctCategory));
+                for (const sp of others) {
+                    if (options.length >= 4) break;
+                    if (!categoriesUsed.has(sp.category)) { options.push(sp); categoriesUsed.add(sp.category); }
+                }
+            } else {
+                let categoriesUsed = new Set(options.map(o => o.category));
+                let others = shuffle(mushroomSpecies.filter(s => s.category !== correctCategory));
+                for (const sp of others) {
+                    if (options.length >= 4) break;
+                    if (!categoriesUsed.has(sp.category)) { options.push(sp); categoriesUsed.add(sp.category); }
                 }
             }
-            let differentGenusOptions = mushroomSpecies.filter(s => s.genus !== correctGenus && !options.some(opt => opt.id === s.id)).sort(() => 0.5 - Math.random());
-            while (options.length < 4 && differentGenusOptions.length > 0) {
-                const speciesToAdd = differentGenusOptions.shift();
-                 if (!options.some(opt => opt.id === speciesToAdd.id)) options.push(speciesToAdd);
+
+            if (options.length < 4) {
+                let filler = shuffle(mushroomSpecies.filter(s => !options.some(o => o.id === s.id)));
+                while (options.length < 4 && filler.length > 0) options.push(filler.shift());
             }
-            let allOtherSpecies = mushroomSpecies.filter(s => !options.some(opt => opt.id === s.id)).sort(() => 0.5 - Math.random());
-            while (options.length < 4 && allOtherSpecies.length > 0) options.push(allOtherSpecies.shift());
-            while (options.length > 4) options.pop();
-            while (options.length < 4 && mushroomSpecies.length >= 4) { 
-                 let fillOptions = mushroomSpecies.filter(s => !options.some(opt => opt.id === s.id));
-                 if (fillOptions.length > 0) options.push(fillOptions[Math.floor(Math.random()*fillOptions.length)]); else break; 
-            }
+
             options.sort(() => 0.5 - Math.random());
             
             gameState.currentQuestion = {
@@ -658,6 +693,8 @@
             gameState.currentStreak = 0; gameState.bestStreak = 0; gameState.correctAnswersCount = 0;
             gameState.seenSpeciesIdsThisGame.clear(); newPhotosBtn.style.display = 'none';
             updateDisplay(); questionCounterDisplay.textContent = `0 / ${gameState.questionsTarget}`;
+            const activeDiff = document.querySelector('.difficulty-button.active');
+            if (activeDiff) gameState.difficulty = activeDiff.dataset.difficulty;
             switchScreen('start');
         }
         
@@ -707,6 +744,13 @@
         startGameBtn.addEventListener('click', startGame);
         playAgainBtn.addEventListener('click', resetGame);
         newPhotosBtn.addEventListener('click', handleNewPhotosRequest);
+        difficultyButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                difficultyButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                gameState.difficulty = btn.dataset.difficulty;
+            });
+        });
         optionsContainer.addEventListener('click', function(event) {
             const button = event.target.closest('.option-button');
             if (button && !button.disabled) { 
@@ -717,7 +761,9 @@
         window.addEventListener('load', () => {
             checkAPIStatus();
             questionCounterDisplay.textContent = `0 / ${gameState.questionsTarget}`;
-            switchScreen('start'); 
+            const activeDiff = document.querySelector('.difficulty-button.active');
+            if (activeDiff) gameState.difficulty = activeDiff.dataset.difficulty;
+            switchScreen('start');
         });
     </script>
 </body>
