@@ -397,7 +397,7 @@
         
         async function fetchMushroomObservations(taxonId, excludeObservationId = null) {
             const requestedSpeciesInfo = mushroomSpecies.find(s => s.id === taxonId);
-            let apiUrl = `https://api.inaturalist.org/v1/observations?taxon_id=${taxonId}&iconic_taxa=Fungi&quality_grade=research&photos=true&photo_license=cc-by,cc-by-nc,cc-by-sa,cc-by-nc-sa,cc0&per_page=50&order_by=votes&locale=en`;
+            let apiUrl = `https://api.inaturalist.org/v1/observations?taxon_id=${taxonId}&iconic_taxa=Fungi&quality_grade=research&photos=true&photo_license=cc-by,cc-by-nc,cc-by-sa,cc-by-nc-sa,cc-by-nd,cc-by-nc-nd,cc0&per_page=50&order_by=votes&locale=en`;
             if (excludeObservationId) {
                 apiUrl += `&not_id=${excludeObservationId}`;
             }
