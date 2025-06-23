@@ -57,7 +57,16 @@
         h1 { font-size: 2.5em; margin-bottom: 10px; color: #5d4e37; font-weight: 700; letter-spacing: -0.5px; }
         .header p { color: #8b7355; font-size: 1.1em; }
 
-        .game-info { display: flex; justify-content: space-around; margin-bottom: 30px; flex-wrap: wrap; gap: 20px; }
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
         .info-box { background: rgba(139, 90, 43, 0.08); padding: 15px 25px; border-radius: 10px; text-align: center; min-width: 150px; border: 1px solid rgba(139, 90, 43, 0.15); }
         .info-label { font-size: 0.9em; color: #8b7355; margin-bottom: 5px; }
         .info-value { font-size: 1.8em; font-weight: bold; color: #5d4e37; }
@@ -150,10 +159,6 @@
                 <div class="info-label">Question</div>
                 <div class="info-value" id="questionCounter">0 / 30</div>
             </div>
-            <div class="info-box">
-                <div class="info-label">Streak</div>
-                <div class="info-value" id="streak">0</div>
-            </div>
         </div>
 
         <div class="start-screen active">
@@ -211,7 +216,6 @@
         // DOM Elements
         const scoreDisplay = document.getElementById('score');
         const questionCounterDisplay = document.getElementById('questionCounter');
-        const streakDisplay = document.getElementById('streak');
         const imageGrid = document.getElementById('imageGrid');
         const optionsContainer = document.getElementById('optionsContainer');
         const newPhotosBtn = document.getElementById('newPhotosBtn');
@@ -503,7 +507,7 @@
             questionCounterDisplay.textContent = `${gameState.questionsAnswered + 1} / ${gameState.questionsTarget}`;
         }
         function updateDisplay() {
-            scoreDisplay.textContent = gameState.score; streakDisplay.textContent = gameState.currentStreak;
+            scoreDisplay.textContent = gameState.score;
         }
 
         async function loadNewQuestion(isInitialLoad = false) {
