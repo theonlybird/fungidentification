@@ -254,7 +254,7 @@
             difficulty: 'beginner'
         };
 
-        const mushroomSpecies = [
+       const mushroomSpecies = [
     // Amanita (7 species) - VERIFIED
     { id: 48715, name: "Fly Agaric", scientific: "Amanita muscaria", genus: "Amanita", category: "Amanita" }, // ✓ VERIFIED
     { id: 52135, name: "Death Cap", scientific: "Amanita phalloides", genus: "Amanita", category: "Amanita" }, // ✓ CORRECTED from 53778
@@ -379,10 +379,6 @@
     { id: 417492, name: "Lilac Fibrecap", scientific: "Inocybe lilacina", genus: "Inocybe", category: "Blewits & Lookalikes" },
     { id: 63509, name: "Amethyst Deceiver", scientific: "Laccaria amethystina", genus: "Laccaria", category: "Blewits & Lookalikes" },
     { id: 55254, name: "Bruising Webcap", scientific: "Cortinarius purpurascens", genus: "Cortinarius", category: "Blewits & Lookalikes" },
-]; & Polypores" },
-    { id: 130039, name: "Smoky Bracket", scientific: "Bjerkandera adusta", genus: "Bjerkandera", category: "Brackets & Polypores" },
-    { id: 47923, name: "Hoof Fungus", scientific: "Fomes fomentarius", genus: "Fomes", category: "Brackets & Polypores" },
-    { id: 55653, name: "Beefsteak Fungus", scientific: "Fistulina hepatica", genus: "Fistulina", category: "Brackets & Polypores" },
     
     // Chanterelles & Allies (6 species) - CORRECTED
     { id: 47347, name: "Golden Chanterelle", scientific: "Cantharellus cibarius", genus: "Cantharellus", category: "Chanterelles & Allies" }, // ✓ CORRECTED from 67747
@@ -440,6 +436,7 @@
     { id: 63509, name: "Amethyst Deceiver", scientific: "Laccaria amethystina", genus: "Laccaria", category: "Blewits & Lookalikes" },
     { id: 55254, name: "Bruising Webcap", scientific: "Cortinarius purpurascens", genus: "Cortinarius", category: "Blewits & Lookalikes" },
 ];
+        
         const observationCache = new Map();
         const delay = ms => new Promise(res => setTimeout(res, ms));
         let fetchQueue = Promise.resolve();
