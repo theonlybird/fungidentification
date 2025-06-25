@@ -604,6 +604,7 @@
                 if (!potentialSpecies) { console.error("Error: Could not select potential species."); break; }
                 currentSelectedCorrectSpecies = potentialSpecies;
                 speciesTriedThisSlot.add(currentSelectedCorrectSpecies.id);
+                console.log(`🎯 SELECTED CORRECT SPECIES: ${currentSelectedCorrectSpecies.name} (ID: ${currentSelectedCorrectSpecies.id})`);
                 
                 try {
                     if (gameState.preloadedQuestionData?.speciesId === currentSelectedCorrectSpecies.id && !gameState.preloadedQuestionData.data.error) {
@@ -612,6 +613,13 @@
                     } else {
                         currentObservationData = await fetchMushroomObservations(currentSelectedCorrectSpecies.id);
                     }
+                    console.log(`📸 FETCHED OBSERVATION DATA:`, {
+                        requestedSpeciesId: currentSelectedCorrectSpecies.id,
+                        requestedSpeciesName: currentSelectedCorrectSpecies.name,
+                        observationId: currentObservationData.observationId,
+                        observationUrl: currentObservationData.observationUrl,
+                        photosCount: currentObservationData.photos?.length
+                    });
                     // Check for at least 1 photo (we'll create 4 total)
                     if (currentObservationData && !currentObservationData.error && currentObservationData.photos?.length >= 1) {
                         validQuestionLoaded = true;
@@ -676,6 +684,11 @@
                 observationUrl_DEBUG: currentObservationData.observationUrl,
                 currentObservationId: currentObservationData.observationId
             };
+            console.log(`❓ FINAL QUESTION STATE:`, {
+                correctSpeciesId: gameState.currentQuestion.correct.id,
+                correctSpeciesName: gameState.currentQuestion.correct.name,
+                observationUrl: gameState.currentQuestion.observationUrl_DEBUG
+            });
             
             // Display 4 images in 2x2 grid
             imageGrid.innerHTML = currentObservationData.photos.map(photo => `
