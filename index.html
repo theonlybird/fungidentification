@@ -246,7 +246,8 @@
             bestStreak: 0,
             correctAnswersCount: 0,
             currentQuestion: null,
-            preloadedQuestionData: null,
+            preloadQueue: [],
+            preloadQueueSize: 3,
             activeScreen: 'start',
             isGameActive: false,
             seenSpeciesIdsThisGame: new Set(),
@@ -551,14 +552,17 @@
         async function startGame() {
             gameState.score = 0; gameState.questionsAnswered = 0; gameState.currentStreak = 0;
             gameState.bestStreak = 0; gameState.correctAnswersCount = 0; gameState.isGameActive = true;
-            gameState.preloadedQuestionData = null; gameState.seenSpeciesIdsThisGame.clear();
+            gameState.preloadQueue = []; gameState.seenSpeciesIdsThisGame.clear();
             updateDisplay(); questionCounterDisplay.textContent = `0 / ${gameState.questionsTarget}`; 
             switchScreen('loading');
             try {
-                await loadNewQuestion(true); 
+                // Load the first question and start preloading in parallel
+                const [firstQuestion] = await Promise.all([
+                    loadNewQuestion(true),
+                    maintainPreloadQueue()
+                ]);
                 if (!gameState.isGameActive) return; 
                 switchScreen('game');
-                preloadNextQuestion(); 
             } catch (error) { 
                 console.error("Failed to start game (error from initial loadNewQuestion):", error.message);
                 showError(
@@ -607,9 +611,10 @@
                 console.log(`🎯 SELECTED CORRECT SPECIES: ${currentSelectedCorrectSpecies.name} (ID: ${currentSelectedCorrectSpecies.id})`);
                 
                 try {
-                    if (gameState.preloadedQuestionData?.speciesId === currentSelectedCorrectSpecies.id && !gameState.preloadedQuestionData.data.error) {
-                        currentObservationData = gameState.preloadedQuestionData.data; 
-                        gameState.preloadedQuestionData = null; 
+                    // Check if we have preloaded data for this species
+                    const preloadedData = getNextPreloadedQuestion(currentSelectedCorrectSpecies.id);
+                    if (preloadedData && !preloadedData.error) {
+                        currentObservationData = preloadedData;
                     } else {
                         currentObservationData = await fetchMushroomObservations(currentSelectedCorrectSpecies.id);
                     }
@@ -624,7 +629,7 @@
                     if (currentObservationData && !currentObservationData.error && currentObservationData.photos?.length >= 1) {
                         validQuestionLoaded = true;
                     } else {
-                         if (gameState.preloadedQuestionData?.speciesId === currentSelectedCorrectSpecies.id) gameState.preloadedQuestionData = null; 
+                        // If preloaded data was invalid, we already handled the fetch above
                     }
                 } catch (fetchError) {
                      console.error(`Error during fetch for ${currentSelectedCorrectSpecies.name}:`, fetchError);
@@ -706,7 +711,7 @@
             optionsContainer.innerHTML = gameState.currentQuestion.options.map((species, index) => `
                 <button class="option-button" data-species-index="${index}">${species.name}<br><small style="opacity: 0.7;"><em>${species.scientific}</em></small></button>`).join('');
 
-            if (gameState.isGameActive) preloadNextQuestion(currentSelectedCorrectSpecies.id);
+            if (gameState.isGameActive) maintainPreloadQueue(currentSelectedCorrectSpecies.id);
         }
         
         async function handleNewPhotosRequest() {
@@ -755,6 +760,8 @@
                 if (gameState.currentQuestion?.observationUrl_DEBUG) console.warn(`Photos were for observation: ${gameState.currentQuestion.observationUrl_DEBUG}`);
             }
             gameState.questionsAnswered++; updateDisplay(); 
+            // Keep the preload queue filled
+            if (gameState.isGameActive) maintainPreloadQueue();
             setTimeout(() => {
                 if (gameState.isGameActive) { 
                     if (gameState.questionsAnswered >= gameState.questionsTarget) endGame();
@@ -776,7 +783,8 @@
         function resetGame() {
             gameState.isGameActive = false; gameState.score = 0; gameState.questionsAnswered = 0;
             gameState.currentStreak = 0; gameState.bestStreak = 0; gameState.correctAnswersCount = 0;
-            gameState.seenSpeciesIdsThisGame.clear(); newPhotosBtn.style.display = 'none';
+            gameState.seenSpeciesIdsThisGame.clear(); gameState.preloadQueue = []; 
+            newPhotosBtn.style.display = 'none';
             updateDisplay(); questionCounterDisplay.textContent = `0 / ${gameState.questionsTarget}`;
             const activeDiff = document.querySelector('.difficulty-button.active');
             if (activeDiff) gameState.difficulty = activeDiff.dataset.difficulty;
@@ -802,23 +810,63 @@
             img.src = 'https://via.placeholder.com/400x400/cccccc/777777?text=Image+Load+Error';
             img.alt = 'Image failed to load';
         }
-        async function preloadNextQuestion(currentCorrectSpeciesId = null) {
-            if (gameState.preloadedQuestionData || !gameState.isGameActive || gameState.questionsAnswered >= gameState.questionsTarget) return; 
-            let potentialSpeciesToPreload;
-            let availableForPreload = mushroomSpecies.filter(s => s.id !== currentCorrectSpeciesId && !gameState.seenSpeciesIdsThisGame.has(s.id));
-            if(availableForPreload.length === 0) { 
-                availableForPreload = mushroomSpecies.filter(s => s.id !== currentCorrectSpeciesId); 
-                 if(availableForPreload.length === 0 && mushroomSpecies.length > 0) potentialSpeciesToPreload = mushroomSpecies[0]; 
-                 else if (availableForPreload.length > 0) potentialSpeciesToPreload = availableForPreload[Math.floor(Math.random() * availableForPreload.length)];
-                 else return; 
-            } else potentialSpeciesToPreload = availableForPreload[Math.floor(Math.random() * availableForPreload.length)];
-            if (!potentialSpeciesToPreload) return;
-            try {
-                const data = await fetchMushroomObservations(potentialSpeciesToPreload.id);
-                // Check for at least 1 photo (we'll create 4 total)
-                if (data && !data.error && data.photos?.length >= 1) gameState.preloadedQuestionData = { speciesId: potentialSpeciesToPreload.id, data: data }; 
-                else gameState.preloadedQuestionData = null;
-            } catch (error) { console.error('Preload fetch failed:', error); gameState.preloadedQuestionData = null; }
+        function selectSpeciesForPreload(currentCorrectSpeciesId = null) {
+            const preloadedSpeciesIds = gameState.preloadQueue.map(item => item.speciesId);
+            let availableForPreload = mushroomSpecies.filter(s => 
+                s.id !== currentCorrectSpeciesId && 
+                !gameState.seenSpeciesIdsThisGame.has(s.id) &&
+                !preloadedSpeciesIds.includes(s.id)
+            );
+            
+            if (availableForPreload.length === 0) {
+                availableForPreload = mushroomSpecies.filter(s => 
+                    s.id !== currentCorrectSpeciesId && 
+                    !preloadedSpeciesIds.includes(s.id)
+                );
+            }
+            
+            if (availableForPreload.length === 0) return null;
+            return availableForPreload[Math.floor(Math.random() * availableForPreload.length)];
+        }
+
+        async function maintainPreloadQueue(currentCorrectSpeciesId = null) {
+            if (!gameState.isGameActive) return;
+            
+            // Fill the queue up to the desired size
+            while (gameState.preloadQueue.length < gameState.preloadQueueSize) {
+                const potentialSpecies = selectSpeciesForPreload(currentCorrectSpeciesId);
+                if (!potentialSpecies) break;
+                
+                try {
+                    console.log(`🔄 Preloading ${potentialSpecies.name} (ID: ${potentialSpecies.id})`);
+                    const data = await fetchMushroomObservations(potentialSpecies.id);
+                    
+                    // Check for at least 1 photo (we'll create 4 total)
+                    if (data && !data.error && data.photos?.length >= 1) {
+                        gameState.preloadQueue.push({ 
+                            speciesId: potentialSpecies.id, 
+                            data: data,
+                            species: potentialSpecies,
+                            timestamp: Date.now()
+                        });
+                        console.log(`✅ Preloaded ${potentialSpecies.name}. Queue size: ${gameState.preloadQueue.length}`);
+                    } else {
+                        console.warn(`❌ Failed to preload ${potentialSpecies.name} - insufficient photos`);
+                    }
+                } catch (error) {
+                    console.error(`❌ Preload fetch failed for ${potentialSpecies.name}:`, error);
+                }
+            }
+        }
+
+        function getNextPreloadedQuestion(targetSpeciesId) {
+            const index = gameState.preloadQueue.findIndex(item => item.speciesId === targetSpeciesId);
+            if (index !== -1) {
+                const preloadedItem = gameState.preloadQueue.splice(index, 1)[0];
+                console.log(`📦 Using preloaded data for ${preloadedItem.species.name}. Queue size: ${gameState.preloadQueue.length}`);
+                return preloadedItem.data;
+            }
+            return null;
         }
         async function checkAPIStatus() {
             try {
