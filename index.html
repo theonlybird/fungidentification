@@ -406,7 +406,7 @@
                 lastFetchTimestamp = Date.now();
 
                 const requestedSpeciesInfo = mushroomSpecies.find(s => s.id === taxonId);
-               let apiUrl = `https://api.inaturalist.org/v1/observations?taxon_id=${taxonId}&without_taxon_id=54743,48250&quality_grade=research&photos=true&photo_license=cc-by,cc-by-nc,cc-by-sa,cc-by-nc-sa,cc-by-nd,cc-by-nc-nd,cc0&per_page=50&order_by=votes&locale=en`;
+             let apiUrl = `https://api.inaturalist.org/v1/observations?taxon_id=${taxonId}&without_taxon_id=54743,48250&taxon_is_leaf=true&quality_grade=research&photos=true&photo_license=cc-by,cc-by-nc,cc-by-sa,cc-by-nc-sa,cc-by-nd,cc-by-nc-nd,cc0&per_page=50&order_by=votes&locale=en`;
                 if (excludeObservationId) {
                     apiUrl += `&not_id=${excludeObservationId}`;
                 }
