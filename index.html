@@ -436,7 +436,16 @@
 
                 let suitableObservation = null;
                 for (const obs of observationsWithPhotos) {
-                    const obsTaxon = obs.taxon; 
+                    const obsTaxon = obs.taxon;
+                    
+                    // START of the new code
+                    // This check makes sure the observation is actually in the Fungi kingdom
+                    if (obs.taxon.iconic_taxon_name !== 'Fungi') {
+                        console.warn(`[ICONIC TAXON MISMATCH] Skipped observation ${obs.id} - it was identified as '${obs.taxon.iconic_taxon_name}', not 'Fungi'.`);
+                        continue; // This skips the current item and moves to the next one
+                    }
+                    // END of the new code
+
                     if (obsTaxon.id === taxonId || (obsTaxon.ancestor_ids && obsTaxon.ancestor_ids.includes(taxonId))) {
                         suitableObservation = obs;
                         break; 
