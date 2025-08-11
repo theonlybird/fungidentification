@@ -406,10 +406,26 @@
                 lastFetchTimestamp = Date.now();
 
                 const requestedSpeciesInfo = mushroomSpecies.find(s => s.id === taxonId);
-             let apiUrl = `https://api.inaturalist.org/v1/observations?taxon_id=${taxonId}&without_taxon_id=54743,48250&taxon_is_leaf=true&quality_grade=research&photos=true&photo_license=cc-by,cc-by-nc,cc-by-sa,cc-by-nc-sa,cc-by-nd,cc-by-nc-nd,cc0&per_page=50&order_by=votes&locale=en`;
-                if (excludeObservationId) {
-                    apiUrl += `&not_id=${excludeObservationId}`;
-                }
+
+                // Build a safer, looser query
+                const params = new URLSearchParams({
+                    taxon_id: String(taxonId),
+                    iconic_taxa: 'Fungi',            // ask the API to give us Fungi only
+                    photos: 'true',
+                    // taxon_is_leaf removed – excludes tons of species-level obs
+                    quality_grade: 'needs_id,research', // widen beyond research-only
+                    photo_license: 'cc0,cc-by,cc-by-sa,cc-by-nd,cc-by-nc,cc-by-nc-sa,cc-by-nc-nd',
+                    per_page: '100',
+                    order_by: 'votes',
+                    order: 'desc',
+                    locale: 'en'
+                });
+
+                // Do NOT globally exclude taxa (this was blocking Yellow Brain entirely)
+                // params.set('without_taxon_id', '54743,48250'); // <-- delete this line
+
+                let apiUrl = `https://api.inaturalist.org/v1/observations?${params.toString()}`;
+                if (excludeObservationId) apiUrl += `&not_id=${excludeObservationId}`;
 
                 const cacheKey = taxonId + (excludeObservationId || '');
                 if (observationCache.has(cacheKey)) {
@@ -420,10 +436,25 @@
                 }
 
                 try {
-                    const response = await fetch(apiUrl);
-                    if (!response.ok) throw new Error(`API ${response.status} for taxon ${taxonId}`);
-                
-                let data = await response.json();
+                    // Fallback: if zero results, retry once with even looser grade
+                    // (keeps CC licenses to remain reuse-safe)
+                    const runQuery = async (url) => {
+                        const res = await fetch(url);
+                        if (!res.ok) throw new Error(`API ${res.status} for taxon ${taxonId}`);
+                        return res.json();
+                    };
+
+                    let data = await runQuery(apiUrl);
+                    if (!data.results || data.results.length === 0) {
+                        const fallback = new URL(apiUrl);
+                        const usp = new URLSearchParams(fallback.search);
+                        // try again without restricting to research/needs_id (verifiable only)
+                        usp.delete('quality_grade');
+                        usp.set('verifiable', 'true');
+                        fallback.search = usp.toString();
+                        data = await runQuery(fallback.toString());
+                    }
+
                 // Filter for observations with at least 1 photo
                 let observationsWithPhotos = data.results.filter(obs => obs.photos && obs.photos.length >= 1 && obs.taxon);
                 
@@ -438,13 +469,10 @@
                 for (const obs of observationsWithPhotos) {
                     const obsTaxon = obs.taxon;
                     
-                    // START of the new code
-                    // This check makes sure the observation is actually in the Fungi kingdom
-                    if (obs.taxon.iconic_taxon_name !== 'Fungi') {
-                        console.warn(`[ICONIC TAXON MISMATCH] Skipped observation ${obs.id} - it was identified as '${obs.taxon.iconic_taxon_name}', not 'Fungi'.`);
-                        continue; // This skips the current item and moves to the next one
+                    // Soft guard: warn if the observation isn't classified under Fungi
+                    if (obs.iconic_taxon_name && obs.iconic_taxon_name !== 'Fungi') {
+                        console.warn(`[ICONIC TAXON MISMATCH] Observation ${obs.id} flagged as '${obs.iconic_taxon_name}', not 'Fungi'.`);
                     }
-                    // END of the new code
 
                     if (obsTaxon.id === taxonId || (obsTaxon.ancestor_ids && obsTaxon.ancestor_ids.includes(taxonId))) {
                         suitableObservation = obs;
