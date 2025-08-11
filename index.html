@@ -177,7 +177,6 @@
 
     // -------------------- Species list --------------------
     const mushroomSpecies = [
-      // Amanita (7)
       { id: 48715, name: "Fly Agaric", scientific: "Amanita muscaria", genus: "Amanita", category: "Amanita" },
       { id: 53778, name: "Death Cap", scientific: "Amanita phalloides", genus: "Amanita", category: "Amanita" },
       { id: 67661, name: "The Blusher", scientific: "Amanita rubescens", genus: "Amanita", category: "Amanita" },
@@ -185,46 +184,34 @@
       { id: 63271, name: "False Death Cap", scientific: "Amanita citrina", genus: "Amanita", category: "Amanita" },
       { id: 58685, name: "Destroying Angel", scientific: "Amanita virosa", genus: "Amanita", category: "Amanita" },
       { id: 350033, name: "Orange Grisette", scientific: "Amanita crocea", genus: "Amanita", category: "Amanita" },
-
-      // Agaricus (6)
       { id: 143563, name: "Field Mushroom", scientific: "Agaricus campestris", genus: "Agaricus", category: "Agaricus" },
       { id: 118394, name: "Yellow Stainer", scientific: "Agaricus xanthodermus", genus: "Agaricus", category: "Agaricus" },
       { id: 58699, name: "Horse Mushroom", scientific: "Agaricus arvensis", genus: "Agaricus", category: "Agaricus" },
       { id: 58696, name: "Pavement Mushroom", scientific: "Agaricus bitorquis", genus: "Agaricus", category: "Agaricus" },
       { id: 60506, name: "Scaly Wood Mushroom", scientific: "Agaricus silvaticus", genus: "Agaricus", category: "Agaricus" },
       { id: 58646, name: "The Prince", scientific: "Agaricus augustus", genus: "Agaricus", category: "Agaricus" },
-
-      // Pleurotus & allies (5)
       { id: 48530, name: "Oyster Mushroom", scientific: "Pleurotus ostreatus", genus: "Pleurotus", category: "Pleurotus" },
       { id: 120469, name: "Pale Oyster", scientific: "Pleurotus pulmonarius", genus: "Pleurotus", category: "Pleurotus" },
       { id: 125425, name: "Veiled Oyster", scientific: "Pleurotus dryinus", genus: "Pleurotus", category: "Pleurotus" },
       { id: 125683, name: "Golden Oyster", scientific: "Pleurotus citrinopileatus", genus: "Pleurotus", category: "Pleurotus" },
       { id: 54635, name: "Olive Oysterling", scientific: "Sarcomyxa serotina", genus: "Sarcomyxa", category: "Pleurotus" },
-
-      // Waxcaps (6)
       { id: 55245, name: "Scarlet Waxcap", scientific: "Hygrocybe coccinea", genus: "Hygrocybe", category: "Waxcaps" },
       { id: 51869, name: "Crimson Waxcap", scientific: "Hygrocybe punicea", genus: "Hygrocybe", category: "Waxcaps" },
       { id: 128868, name: "Blackening Waxcap", scientific: "Hygrocybe conica", genus: "Hygrocybe", category: "Waxcaps" },
       { id: 63475, name: "Parrot Waxcap", scientific: "Gliophorus psittacinus", genus: "Gliophorus", category: "Waxcaps" },
       { id: 55240, name: "Meadow Waxcap", scientific: "Cuphophyllus pratensis", genus: "Cuphophyllus", category: "Waxcaps" },
       { id: 524919, name: "Heath Waxcap", scientific: "Gliophorus laetus", genus: "Gliophorus", category: "Waxcaps" },
-
-      // Boletes (6)
       { id: 48701, name: "King Bolete", scientific: "Boletus edulis", genus: "Boletus", category: "Boletes" },
       { id: 53903, name: "Bay Bolete", scientific: "Imleria badia", genus: "Imleria", category: "Boletes" },
       { id: 53478, name: "Slippery Jack", scientific: "Suillus luteus", genus: "Suillus", category: "Boletes" },
       { id: 63232, name: "Birch Bolete", scientific: "Leccinum scabrum", genus: "Leccinum", category: "Boletes" },
       { id: 54163, name: "Red Cracking Bolete", scientific: "Xerocomellus chrysenteron", genus: "Xerocomellus", category: "Boletes" },
       { id: 125740, name: "Suede Bolete", scientific: "Xerocomus subtomentosus", genus: "Xerocomus", category: "Boletes" },
-
-      // Mycena (5)
       { id: 63460, name: "Bleeding Bonnet", scientific: "Mycena haematopus", genus: "Mycena", category: "Mycena" },
       { id: 63446, name: "Common Bonnet", scientific: "Mycena galericulata", genus: "Mycena", category: "Mycena" },
       { id: 63471, name: "Clustered Bonnet", scientific: "Mycena inclinata", genus: "Mycena", category: "Mycena" },
       { id: 63478, name: "Lilac Bonnet", scientific: "Mycena pura", genus: "Mycena", category: "Mycena" },
       { id: 566411, name: "Saffrondrop Bonnet", scientific: "Mycena crocata", genus: "Mycena", category: "Mycena" },
-
-      // Russula (8)
       { id: 194437, name: "Charcoal Burner", scientific: "Russula cyanoxantha", genus: "Russula", category: "Russula" },
       { id: 56079, name: "The Sickener", scientific: "Russula emetica", genus: "Russula", category: "Russula" },
       { id: 49446, name: "Beechwood Sickener", scientific: "Russula nobilis", genus: "Russula", category: "Russula" },
@@ -233,8 +220,6 @@
       { id: 56081, name: "Greencracked Brittlegill", scientific: "Russula virescens", genus: "Russula", category: "Russula" },
       { id: 125576, name: "Powdery Brittlegill", scientific: "Russula parazurea", genus: "Russula", category: "Russula" },
       { id: 416072, name: "Stinking Brittlegill", scientific: "Russula foetens", genus: "Russula", category: "Russula" },
-
-      // Brackets & Polypores (10)
       { id: 47392, name: "Turkey Tail", scientific: "Trametes versicolor", genus: "Trametes", category: "Brackets & Polypores" },
       { id: 125434, name: "Artist's Conk", scientific: "Ganoderma applanatum", genus: "Ganoderma", category: "Brackets & Polypores" },
       { id: 124459, name: "Red-belted Polypore", scientific: "Fomitopsis pinicola", genus: "Fomitopsis", category: "Brackets & Polypores" },
@@ -245,16 +230,12 @@
       { id: 55653, name: "Beefsteak Fungus", scientific: "Fistulina hepatica", genus: "Fistulina", category: "Brackets & Polypores" },
       { id: 55155, name: "Purplepore Bracket", scientific: "Trichaptum abietinum", genus: "Trichaptum", category: "Brackets & Polypores" },
       { id: 118063, name: "Crimped Gill", scientific: "Plicaturopsis crispa", genus: "Plicaturopsis", category: "Brackets & Polypores" },
-
-      // Chanterelles & Allies (6)
       { id: 47347, name: "Golden Chanterelle", scientific: "Cantharellus cibarius", genus: "Cantharellus", category: "Chanterelles & Allies" },
       { id: 175283, name: "Horn of Plenty", scientific: "Craterellus cornucopioides", genus: "Craterellus", category: "Chanterelles & Allies" },
       { id: 350511, name: "Winter Chanterelle", scientific: "Craterellus tubaeformis", genus: "Craterellus", category: "Chanterelles & Allies" },
       { id: 127394, name: "False Chanterelle", scientific: "Hygrophoropsis aurantiaca", genus: "Hygrophoropsis", category: "Chanterelles & Allies" },
       { id: 58857, name: "Hedgehog Fungus", scientific: "Hydnum repandum", genus: "Hydnum", category: "Chanterelles & Allies" },
       { id: 124699, name: "Scaly Chanterelle", scientific: "Turbinellus floccosus", genus: "Turbinellus", category: "Chanterelles & Allies" },
-
-      // Funnels & Grassland (13)
       { id: 123623, name: "Clouded Funnel", scientific: "Clitocybe nebularis", genus: "Clitocybe", category: "Funnels & Grassland" },
       { id: 119227, name: "Trooping Funnel", scientific: "Infundibulicybe geotropa", genus: "Infundibulicybe", category: "Funnels & Grassland" },
       { id: 55239, name: "Fairy Ring Champignon", scientific: "Marasmius oreades", genus: "Marasmius", category: "Funnels & Grassland" },
@@ -268,16 +249,12 @@
       { id: 47468, name: "The Parasol", scientific: "Macrolepiota procera", genus: "Macrolepiota", category: "Funnels & Grassland" },
       { id: 54025, name: "Liberty Cap", scientific: "Psilocybe semilanceata", genus: "Psilocybe", category: "Funnels & Grassland" },
       { id: 125630, name: "Common Conecap", scientific: "Conocybe tenera", genus: "Conocybe", category: "Funnels & Grassland" },
-
-      // Cup & other Saprotrophs (6)
       { id: 119945, name: "Orange Peel Fungus", scientific: "Aleuria aurantia", genus: "Aleuria", category: "Cup & other Saprotrophs" },
       { id: 119224, name: "King Alfred's Cakes", scientific: "Daldinia concentrica", genus: "Daldinia", category: "Cup & other Saprotrophs" },
       { id: 84740, name: "Scarlet Elfcup", scientific: "Sarcoscypha austriaca", genus: "Sarcoscypha", category: "Cup & other Saprotrophs" },
       { id: 55655, name: "Yellow Stagshorn", scientific: "Calocera viscosa", genus: "Calocera", category: "Cup & other Saprotrophs" },
       { id: 117556, name: "Jelly Ear", scientific: "Auricularia auricula-judae", genus: "Auricularia", category: "Cup & other Saprotrophs" },
       { id: 54743, name: "Yellow Brain", scientific: "Tremella mesenterica", genus: "Tremella", category: "Cup & other Saprotrophs" },
-
-      // Woodland Fungi (8)
       { id: 47346, name: "Funeral Bell", scientific: "Galerina marginata", genus: "Galerina", category: "Woodland Fungi" },
       { id: 56086, name: "False Morel", scientific: "Gyromitra esculenta", genus: "Gyromitra", category: "Woodland Fungi" },
       { id: 54844, name: "Honey Mushroom", scientific: "Armillaria mellea", genus: "Armillaria", category: "Woodland Fungi" },
@@ -286,16 +263,12 @@
       { id: 56021, name: "Velvet Shank", scientific: "Flammulina velutipes", genus: "Flammulina", category: "Woodland Fungi" },
       { id: 481482, name: "Wrinkled Peach", scientific: "Rhodotus palmatus", genus: "Rhodotus", category: "Woodland Fungi" },
       { id: 63433, name: "Golden Scalycap", scientific: "Pholiota aurivella", genus: "Pholiota", category: "Woodland Fungi" },
-
-      // Distinctive Oddballs (6)
       { id: 53715, name: "Lion's Mane", scientific: "Hericium erinaceus", genus: "Hericium", category: "Distinctive Oddballs" },
       { id: 55265, name: "Chicken of the Woods", scientific: "Laetiporus sulphureus", genus: "Laetiporus", category: "Distinctive Oddballs" },
       { id: 84613, name: "Hen of the Woods", scientific: "Grifola frondosa", genus: "Grifola", category: "Distinctive Oddballs" },
       { id: 57343, name: "Giant Puffball", scientific: "Calvatia gigantea", genus: "Calvatia", category: "Distinctive Oddballs" },
       { id: 469901, name: "Devil's Fingers", scientific: "Clathrus archeri", genus: "Clathrus", category: "Distinctive Oddballs" },
       { id: 53764, name: "Dead Man's Fingers", scientific: "Xylaria polymorpha", genus: "Xylaria", category: "Distinctive Oddballs" },
-
-      // Blewits & Lookalikes (5)
       { id: 119152, name: "Wood Blewit", scientific: "Lepista nuda", genus: "Lepista", category: "Blewits & Lookalikes" },
       { id: 1039723, name: "Field Blewit", scientific: "Lepista saeva", genus: "Lepista", category: "Blewits & Lookalikes" },
       { id: 417492, name: "Lilac Fibrecap", scientific: "Inocybe lilacina", genus: "Inocybe", category: "Blewits & Lookalikes" },
@@ -349,14 +322,10 @@
         const params = new URLSearchParams({
           taxon_id: String(taxonId),
           iconic_taxa: 'Fungi',          // server-side filter
-          verifiable: 'true',            // RG or needs_id
-          quality_grade: 'research,needs_id',
           photos: 'true',
-          photo_licensed: 'true',
-          photo_license: 'cc0,cc-by,cc-by-sa,cc-by-nd,cc-by-nc,cc-by-nc-sa,cc-by-nc-nd',
           per_page: '200',
           order: 'desc',
-          order_by: 'votes',
+          order_by: 'observed_on',      // stable ordering
           locale: 'en'
         });
         if (excludeObservationId) params.set('not_id', String(excludeObservationId));
@@ -371,28 +340,31 @@
           return res.json();
         };
 
-        let apiUrl = `${base}?${params.toString()}`;
+        const apiUrl = `${base}?${params.toString()}`;
         let data;
         try {
           data = await runQuery(apiUrl);
         } catch (e) {
           console.error(e.message);
-          // If first call 422s or similar, try the fallback immediately
-          const usp = new URLSearchParams(params);
-          usp.delete('quality_grade'); // broader
-          apiUrl = `${base}?${usp.toString()}`;
-          data = await runQuery(apiUrl);
+          data = { results: [] };
         }
 
-        let observationsWithPhotos = (data.results || []).filter(obs => obs.photos && obs.photos.length && obs.taxon);
+        const ALLOWED = new Set(['cc0','cc-by','cc-by-sa','cc-by-nd','cc-by-nc','cc-by-nc-sa','cc-by-nc-nd']);
+        let observationsWithPhotos = (data.results || []).filter(obs => {
+          if (!obs || !obs.photos || !obs.photos.length || !obs.taxon) return false;
+          // ensure at least one CC-licensed photo
+          return obs.photos.some(p => ALLOWED.has(String(p.license_code || '').toLowerCase()));
+        });
 
-        // No luck? Try fallback (drop quality filter) if not already dropped
-        if (!observationsWithPhotos.length && params.get('quality_grade')) {
+        // Fallback: try a different ordering if we saw nothing
+        if (!observationsWithPhotos.length) {
           const usp = new URLSearchParams(params);
-          usp.delete('quality_grade');
+          usp.set('order_by', 'created_at');
           const fallbackUrl = `${base}?${usp.toString()}`;
-          const data2 = await runQuery(fallbackUrl);
-          observationsWithPhotos = (data2.results || []).filter(obs => obs.photos && obs.photos.length && obs.taxon);
+          try {
+            const d2 = await runQuery(fallbackUrl);
+            observationsWithPhotos = (d2.results || []).filter(obs => obs && obs.photos && obs.photos.length && obs.taxon && obs.photos.some(p => ALLOWED.has(String(p.license_code || '').toLowerCase())));
+          } catch (e) { console.warn('Fallback query failed:', e.message); }
         }
 
         if (!observationsWithPhotos.length) {
@@ -400,24 +372,29 @@
           return { photos: [], attribution: 'Not enough quality photos found.', observationUrl: null, error: true, speciesId: taxonId, observationId: null };
         }
 
-        // Shuffle a bit, then choose one that matches the requested taxon (or is an infraspecific child)
+        // Shuffle, then pick an observation that matches the requested species (or its infraspecific children)
         observationsWithPhotos.sort(() => 0.5 - Math.random());
         let selected = null;
         for (const obs of observationsWithPhotos) {
           const t = obs.taxon;
-          if (t?.iconic_taxon_name && t.iconic_taxon_name !== 'Fungi') continue; // guard, should rarely fire
+          if (t?.iconic_taxon_name && t.iconic_taxon_name !== 'Fungi') continue; // guard
           if (t && (t.id === taxonId || (Array.isArray(t.ancestor_ids) && t.ancestor_ids.includes(taxonId)))) { selected = obs; break; }
         }
         if (!selected) selected = observationsWithPhotos[0];
 
-        const available = selected.photos.slice(0, 3);
-        const photos = available.map(p => ({ url: p.url.replace('square', 'medium'), attribution: p.attribution || 'iNaturalist contributor' }));
+        // Choose up to 3 CC-licensed photos and expand to 4 tiles
+        const goodPhotos = selected.photos.filter(p => ALLOWED.has(String(p.license_code || '').toLowerCase()));
+        const pick = goodPhotos.slice(0, 3);
+        const photos = pick.map(p => {
+          const url = p.medium_url || (p.url ? p.url.replace('square','medium') : p.url) || p.small_url || p.url;
+          return { url, attribution: p.attribution || 'iNaturalist contributor' };
+        });
         while (photos.length < 4 && photos.length) photos.push({ ...photos[0] });
-        if (!photos.length) return { photos: [], attribution: 'No photos available.', observationUrl: null, error: true, speciesId: taxonId, observationId: null };
+        if (!photos.length) return { photos: [], attribution: 'No suitable licensed photos.', observationUrl: null, error: true, speciesId: taxonId, observationId: null };
 
         const result = {
           photos,
-          attribution: `Photos by ${selected.user?.login || 'Unknown User'} via iNaturalist (${available[0]?.license_code || 'License N/A'})`,
+          attribution: `Photos by ${selected.user?.login || 'Unknown User'} via iNaturalist`,
           observationUrl: selected.uri,
           observationId: selected.id,
           error: false,
@@ -469,14 +446,21 @@
       gameState.score = 0; gameState.questionsAnswered = 0; gameState.currentStreak = 0; gameState.bestStreak = 0; gameState.correctAnswersCount = 0;
       gameState.currentQuestion = null; gameState.preloadQueue = []; gameState.seenSpeciesIdsThisGame.clear(); gameState.newPhotosUsedThisQuestion = false;
       updateDisplay(); questionCounterDisplay.textContent = `0 / ${gameState.questionsTarget}`; switchScreen('loading'); gameState.isGameActive = true;
-      try {
-        await Promise.all([loadNewQuestion(true), maintainPreloadQueue()]);
-        if (!gameState.isGameActive) return; switchScreen('game');
-      } catch (err) {
-        console.error('Failed to start:', err);
-        showError('Could not load the first mushroom question. Please try again.', () => { startGame(); }, 'Restart');
-        gameState.isGameActive = false;
+
+      // Try several times to secure a first question before giving up
+      let success = false; let errLast = null;
+      for (let attempt = 0; attempt < 6 && !success; attempt++) {
+        try { await loadNewQuestion(true); success = true; }
+        catch (err) { errLast = err; console.warn('Initial load attempt failed', attempt+1, err.message); }
       }
+      if (!success) {
+        console.error('Failed to start:', errLast);
+        showError('Could not load the first mushroom question. Please try again.', () => { startGame(); }, 'Restart');
+        gameState.isGameActive = false; return;
+      }
+
+      try { await maintainPreloadQueue(); } catch (e) { console.warn('Preload after start failed:', e.message); }
+      if (!gameState.isGameActive) return; switchScreen('game');
     }
 
     async function loadNewQuestion(isInitialLoad = false) {
@@ -588,7 +572,6 @@
       updateDisplay();
 
       if (gameState.questionsAnswered >= gameState.questionsTarget) {
-        // show results
         finalScoreDisplay.textContent = gameState.score;
         correctAnswersResultsDisplay.textContent = gameState.correctAnswersCount;
         totalQuestionsResultsDisplay.textContent = gameState.questionsTarget;
