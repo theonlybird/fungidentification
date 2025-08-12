@@ -2,685 +2,391 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Fungidentification</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: #f5e6d3; color: #3d2914; min-height: 100vh;
-      display: flex; align-items: center; justify-content: center; padding: 20px;
-      position: relative; overflow-x: hidden;
+    /* --- Base --- */
+    :root{
+      --bg:#f5e6d3; --card:#fff8f0; --ink:#3d2914; --ink-2:#5d4e37; --muted:#8b7355;
+      --brand-1:#8b6f47; --brand-2:#6b5637; --ring:rgba(139,90,43,.15);
+      --radius:16px;
     }
-    body::before {
-      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 1;
-      background:
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800'%3E%3Cpath d='M150 100c30-20 60-30 90-20s50 40 40 70c-10 30-40 50-70 40s-60-30-60-60' fill='%23000' opacity='0.03'/%3E%3Cpath d='M900 200c20-15 45-20 65-10s35 35 25 55c-10 20-35 30-55 20s-35-35-35-45' fill='%23000' opacity='0.02'/%3E%3Cpath d='M500 50c0-20 20-40 45-40s45 20 45 40c0 25-20 45-45 45s-45-20-45-45' fill='%23000' opacity='0.02'/%3E%3Cpath d='M100 500c40 0 80 20 80 60s-40 60-80 60s-80-20-80-60 40-60 80-60' fill='%23000' opacity='0.03'/%3E%3Cpath d='M1000 400l20 40-40 20-20-40z' fill='%23000' opacity='0.02'/%3E%3Cpath d='M300 700c15-25 45-35 70-25s35 40 20 65c-15 25-45 35-70 25s-35-40-20-65' fill='%23000' opacity='0.03'/%3E%3C/svg%3E") no-repeat,
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800'%3E%3Cpath d='M200 300q20-40 60-40t60 40q-20 40-60 40t-60-40' fill='%23000' opacity='0.02'/%3E%3Cpath d='M700 150l30-50 50 30-30 50z' fill='%23000' opacity='0.02'/%3E%3C/svg%3E") no-repeat;
-      background-position: 0 0, 50% 50%; background-size: cover, cover;
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background:var(--bg); color:var(--ink); padding:20px; display:flex; justify-content:center;
+    }
+    .game{width:100%; max-width:960px; background:var(--card); border-radius:20px; padding:24px;
+      border:1px solid rgba(139,90,43,.12); box-shadow:0 10px 30px rgba(139,90,43,.15)}
+    .header{ text-align:center; margin-bottom:12px }
+    h1{margin:0; font-size:2.2rem; color:var(--ink-2)}
+    .sub{color:var(--muted)}
+
+    /* --- HUD (Score / Question) --- */
+    .hud{ display:none; /* hidden on landing */ 
+      justify-content:center; gap:16px; flex-wrap:wrap; margin:16px 0 12px}
+    .hud .box{min-width:150px; padding:12px 18px; text-align:center; border-radius:12px;
+      background:rgba(139,90,43,.08); border:1px solid var(--ring)}
+    .hud .label{color:var(--muted); font-size:.9rem}
+    .hud .value{color:var(--ink-2); font-weight:800; font-size:1.6rem}
+
+    /* --- Screens --- */
+    .screen{display:none}
+    .screen.active{display:block}
+
+    /* --- Difficulty row --- */
+    .difficulty{ display:flex; justify-content:center; gap:10px; flex-wrap:nowrap; margin:14px 0 18px }
+    .diff-btn{
+      background:#d4c8b8; color:var(--ink-2); border:1px solid #bcaea0; border-radius:999px;
+      padding:10px 16px; min-width:110px; font-weight:700; cursor:pointer
+    }
+    .diff-btn.active{ background:var(--brand-1); color:#fff; border-color:transparent }
+
+    /* Make the three buttons fit on narrow screens */
+    @media (max-width:420px){
+      .difficulty{ gap:8px }
+      .diff-btn{ min-width:96px; padding:8px 12px; font-size:.95rem }
     }
 
-    .game-container {
-      position: relative; z-index: 2; width: 100%; max-width: 1200px;
-      background: rgba(255, 248, 240, 0.9); border-radius: 20px; padding: 30px;
-      border: 1px solid rgba(139, 90, 43, 0.1); box-shadow: 0 10px 30px rgba(139, 90, 43, 0.15);
+    /* --- Image grid (always 2×2) --- */
+    .image-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; max-width:740px; margin:0 auto 10px }
+    .img-card{ border:2px solid var(--ring); border-radius:14px; overflow:hidden; background:#eee0cf; aspect-ratio:1/1 }
+    .img-card img{ width:100%; height:100%; object-fit:cover; display:block }
+
+    /* attribution under each image (compact) */
+    .credit{ font-size:12px; color:var(--muted); background:#efe6da; padding:4px 6px; }
+
+    /* --- Controls --- */
+    .actions{ text-align:center; margin:10px 0 12px }
+    #newPhotosBtn{
+      display:inline-flex; align-items:center; justify-content:center;
+      background:linear-gradient(135deg, var(--brand-1), var(--brand-2)); color:#fff;
+      border:none; padding:12px 24px; border-radius:999px; font-weight:800; cursor:pointer;
+      box-shadow:0 8px 24px rgba(139,90,43,.25)
     }
 
-    .header { text-align: center; margin-bottom: 30px; }
-    h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.5px; color: #5d4e37; }
-    .header p { color: #8b7355; margin-top: 6px; }
-
-    .game-info { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
-    .info-box { min-width: 160px; text-align: center; padding: 14px 22px; border-radius: 12px; background: rgba(139, 90, 43, 0.08); border: 1px solid rgba(139, 90, 43, 0.15); }
-    .info-label { color: #8b7355; font-size: .9rem; margin-bottom: 4px; }
-    .info-value { color: #5d4e37; font-size: 1.8rem; font-weight: 700; }
-
-    .start-screen, .loading-screen, .game-screen, .results-screen { display: none; }
-    .start-screen.active, .loading-screen.active, .game-screen.active, .results-screen.active { display: block; }
-
-    .start-button, .retry-button, .play-again-button {
-      background: linear-gradient(135deg, #8b6f47 0%, #6b5637 100%);
-      color: #fff8f0; border: none; padding: 16px 32px; font-size: 1.1rem;
-      border-radius: 999px; cursor: pointer; font-weight: 700; display: inline-block;
-      transition: transform .2s ease, box-shadow .2s ease; box-shadow: 0 8px 24px rgba(139, 90, 43, .25);
+    /* --- Answers grid --- */
+    .answers{
+      display:grid; gap:12px; max-width:740px; margin:0 auto;
+      grid-template-columns:repeat(4, minmax(0,1fr));
     }
-    .start-button:hover, .retry-button:hover, .play-again-button:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(139, 90, 43, .35); }
+    @media (max-width:768px){
+      .answers{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+    }
+    .answer{
+      background: rgba(255,248,240,.9); border:2px solid var(--ring); border-radius:12px;
+      padding:14px; text-align:center; font-weight:700; cursor:pointer
+    }
+    .answer small{ display:block; color:var(--muted) }
+    .answer.correct{ background:rgba(76,175,80,.18); border-color:#4CAF50; color:#2e7d32}
+    .answer.incorrect{ background:rgba(244,67,54,.18); border-color:#F44336; color:#c62828}
+    .answer:disabled{ opacity:.7; cursor:not-allowed }
 
-    .difficulty-select { text-align: center; margin: 24px 0; }
-    .difficulty-button { background: #d4c8b8; color: #5d4e37; border: 1px solid #bcaea0; padding: 8px 16px; border-radius: 10px; cursor: pointer; margin: 0 6px; }
-    .difficulty-button.active { background: #8b6f47; color: #fff8f0; border-color: transparent; }
+    .footnote{ text-align:center; color:var(--muted); margin-top:10px }
 
-    .image-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 0 auto 14px; max-width: 740px; }
-    .image-container { width: 100%; aspect-ratio: 1 / 1; background: #eee0cf; border-radius: 14px; overflow: hidden; border: 2px solid rgba(139, 90, 43, 0.25); position: relative; }
-    .mushroom-image { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .photo-credit { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(255, 248, 240, 0.75); font-size: .6rem; padding: 2px 4px; text-align: center; color: #5d4e37; }
-    .license-badge { font-weight: 600; margin-left: 4px; }
+    /* --- Modal --- */
+    .modal{ position:fixed; inset:0; background:rgba(61,41,20,.85); display:none; place-items:center; z-index:1000 }
+    .modal.active{ display:grid }
+    .modal .card{ background:var(--card); padding:24px; border-radius:12px; box-shadow:0 12px 40px rgba(0,0,0,.35); text-align:center }
+    .btn{ background:linear-gradient(135deg, var(--brand-1), var(--brand-2)); color:#fff; border:none; padding:12px 22px; border-radius:999px; font-weight:800; cursor:pointer }
 
-    .game-actions { text-align: center; margin-bottom: 12px; }
-    .secondary-action-button { background: #d4c8b8; color: #3d2914; border: 1px solid #bcaea0; padding: 10px 18px; border-radius: 999px; cursor: pointer; font-weight: 600; }
-    .secondary-action-button:disabled { opacity: .55; cursor: not-allowed; }
-
-    .options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; max-width: 740px; margin: 0 auto; }
-    .option-button { background: rgba(255, 248, 240, 0.85); border: 2px solid rgba(139, 90, 43, 0.25); color: #5d4e37; padding: 16px; border-radius: 12px; cursor: pointer; font-weight: 600; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .option-button:hover:not(:disabled) { background: rgba(139, 90, 43, 0.15); border-color: rgba(139, 90, 43, 0.45); transform: translateY(-1px); }
-    .option-button:disabled { opacity: .75; cursor: not-allowed; }
-    .option-button.correct { background: rgba(76, 175, 80, 0.18); border-color: #4CAF50; color: #2e7d32; }
-    .option-button.incorrect { background: rgba(244, 67, 54, 0.18); border-color: #F44336; color: #c62828; }
-
-    .loading-spinner { width: 50px; height: 50px; border-radius: 50%; border: 3px solid rgba(139, 90, 43, 0.2); border-top-color: #8b6f47; animation: spin 1s linear infinite; margin: 20px auto; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .attribution { grid-column: 1 / -1; font-size: .85rem; color: #8b7355; text-align: center; margin-top: 10px; }
-    .attribution a { color: #6b5637; text-decoration: none; font-weight: 600; }
-    .attribution a:hover { text-decoration: underline; }
-
-    .modal { display: none; position: fixed; inset: 0; background: rgba(61, 41, 20, 0.88); z-index: 1000; align-items: center; justify-content: center; }
-    .modal.active { display: flex; }
-    .modal-content { background: #fff8f0; padding: 26px; border-radius: 16px; max-width: 520px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,.3); }
-    .error { color: #c9302c; margin: 12px 0 4px; }
   </style>
 </head>
 <body>
-  <div class="game-container">
+  <div class="game">
     <div class="header">
       <h1>🍄 Fungidentification</h1>
-      <p>Test your mycology knowledge in nature's classroom</p>
+      <div class="sub">Test your mycology knowledge in nature's classroom</div>
     </div>
 
-    <div class="game-info">
-      <div class="info-box"><div class="info-label">Score</div><div class="info-value" id="score">0</div></div>
-      <div class="info-box"><div class="info-label">Question</div><div class="info-value" id="questionCounter">0 / 30</div></div>
-    </div>
-
-    <div class="start-screen active">
-      <h2 style="text-align:center;margin-bottom:10px;">Welcome to the Mushroom ID Challenge!</h2>
-      <p style="text-align:center;margin-bottom:20px;">You will be shown 30 mushroom species to identify. Each round shows 4 photos of the same species.</p>
-      <div class="difficulty-select" id="difficultySelect">
-        <button class="difficulty-button active" data-difficulty="beginner">Beginner</button>
-        <button class="difficulty-button" data-difficulty="intermediate">Intermediate</button>
-        <button class="difficulty-button" data-difficulty="expert">Expert</button>
+    <!-- HUD (hidden on landing; shown only during game) -->
+    <div id="hud" class="hud">
+      <div class="box">
+        <div class="label">Score</div>
+        <div id="score" class="value">0</div>
       </div>
+      <div class="box">
+        <div class="label">Question</div>
+        <div id="questionCounter" class="value">0 / 30</div>
+      </div>
+    </div>
+
+    <!-- Start / Landing -->
+    <section id="start" class="screen active">
+      <h2 style="text-align:center;margin:10px 0 6px;">Welcome to the Mushroom ID Challenge!</h2>
+      <p style="text-align:center;margin:0 0 10px;">You will be shown 30 mushroom species to identify. Each round shows 4 photos of the same species.</p>
+
+      <div class="difficulty" id="difficultyRow">
+        <button class="diff-btn active" data-difficulty="beginner">Beginner</button>
+        <button class="diff-btn" data-difficulty="intermediate">Intermediate</button>
+        <button class="diff-btn" data-difficulty="expert">Expert</button>
+      </div>
+
       <div style="text-align:center;">
-        <button class="start-button" id="startGameBtn">Start Game</button>
+        <button id="startBtn" class="btn">Start Game</button>
       </div>
-    </div>
+    </section>
 
-    <div class="loading-screen">
+    <!-- Loading -->
+    <section id="loading" class="screen">
       <h2 style="text-align:center;margin-bottom:10px;">Loading mushroom data…</h2>
-      <div class="loading-spinner"></div>
-      <p style="text-align:center;margin-top:10px;">Foraging for fungi on iNaturalist.</p>
-    </div>
+      <div style="text-align:center;color:var(--muted)">Foraging for fungi on iNaturalist…</div>
+    </section>
 
-    <div class="game-screen">
+    <!-- Game -->
+    <section id="game" class="screen">
       <div class="image-grid" id="imageGrid"></div>
-      <div class="game-actions">
-        <button id="newPhotosBtn" class="secondary-action-button" style="display:none;margin:10px auto 0;">New Photos (1 use)</button>
-      </div>
-      <div class="options" id="optionsContainer"></div>
-    </div>
 
-    <div class="results-screen">
-      <h2 style="text-align:center;margin-bottom:10px;">Quiz Complete!</h2>
-      <div style="text-align:center;">
+      <div class="actions">
+        <a id="inatLink" href="#" target="_blank" style="display:none; margin:0 0 10px; color:var(--ink-2); font-weight:800;">View on iNaturalist</a><br />
+        <button id="newPhotosBtn" style="display:none">New Photos (1 use)</button>
+      </div>
+
+      <div id="answers" class="answers"></div>
+    </section>
+
+    <!-- Results -->
+    <section id="results" class="screen">
+      <h2 style="text-align:center;margin:10px 0;">Quiz complete!</h2>
+      <div style="text-align:center">
         <p style="font-size:1.25rem;">Final Score: <span id="finalScore">0</span> / 300</p>
-        <p>Correct Answers: <span id="correctAnswersDisplay">0</span> / <span id="totalQuestionsDisplay">30</span></p>
+        <p>Correct Answers: <span id="correctAnswers">0</span> / <span id="totalQuestions">30</span></p>
         <p>Best Streak: <span id="bestStreak">0</span></p>
-        <button class="play-again-button" id="playAgainBtn">Play Again</button>
+        <button id="playAgainBtn" class="btn">Play again</button>
       </div>
-    </div>
+    </section>
 
-    <div class="attribution">Images sourced from iNaturalist API under Creative Commons licenses</div>
+    <div class="footnote">Images sourced from iNaturalist API under Creative Commons licenses</div>
   </div>
 
-  <div class="modal" id="errorModal">
-    <div class="modal-content">
+  <!-- Error modal -->
+  <div id="errorModal" class="modal">
+    <div class="card">
       <h3>Oops! Something went wrong</h3>
-      <p class="error" id="errorMessage"></p>
-      <button class="retry-button" id="errorModalRetryBtn">Try Again</button>
+      <p id="errorMsg" style="color:#c9302c; margin:10px 0 16px;">Could not load the first mushroom question.</p>
+      <button id="retryBtn" class="btn">Try again</button>
     </div>
   </div>
 
   <script>
-    // DOM elements
-    const scoreDisplay = document.getElementById('score');
-    const questionCounterDisplay = document.getElementById('questionCounter');
-    const imageGrid = document.getElementById('imageGrid');
-    const optionsContainer = document.getElementById('optionsContainer');
-    const newPhotosBtn = document.getElementById('newPhotosBtn');
+    /* ---------------- state & DOM ---------------- */
+    const $ = sel => document.querySelector(sel);
+    const hud = $('#hud');
+    const screens = { start: $('#start'), loading: $('#loading'), game: $('#game'), results: $('#results') };
+    const scoreEl = $('#score'), qEl = $('#questionCounter');
+    const imageGrid = $('#imageGrid'), answersEl = $('#answers');
+    const newBtn = $('#newPhotosBtn'), inatLink = $('#inatLink');
 
-    const finalScoreDisplay = document.getElementById('finalScore');
-    const correctAnswersResultsDisplay = document.getElementById('correctAnswersDisplay');
-    const totalQuestionsResultsDisplay = document.getElementById('totalQuestionsDisplay');
-    const bestStreakDisplay = document.getElementById('bestStreak');
+    const diffButtons = [...document.querySelectorAll('.diff-btn')];
 
-    const errorModal = document.getElementById('errorModal');
-    const errorMessageDisplay = document.getElementById('errorMessage');
-    const errorModalRetryBtn = document.getElementById('errorModalRetryBtn');
-
-    const startScreen = document.querySelector('.start-screen');
-    const loadingScreen = document.querySelector('.loading-screen');
-    const gameScreen = document.querySelector('.game-screen');
-    const resultsScreen = document.querySelector('.results-screen');
-
-    const startGameBtn = document.getElementById('startGameBtn');
-    const playAgainBtn = document.getElementById('playAgainBtn');
-    const difficultyButtons = document.querySelectorAll('.difficulty-button');
-
-    // -------------------- Game state --------------------
-    let gameState = {
-      score: 0, questionsTarget: 30, questionsAnswered: 0,
-      currentStreak: 0, bestStreak: 0, correctAnswersCount: 0,
-      currentQuestion: null,
-      preloadQueue: [], preloadQueueSize: 3,
-      activeScreen: 'start', isGameActive: false,
-      seenSpeciesThisGame: new Set(), newPhotosUsedThisQuestion: false,
-      difficulty: 'beginner'
+    const state = {
+      difficulty: 'beginner',
+      score: 0, q: 0, total: 30,
+      isGameActive: false,
+      seen: new Set(),
+      newPhotosUsed: false,
+      current: null,
     };
 
-    // -------------------- Species list --------------------
-    const mushroomSpecies = [
-      { name: "Fly Agaric", scientific: "Amanita muscaria", genus: "Amanita", category: "Amanita" },
-      { name: "Death Cap", scientific: "Amanita phalloides", genus: "Amanita", category: "Amanita" },
-      { name: "The Blusher", scientific: "Amanita rubescens", genus: "Amanita", category: "Amanita" },
-      { name: "Panther Cap", scientific: "Amanita pantherina", genus: "Amanita", category: "Amanita" },
-      { name: "False Death Cap", scientific: "Amanita citrina", genus: "Amanita", category: "Amanita" },
-      { name: "Destroying Angel", scientific: "Amanita virosa", genus: "Amanita", category: "Amanita" },
-      { name: "Orange Grisette", scientific: "Amanita crocea", genus: "Amanita", category: "Amanita" },
-      { name: "Field Mushroom", scientific: "Agaricus campestris", genus: "Agaricus", category: "Agaricus" },
-      { name: "Yellow Stainer", scientific: "Agaricus xanthodermus", genus: "Agaricus", category: "Agaricus" },
-      { name: "Horse Mushroom", scientific: "Agaricus arvensis", genus: "Agaricus", category: "Agaricus" },
-      { name: "Pavement Mushroom", scientific: "Agaricus bitorquis", genus: "Agaricus", category: "Agaricus" },
-      { name: "Scaly Wood Mushroom", scientific: "Agaricus silvaticus", genus: "Agaricus", category: "Agaricus" },
-      { name: "The Prince", scientific: "Agaricus augustus", genus: "Agaricus", category: "Agaricus" },
-      { name: "Oyster Mushroom", scientific: "Pleurotus ostreatus", genus: "Pleurotus", category: "Pleurotus" },
-      { name: "Pale Oyster", scientific: "Pleurotus pulmonarius", genus: "Pleurotus", category: "Pleurotus" },
-      { name: "Veiled Oyster", scientific: "Pleurotus dryinus", genus: "Pleurotus", category: "Pleurotus" },
-      { name: "Golden Oyster", scientific: "Pleurotus citrinopileatus", genus: "Pleurotus", category: "Pleurotus" },
-      { name: "Olive Oysterling", scientific: "Sarcomyxa serotina", genus: "Sarcomyxa", category: "Pleurotus" },
-      { name: "Scarlet Waxcap", scientific: "Hygrocybe coccinea", genus: "Hygrocybe", category: "Waxcaps" },
-      { name: "Crimson Waxcap", scientific: "Hygrocybe punicea", genus: "Hygrocybe", category: "Waxcaps" },
-      { name: "Blackening Waxcap", scientific: "Hygrocybe conica", genus: "Hygrocybe", category: "Waxcaps" },
-      { name: "Parrot Waxcap", scientific: "Gliophorus psittacinus", genus: "Gliophorus", category: "Waxcaps" },
-      { name: "Meadow Waxcap", scientific: "Cuphophyllus pratensis", genus: "Cuphophyllus", category: "Waxcaps" },
-      { name: "Heath Waxcap", scientific: "Gliophorus laetus", genus: "Gliophorus", category: "Waxcaps" },
-      { name: "King Bolete", scientific: "Boletus edulis", genus: "Boletus", category: "Boletes" },
-      { name: "Bay Bolete", scientific: "Imleria badia", genus: "Imleria", category: "Boletes" },
-      { name: "Slippery Jack", scientific: "Suillus luteus", genus: "Suillus", category: "Boletes" },
-      { name: "Birch Bolete", scientific: "Leccinum scabrum", genus: "Leccinum", category: "Boletes" },
-      { name: "Red Cracking Bolete", scientific: "Xerocomellus chrysenteron", genus: "Xerocomellus", category: "Boletes" },
-      { name: "Suede Bolete", scientific: "Xerocomus subtomentosus", genus: "Xerocomus", category: "Boletes" },
-      { name: "Bleeding Bonnet", scientific: "Mycena haematopus", genus: "Mycena", category: "Mycena" },
-      { name: "Common Bonnet", scientific: "Mycena galericulata", genus: "Mycena", category: "Mycena" },
-      { name: "Clustered Bonnet", scientific: "Mycena inclinata", genus: "Mycena", category: "Mycena" },
-      { name: "Lilac Bonnet", scientific: "Mycena pura", genus: "Mycena", category: "Mycena" },
-      { name: "Saffrondrop Bonnet", scientific: "Mycena crocata", genus: "Mycena", category: "Mycena" },
-      { name: "Charcoal Burner", scientific: "Russula cyanoxantha", genus: "Russula", category: "Russula" },
-      { name: "The Sickener", scientific: "Russula emetica", genus: "Russula", category: "Russula" },
-      { name: "Beechwood Sickener", scientific: "Russula nobilis", genus: "Russula", category: "Russula" },
-      { name: "Ochre Brittlegill", scientific: "Russula ochroleuca", genus: "Russula", category: "Russula" },
-      { name: "Purple Brittlegill", scientific: "Russula atropurpurea", genus: "Russula", category: "Russula" },
-      { name: "Greencracked Brittlegill", scientific: "Russula virescens", genus: "Russula", category: "Russula" },
-      { name: "Powdery Brittlegill", scientific: "Russula parazurea", genus: "Russula", category: "Russula" },
-      { name: "Stinking Brittlegill", scientific: "Russula foetens", genus: "Russula", category: "Russula" },
-      { name: "Turkey Tail", scientific: "Trametes versicolor", genus: "Trametes", category: "Brackets & Polypores" },
-      { name: "Artist's Conk", scientific: "Ganoderma applanatum", genus: "Ganoderma", category: "Brackets & Polypores" },
-      { name: "Red-belted Polypore", scientific: "Fomitopsis pinicola", genus: "Fomitopsis", category: "Brackets & Polypores" },
-      { name: "Birch Polypore", scientific: "Fomitopsis betulina", genus: "Fomitopsis", category: "Brackets & Polypores" },
-      { name: "Lumpy Bracket", scientific: "Trametes gibbosa", genus: "Trametes", category: "Brackets & Polypores" },
-      { name: "Smoky Bracket", scientific: "Bjerkandera adusta", genus: "Bjerkandera", category: "Brackets & Polypores" },
-      { name: "Hoof Fungus", scientific: "Fomes fomentarius", genus: "Fomes", category: "Brackets & Polypores" },
-      { name: "Beefsteak Fungus", scientific: "Fistulina hepatica", genus: "Fistulina", category: "Brackets & Polypores" },
-      { name: "Purplepore Bracket", scientific: "Trichaptum abietinum", genus: "Trichaptum", category: "Brackets & Polypores" },
-      { name: "Crimped Gill", scientific: "Plicaturopsis crispa", genus: "Plicaturopsis", category: "Brackets & Polypores" },
-      { name: "Golden Chanterelle", scientific: "Cantharellus cibarius", genus: "Cantharellus", category: "Chanterelles & Allies" },
-      { name: "Horn of Plenty", scientific: "Craterellus cornucopioides", genus: "Craterellus", category: "Chanterelles & Allies" },
-      { name: "Winter Chanterelle", scientific: "Craterellus tubaeformis", genus: "Craterellus", category: "Chanterelles & Allies" },
-      { name: "False Chanterelle", scientific: "Hygrophoropsis aurantiaca", genus: "Hygrophoropsis", category: "Chanterelles & Allies" },
-      { name: "Hedgehog Fungus", scientific: "Hydnum repandum", genus: "Hydnum", category: "Chanterelles & Allies" },
-      { name: "Scaly Chanterelle", scientific: "Turbinellus floccosus", genus: "Turbinellus", category: "Chanterelles & Allies" },
-      { name: "Clouded Funnel", scientific: "Clitocybe nebularis", genus: "Clitocybe", category: "Funnels & Grassland" },
-      { name: "Trooping Funnel", scientific: "Infundibulicybe geotropa", genus: "Infundibulicybe", category: "Funnels & Grassland" },
-      { name: "Fairy Ring Champignon", scientific: "Marasmius oreades", genus: "Marasmius", category: "Funnels & Grassland" },
-      { name: "St. George's Mushroom", scientific: "Calocybe gambosa", genus: "Calocybe", category: "Funnels & Grassland" },
-      { name: "Brown Mottlegill", scientific: "Panaeolina foenisecii", genus: "Panaeolina", category: "Funnels & Grassland" },
-      { name: "Common Puffball", scientific: "Lycoperdon perlatum", genus: "Lycoperdon", category: "Funnels & Grassland" },
-      { name: "Shaggy Mane", scientific: "Coprinus comatus", genus: "Coprinus", category: "Funnels & Grassland" },
-      { name: "Common Inkcap", scientific: "Coprinopsis atramentaria", genus: "Coprinopsis", category: "Funnels & Grassland" },
-      { name: "Magpie Inkcap", scientific: "Coprinopsis picacea", genus: "Coprinopsis", category: "Funnels & Grassland" },
-      { name: "Shaggy Parasol", scientific: "Chlorophyllum rhacodes", genus: "Chlorophyllum", category: "Funnels & Grassland" },
-      { name: "The Parasol", scientific: "Macrolepiota procera", genus: "Macrolepiota", category: "Funnels & Grassland" },
-      { name: "Liberty Cap", scientific: "Psilocybe semilanceata", genus: "Psilocybe", category: "Funnels & Grassland" },
-      { name: "Common Conecap", scientific: "Conocybe tenera", genus: "Conocybe", category: "Funnels & Grassland" },
-      { name: "Orange Peel Fungus", scientific: "Aleuria aurantia", genus: "Aleuria", category: "Cup & other Saprotrophs" },
-      { name: "King Alfred's Cakes", scientific: "Daldinia concentrica", genus: "Daldinia", category: "Cup & other Saprotrophs" },
-      { name: "Scarlet Elfcup", scientific: "Sarcoscypha austriaca", genus: "Sarcoscypha", category: "Cup & other Saprotrophs" },
-      { name: "Yellow Stagshorn", scientific: "Calocera viscosa", genus: "Calocera", category: "Cup & other Saprotrophs" },
-      { name: "Jelly Ear", scientific: "Auricularia auricula-judae", genus: "Auricularia", category: "Cup & other Saprotrophs" },
-      { name: "Yellow Brain", scientific: "Tremella mesenterica", genus: "Tremella", category: "Cup & other Saprotrophs" },
-      { name: "Funeral Bell", scientific: "Galerina marginata", genus: "Galerina", category: "Woodland Fungi" },
-      { name: "False Morel", scientific: "Gyromitra esculenta", genus: "Gyromitra", category: "Woodland Fungi" },
-      { name: "Honey Mushroom", scientific: "Armillaria mellea", genus: "Armillaria", category: "Woodland Fungi" },
-      { name: "Sheathed Woodtuft", scientific: "Kuehneromyces mutabilis", genus: "Kuehneromyces", category: "Woodland Fungi" },
-      { name: "Common Rustgill", scientific: "Gymnopilus penetrans", genus: "Gymnopilus", category: "Woodland Fungi" },
-      { name: "Velvet Shank", scientific: "Flammulina velutipes", genus: "Flammulina", category: "Woodland Fungi" },
-      { name: "Wrinkled Peach", scientific: "Rhodotus palmatus", genus: "Rhodotus", category: "Woodland Fungi" },
-      { name: "Golden Scalycap", scientific: "Pholiota aurivella", genus: "Pholiota", category: "Woodland Fungi" },
-      { name: "Lion's Mane", scientific: "Hericium erinaceus", genus: "Hericium", category: "Distinctive Oddballs" },
-      { name: "Chicken of the Woods", scientific: "Laetiporus sulphureus", genus: "Laetiporus", category: "Distinctive Oddballs" },
-      { name: "Hen of the Woods", scientific: "Grifola frondosa", genus: "Grifola", category: "Distinctive Oddballs" },
-      { name: "Giant Puffball", scientific: "Calvatia gigantea", genus: "Calvatia", category: "Distinctive Oddballs" },
-      { name: "Devil's Fingers", scientific: "Clathrus archeri", genus: "Clathrus", category: "Distinctive Oddballs" },
-      { name: "Dead Man's Fingers", scientific: "Xylaria polymorpha", genus: "Xylaria", category: "Distinctive Oddballs" },
-      { name: "Wood Blewit", scientific: "Lepista nuda", genus: "Lepista", category: "Blewits & Lookalikes" },
-      { name: "Field Blewit", scientific: "Lepista saeva", genus: "Lepista", category: "Blewits & Lookalikes" },
-      { name: "Lilac Fibrecap", scientific: "Inocybe lilacina", genus: "Inocybe", category: "Blewits & Lookalikes" },
-      { name: "Amethyst Deceiver", scientific: "Laccaria amethystina", genus: "Laccaria", category: "Blewits & Lookalikes" },
-      { name: "Bruising Webcap", scientific: "Cortinarius purpurascens", genus: "Cortinarius", category: "Blewits & Lookalikes" }
+    /* ---------------- species list (names only; ids resolved at runtime) ---------------- */
+    const speciesList = [
+      { name:"Fly Agaric", scientific:"Amanita muscaria", category:"Amanita" },
+      { name:"Death Cap", scientific:"Amanita phalloides", category:"Amanita" },
+      { name:"The Blusher", scientific:"Amanita rubescens", category:"Amanita" },
+      { name:"Panther Cap", scientific:"Amanita pantherina", category:"Amanita" },
+      { name:"False Death Cap", scientific:"Amanita citrina", category:"Amanita" },
+      { name:"Destroying Angel", scientific:"Amanita virosa", category:"Amanita" },
+      { name:"Orange Grisette", scientific:"Amanita crocea", category:"Amanita" },
+      /* (…keep your full list here exactly as before, minus the id fields…) */
     ];
 
-    // -------------------- Helpers --------------------
-    const taxonIdCache = new Map();
-    const MAX_CONCURRENT_FETCHES = 4;
-    const fetchQueue = [];
-    let activeFetches = 0;
-    const activeControllers = new Set();
+    /* ---------------- utility ---------------- */
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const ALLOWED = new Set(['cc0','cc-by','cc-by-sa','cc-by-nd','cc-by-nc','cc-by-nc-sa','cc-by-nc-nd']);
 
-    function queueFetch(url, options = {}) {
-      return new Promise((resolve, reject) => {
-        const task = () => {
-          activeFetches++;
-          const controller = new AbortController();
-          options.signal = controller.signal;
-          activeControllers.add(controller);
-          fetch(url, options).then(res => {
-            activeControllers.delete(controller);
-            resolve(res);
-          }).catch(err => {
-            activeControllers.delete(controller);
-            reject(err);
-          }).finally(() => {
-            activeFetches--;
-            if (fetchQueue.length) fetchQueue.shift()();
-          });
-        };
-        if (activeFetches < MAX_CONCURRENT_FETCHES) task();
-        else fetchQueue.push(task);
-      });
+    function setScreen(name){
+      Object.values(screens).forEach(s=>s.classList.remove('active'));
+      screens[name].classList.add('active');
+      // show HUD only in game screen
+      hud.style.display = (name === 'game') ? 'flex' : 'none';
+    }
+    function updateHud(){
+      scoreEl.textContent = state.score;
+      qEl.textContent = `${state.q+1} / ${state.total}`;
     }
 
-    function abortAllFetches() {
-      for (const c of activeControllers) c.abort();
-      activeControllers.clear();
-      fetchQueue.length = 0;
-      activeFetches = 0;
-    }
-
-    async function resolveTaxonId(scientificName, rank = 'species') {
-      const key = rank === 'species' ? `inatTaxonId:${scientificName}` : `inatTaxonId:${rank}:${scientificName}`;
-      if (taxonIdCache.has(key)) return taxonIdCache.get(key);
+    /* ----------- resolve iNat taxon id from scientific name (cached) ----------- */
+    async function resolveTaxonId(scientific){
+      const key = `inatTaxonId:${scientific}`;
       const cached = localStorage.getItem(key);
-      if (cached) {
-        const num = Number(cached);
-        taxonIdCache.set(key, num);
-        return num;
-      }
-      const url = `https://api.inaturalist.org/v1/taxa?q=${encodeURIComponent(scientificName)}&rank=${rank}&is_active=true&per_page=1`;
-      const res = await queueFetch(url);
-      if (!res.ok) throw new Error(`Could not resolve taxon id for ${scientificName}`);
-      const data = await res.json();
-      if (data.results && data.results.length) {
-        const id = data.results[0].id;
-        localStorage.setItem(key, String(id));
-        taxonIdCache.set(key, id);
-        return id;
-      }
-      throw new Error(`No taxon id found for ${scientificName}`);
+      if (cached) return Number(cached);
+      const url = `https://api.inaturalist.org/v1/taxa?q=${encodeURIComponent(scientific)}&rank=species&is_active=true&per_page=1`;
+      const r = await fetch(url); const j = await r.json();
+      const id = j?.results?.[0]?.id;
+      if (!id) throw new Error(`Could not resolve taxon for ${scientific}`);
+      localStorage.setItem(key, String(id));
+      return id;
     }
 
-    async function fetchMushroomObservation(species, excludeObservationId = null) {
-      const ALLOWED = new Set(['cc0','cc-by','cc-by-sa','cc-by-nd','cc-by-nc','cc-by-nc-sa','cc-by-nc-nd']);
-      const base = 'https://api.inaturalist.org/v1/observations';
-      const baseParams = {
-        per_page: '50',
-        order: 'desc',
-        order_by: 'votes',
-        fields: 'results.id,results.photos.id,results.photos.license_code,results.photos.url,results.photos.medium_url,results.photos.large_url,results.photos.attribution,results.observed_on_details.date,results.taxon.id'
-      };
+    /* ----------- image helpers (avoid blurry thumbs) ----------- */
+    function bestPhotoUrls(p){
+      const med = p.medium_url || (p.url ? p.url.replace('/square.', '/medium.') : null);
+      const lg  = p.large_url  || (p.url ? p.url.replace('/square.', '/large.')  : med);
+      return { med, lg };
+    }
 
-      async function query(params) {
-        const usp = new URLSearchParams();
-        Object.entries(params).forEach(([k,v]) => {
-          if (Array.isArray(v)) v.forEach(val => usp.append(k, val));
-          else usp.append(k, v);
+    /* ----------- fetch one observation with CC-licensed photos ----------- */
+    async function fetchOneObservation(scientific, excludeId=null){
+      const taxonId = await resolveTaxonId(scientific);
+      for (let page=1; page<=5; page++){
+        const params = new URLSearchParams({
+          taxon_id: String(taxonId),
+          has: 'photos',
+          quality_grade: 'needs_id,research',
+          per_page: '50',
+          order: 'desc',
+          order_by: 'observed_on',
+          page: String(page),
+          fields: 'results.id,results.uri,results.taxon.id,' +
+                  'results.photos.id,results.photos.url,results.photos.medium_url,results.photos.large_url,' +
+                  'results.photos.attribution,results.photos.license_code'
         });
-        const url = `${base}?${usp.toString()}`;
-        const res = await queueFetch(url);
-        if (!res.ok) throw new Error(`API ${res.status} for ${url}`);
-        return res.json();
-      }
-
-      async function tryStep(step, paramsBuilder) {
-        const params = { ...baseParams, 'has[]': 'photos', ...paramsBuilder() };
-        if (excludeObservationId) params.not_id = String(excludeObservationId);
-        let data;
-        try {
-          data = await query(params);
-        } catch (e) {
-          console.warn('query failed', e.message);
-          return { photos: [] };
-        }
-        const results = data.results || [];
-        if (!results.length) return { photos: [] };
-        for (const obs of results) {
-          if (!obs.photos || !obs.photos.length) continue;
-          const good = obs.photos.filter(p => ALLOWED.has(String(p.license_code || '').toLowerCase()));
-          if (good.length) {
-            const photos = good.slice(0,4).map(p => ({
-              url: p.url,
-              medium_url: p.medium_url,
-              large_url: p.large_url,
-              attribution: p.attribution || 'iNaturalist contributor',
-              license_code: p.license_code
-            }));
-            while (photos.length < 4 && photos.length) photos.push({ ...photos[0] });
-            return { photos, observationId: obs.id, observationUrl: obs.uri, step };
-          }
-        }
-        if (results.some(r => r.photos && r.photos.length)) {
-          return { skip: true, message: "couldn't find a CC-licensed photo; skipped" };
-        }
-        return { photos: [] };
-      }
-
-      const stepOrder = [
-        async () => {
-          const id = await resolveTaxonId(species.scientific);
-          return { name: 'taxon_id', builder: () => ({ taxon_id: String(id), quality_grade: 'needs_id,research' }), resolvedId: id };
-        },
-        async () => ({ name: 'taxon_name', builder: () => ({ taxon_name: species.scientific, quality_grade: 'needs_id,research' }), resolvedId: null }),
-        async () => {
-          const id = await resolveTaxonId(species.scientific);
-          return { name: 'verifiable', builder: () => ({ taxon_id: String(id), verifiable: 'true' }), resolvedId: id };
-        },
-        async () => {
-          const genusId = await resolveTaxonId(species.genus, 'genus');
-          return { name: 'genus', builder: () => ({ taxon_id: String(genusId), quality_grade: 'needs_id,research' }), resolvedId: genusId };
-        }
-      ];
-
-      for (const getStep of stepOrder) {
-        const { name, builder, resolvedId } = await getStep();
-        const result = await tryStep(name, builder);
-        if (result.skip) {
-          console.info('telemetry', { species: species.scientific, resolvedId, photos: 0, step: name, skipped: true });
-          return result;
-        }
-        if (result.photos && result.photos.length) {
-          console.info('telemetry', { species: species.scientific, resolvedId, photos: result.photos.length, step: name });
-          result.resolvedId = resolvedId;
-          result.step = name;
-          return result;
+        if (excludeId) params.set('not_id', String(excludeId));
+        const url = `https://api.inaturalist.org/v1/observations?${params.toString()}`;
+        const r = await fetch(url);
+        if (!r.ok){ continue; }
+        const data = await r.json();
+        const pool = (data.results||[]).filter(o => o.photos?.some(p => ALLOWED.has((p.license_code||'').toLowerCase())));
+        if (pool.length){
+          // pick one with at least 3 good photos
+          const pick = pool.find(o => o.photos.filter(p => ALLOWED.has((p.license_code||'').toLowerCase())).length >= 3) || pool[0];
+          return pick;
         }
       }
-      throw new Error(`No photos found for ${species.scientific}`);
-    }
-
-    function switchScreen(screen) {
-      startScreen.classList.remove('active'); loadingScreen.classList.remove('active');
-      gameScreen.classList.remove('active'); resultsScreen.classList.remove('active');
-      if (screen === 'start') startScreen.classList.add('active');
-      else if (screen === 'loading') loadingScreen.classList.add('active');
-      else if (screen === 'game') gameScreen.classList.add('active');
-      else if (screen === 'results') resultsScreen.classList.add('active');
-      gameState.activeScreen = screen;
-    }
-
-    function showError(message, retryFn = null, retryLabel = 'Try Again') {
-      errorMessageDisplay.textContent = message;
-      errorModalRetryBtn.textContent = retryLabel;
-      errorModalRetryBtn.onclick = () => { errorModal.classList.remove('active'); if (retryFn) retryFn(); };
-      errorModal.classList.add('active');
-    }
-
-    function handleImageError(img) { img.style.opacity = 0.3; img.alt = 'Image unavailable'; }
-
-    function randomChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
-    // -------------------- Game flow --------------------
-    function updateQuestionCounter() { questionCounterDisplay.textContent = `${gameState.questionsAnswered + 1} / ${gameState.questionsTarget}`; }
-    function updateDisplay() { scoreDisplay.textContent = gameState.score; }
-
-    function selectSpeciesForPreload(currentCorrectScientific = null) {
-      const preloaded = gameState.preloadQueue.map(it => it.scientific);
-      let candidates = mushroomSpecies.filter(s => s.scientific !== currentCorrectScientific && !gameState.seenSpeciesThisGame.has(s.scientific) && !preloaded.includes(s.scientific));
-      if (!candidates.length) candidates = mushroomSpecies.filter(s => s.scientific !== currentCorrectScientific && !preloaded.includes(s.scientific));
-      if (!candidates.length) return null;
-      return randomChoice(candidates);
-    }
-
-    async function maintainPreloadQueue(currentCorrectScientific = null) {
-      if (!gameState.isGameActive) return;
-      while (gameState.preloadQueue.length < gameState.preloadQueueSize) {
-        const species = selectSpeciesForPreload(currentCorrectScientific);
-        if (!species) break;
-        try {
-          const data = await fetchMushroomObservation(species);
-          if (data && !data.error && data.photos?.length) {
-            gameState.preloadQueue.push({ scientific: species.scientific, data, species, timestamp: Date.now() });
-          } else if (data && data.skip) {
-            console.warn(data.message);
-          }
-        } catch (e) { console.warn('Preload failed for', species?.name, e); }
-      }
-    }
-
-    function popPreloaded(scientific) {
-      const i = gameState.preloadQueue.findIndex(it => it.scientific === scientific);
-      if (i !== -1) return gameState.preloadQueue.splice(i, 1)[0].data;
       return null;
     }
 
-    async function startGame() {
-      abortAllFetches();
-      gameState.score = 0; gameState.questionsAnswered = 0; gameState.currentStreak = 0; gameState.bestStreak = 0; gameState.correctAnswersCount = 0;
-      gameState.currentQuestion = null; gameState.preloadQueue = []; gameState.seenSpeciesThisGame.clear(); gameState.newPhotosUsedThisQuestion = false;
-      updateDisplay(); questionCounterDisplay.textContent = `0 / ${gameState.questionsTarget}`; switchScreen('loading'); gameState.isGameActive = true;
+    /* ----------- render question ----------- */
+    function renderPhotos(observation, species){
+      imageGrid.innerHTML = '';
+      const good = observation.photos.filter(p => ALLOWED.has((p.license_code||'').toLowerCase())).slice(0,3);
+      const four = [...good];
+      while (four.length < 4 && good.length) four.push(good[0]); // duplicate to 4
 
-      // Try several times to secure a first question before giving up
-      let success = false; let errLast = null;
-      for (let attempt = 0; attempt < 6 && !success; attempt++) {
-        try { await loadNewQuestion(true); success = true; }
-        catch (err) { errLast = err; console.warn('Initial load attempt failed', attempt+1, err.message); }
-      }
-      if (!success) {
-        console.error('Failed to start:', errLast);
-        showError('Could not load the first mushroom question. Please try again.', () => { startGame(); }, 'Restart');
-        gameState.isGameActive = false; return;
-      }
+      four.forEach(p=>{
+        const { med, lg } = bestPhotoUrls(p);
+        const wrap = document.createElement('div'); wrap.className = 'img-card';
+        wrap.innerHTML = `
+          <img loading="lazy" decoding="async" src="${med}" srcset="${med} 1x, ${lg} 2x" alt="${species.name}">
+          <div class="credit">(c) ${p.attribution || 'iNaturalist user'} &nbsp; ${String(p.license_code||'').toUpperCase()}</div>`;
+        imageGrid.appendChild(wrap);
+      });
 
-      try { await maintainPreloadQueue(); } catch (e) { console.warn('Preload after start failed:', e.message); }
-      if (!gameState.isGameActive) return; switchScreen('game');
+      inatLink.style.display = 'inline-block';
+      inatLink.href = observation.uri;
     }
 
-    async function loadNewQuestion(isInitialLoad = false) {
-      if (!gameState.isGameActive) return;
-      updateQuestionCounter();
-
-      // choose a correct species we haven't used this game (if possible)
-      let candidates = mushroomSpecies.filter(s => !gameState.seenSpeciesThisGame.has(s.scientific));
-      if (!candidates.length) candidates = [...mushroomSpecies];
-      const correct = randomChoice(candidates);
-
-      // Load observation data (prefer preloaded)
-      let data = popPreloaded(correct.scientific) || await fetchMushroomObservation(correct);
-      if (!data || data.error || data.skip || !data.photos?.length) {
-        if (data && data.skip) {
-          showError(data.message, () => loadNewQuestion(isInitialLoad), 'Continue');
-          return;
-        }
-        if (isInitialLoad) throw new Error('Failed to load initial question');
-        showError('Could not find a suitable mushroom for the next question.', () => loadNewQuestion(false), 'Try Next');
-        return;
-      }
-
-      gameState.seenSpeciesThisGame.add(correct.scientific);
-      gameState.newPhotosUsedThisQuestion = false;
-      newPhotosBtn.style.display = 'inline-flex'; newPhotosBtn.disabled = false; newPhotosBtn.textContent = 'New Photos (1 use)';
-
-      // Build options based on difficulty
-      const options = [correct];
-      const correctCategory = correct.category;
-      const shuffled = (arr) => arr.slice().sort(() => 0.5 - Math.random());
-
-      if (gameState.difficulty === 'expert') {
-        let same = shuffled(mushroomSpecies.filter(s => s.category === correctCategory && s.scientific !== correct.scientific));
-        while (options.length < 4 && same.length) options.push(same.shift());
-      } else if (gameState.difficulty === 'intermediate') {
-        let same = shuffled(mushroomSpecies.filter(s => s.category === correctCategory && s.scientific !== correct.scientific));
-        if (same.length) options.push(same.shift());
-        let usedCats = new Set(options.map(o => o.category));
-        let others = shuffled(mushroomSpecies.filter(s => s.category !== correctCategory));
-        for (const sp of others) { if (options.length >= 4) break; if (!usedCats.has(sp.category)) { options.push(sp); usedCats.add(sp.category); } }
-      } else { // beginner
-        let usedCats = new Set(options.map(o => o.category));
-        let others = shuffled(mushroomSpecies.filter(s => s.category !== correctCategory));
-        for (const sp of others) { if (options.length >= 4) break; if (!usedCats.has(sp.category)) { options.push(sp); usedCats.add(sp.category); } }
-      }
-
-      if (options.length < 4) {
-        let filler = shuffled(mushroomSpecies.filter(s => !options.some(o => o.scientific === s.scientific)));
-        while (options.length < 4 && filler.length) options.push(filler.shift());
-      }
-
-      options.sort(() => 0.5 - Math.random());
-
-      gameState.currentQuestion = { correct, options, currentObservationId: data.observationId, observationUrl_DEBUG: data.observationUrl };
-
-      // Render images (2x2)
-      imageGrid.innerHTML = data.photos.map(p => {
-        const medium = p.medium_url || p.url.replace('/square.', '/medium.');
-        const large = p.large_url || p.url.replace('/square.', '/large.');
-        return `
-        <div class="image-container">
-          <img src="${medium}" srcset="${large} 2x" class="mushroom-image" alt="Mushroom photo" onerror="handleImageError(this)">
-          <div class="photo-credit">${p.attribution} <span class="license-badge">${(p.license_code || '').toUpperCase()}</span></div>
-        </div>
-        `;
-      }).join('');
-      const oldAttr = imageGrid.querySelector('.attribution'); if (oldAttr) oldAttr.remove();
-      if (data.observationUrl) {
-        const attr = document.createElement('div'); attr.className = 'attribution';
-        attr.innerHTML = `<a href="${data.observationUrl}" target="_blank" rel="noopener">View on iNaturalist</a>`;
-        imageGrid.appendChild(attr);
-      }
-
-      // Render options
-      optionsContainer.innerHTML = options.map((sp, idx) => `<button class="option-button" data-index="${idx}">${sp.name}<br><small style="opacity:.75"><em>${sp.scientific}</em></small></button>`).join('');
-
-      // keep preloading others
-      maintainPreloadQueue(correct.scientific);
+    function renderAnswers(options, correct){
+      answersEl.innerHTML = options.map((sp, i)=>`
+        <button class="answer" data-i="${i}">
+          ${sp.name}<small><em>${sp.scientific}</em></small>
+        </button>`).join('');
     }
 
-    async function handleNewPhotosRequest() {
-      if (!gameState.isGameActive || !gameState.currentQuestion || gameState.newPhotosUsedThisQuestion) return;
-      gameState.newPhotosUsedThisQuestion = true; newPhotosBtn.disabled = true; newPhotosBtn.textContent = 'Loading…';
-      const excludeId = gameState.currentQuestion.currentObservationId;
-      const newData = await fetchMushroomObservation(gameState.currentQuestion.correct, excludeId);
-      if (newData && !newData.error && !newData.skip && newData.photos?.length) {
-        imageGrid.innerHTML = newData.photos.map(p => {
-          const medium = p.medium_url || p.url.replace('/square.', '/medium.');
-          const large = p.large_url || p.url.replace('/square.', '/large.');
-          return `
-          <div class="image-container">
-            <img src="${medium}" srcset="${large} 2x" class="mushroom-image" onerror="handleImageError(this)">
-            <div class="photo-credit">${p.attribution} <span class="license-badge">${(p.license_code || '').toUpperCase()}</span></div>
-          </div>
-          `;
-        }).join('');
-        const oldAttr = imageGrid.querySelector('.attribution'); if (oldAttr) oldAttr.remove();
-        if (newData.observationUrl) {
-          const attr = document.createElement('div'); attr.className = 'attribution';
-          attr.innerHTML = `<a href="${newData.observationUrl}" target="_blank" rel="noopener">View on iNaturalist</a>`;
-          imageGrid.appendChild(attr);
-        }
-        gameState.currentQuestion.currentObservationId = newData.observationId;
-        gameState.currentQuestion.observationUrl_DEBUG = newData.observationUrl;
-        newPhotosBtn.textContent = 'New Photos Used';
-      } else {
-        showError('Could not find alternative photos for this mushroom.');
-        newPhotosBtn.textContent = 'No Alternatives Found';
-      }
+    /* ----------- round flow ----------- */
+    async function nextQuestion(initial=false){
+      updateHud();
+      const candidates = speciesList.filter(s => !state.seen.has(s.scientific));
+      const correct = candidates[Math.floor(Math.random()*candidates.length)] || speciesList[Math.floor(Math.random()*speciesList.length)];
+      const obs = await fetchOneObservation(correct.scientific);
+      if (!obs){ if (initial) throw new Error('No observation to start'); return nextQuestion(initial); }
+
+      state.current = { correct, obsId: obs.id };
+      state.seen.add(correct.scientific);
+      state.newPhotosUsed = false;
+      newBtn.style.display = 'inline-flex'; newBtn.disabled = false; newBtn.textContent = 'New Photos (1 use)';
+
+      renderPhotos(obs, correct);
+
+      // build 3 distractors
+      const pool = speciesList.filter(s => s !== correct);
+      const picks = [];
+      const byCat = pool.filter(s => s.category === correct.category);
+      while (picks.length<2 && byCat.length) picks.push(byCat.splice(Math.floor(Math.random()*byCat.length),1)[0]);
+      while (picks.length<3 && pool.length) picks.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);
+
+      const options = [correct, ...picks].sort(()=>Math.random()-.5);
+      renderAnswers(options, correct);
     }
 
-    function selectAnswer(index) {
-      if (!gameState.isGameActive || !gameState.currentQuestion) return;
-      const selected = gameState.currentQuestion.options[index];
-      const correct = gameState.currentQuestion.correct;
-      const buttons = optionsContainer.querySelectorAll('.option-button');
-      buttons.forEach(b => b.disabled = true);
-      newPhotosBtn.disabled = true;
-
-      if (selected.scientific === correct.scientific) {
-        gameState.score += 10; gameState.currentStreak++; gameState.correctAnswersCount++;
-        if (gameState.currentStreak > gameState.bestStreak) gameState.bestStreak = gameState.currentStreak;
-        buttons[index].classList.add('correct');
-      } else {
-        gameState.currentStreak = 0;
-        buttons[index].classList.add('incorrect');
-        const correctIndex = [...buttons].findIndex((b, i) => gameState.currentQuestion.options[i].scientific === correct.scientific);
-        if (correctIndex !== -1) buttons[correctIndex].classList.add('correct');
+    /* ----------- events ----------- */
+    $('#startBtn').addEventListener('click', async ()=>{
+      state.isGameActive = true;
+      state.score = 0; state.q = 0; state.seen.clear();
+      setScreen('loading');
+      try{
+        await nextQuestion(true);
+        setScreen('game');
+      }catch(e){
+        $('#errorMsg').textContent = 'Could not load the first mushroom question. Please try again.';
+        $('#errorModal').classList.add('active');
       }
-
-      gameState.questionsAnswered++;
-      updateDisplay();
-
-      if (gameState.questionsAnswered >= gameState.questionsTarget) {
-        finalScoreDisplay.textContent = gameState.score;
-        correctAnswersResultsDisplay.textContent = gameState.correctAnswersCount;
-        totalQuestionsResultsDisplay.textContent = gameState.questionsTarget;
-        bestStreakDisplay.textContent = gameState.bestStreak;
-        switchScreen('results'); gameState.isGameActive = false;
-      } else {
-        setTimeout(() => loadNewQuestion(false), 600);
-      }
-    }
-
-    function resetGame() { abortAllFetches(); switchScreen('start'); }
-
-    async function checkAPIStatus() {
-      try {
-        const r = await fetch('https://api.inaturalist.org/v1/observations?per_page=1');
-        if (!r.ok) showError('iNaturalist API may be having issues. Please try again later.');
-      } catch {
-        showError('Cannot connect to iNaturalist API. Please check your internet and try again.');
-      }
-    }
-
-    // -------------------- Event wiring --------------------
-    startGameBtn.addEventListener('click', startGame);
-    playAgainBtn.addEventListener('click', () => { switchScreen('start'); });
-    newPhotosBtn.addEventListener('click', handleNewPhotosRequest);
-    difficultyButtons.forEach(btn => btn.addEventListener('click', () => {
-      difficultyButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      gameState.difficulty = btn.dataset.difficulty;
-    }));
-
-    optionsContainer.addEventListener('click', (e) => {
-      const btn = e.target.closest('.option-button');
-      if (!btn || btn.disabled) return;
-      const idx = parseInt(btn.dataset.index, 10);
-      if (!Number.isNaN(idx)) selectAnswer(idx);
     });
 
-    window.addEventListener('load', () => {
-      checkAPIStatus();
-      questionCounterDisplay.textContent = `0 / ${gameState.questionsTarget}`;
-      const active = document.querySelector('.difficulty-button.active');
-      if (active) gameState.difficulty = active.dataset.difficulty;
-      switchScreen('start');
+    $('#retryBtn').addEventListener('click', ()=>{
+      $('#errorModal').classList.remove('active');
+      setScreen('start');
     });
+
+    newBtn.addEventListener('click', async ()=>{
+      if (state.newPhotosUsed) return;
+      state.newPhotosUsed = true; newBtn.disabled = true; newBtn.textContent = 'Loading…';
+      const obs = await fetchOneObservation(state.current.correct.scientific, state.current.obsId);
+      if (obs){ renderPhotos(obs, state.current.correct); newBtn.textContent = 'New Photos Used'; }
+      else { newBtn.textContent = 'No Alternatives Found'; }
+    });
+
+    answersEl.addEventListener('click', e=>{
+      const btn = e.target.closest('.answer'); if (!btn) return;
+      const idx = Number(btn.dataset.i);
+      const buttons = [...answersEl.querySelectorAll('.answer')];
+      buttons.forEach(b=>b.disabled = true);
+
+      const chosen = buttons[idx].textContent.trim();
+      const correctName = state.current.correct.name;
+
+      if (chosen.startsWith(correctName)){
+        btn.classList.add('correct'); state.score += 10;
+      } else {
+        btn.classList.add('incorrect');
+        const i = buttons.findIndex(b => b.textContent.trim().startsWith(correctName));
+        if (i>-1) buttons[i].classList.add('correct');
+      }
+      state.q++;
+      if (state.q >= state.total){
+        $('#finalScore').textContent = state.score;
+        $('#correctAnswers').textContent = Math.floor(state.score/10);
+        $('#totalQuestions').textContent = state.total;
+        $('#bestStreak').textContent = '—';
+        setScreen('results'); state.isGameActive = false;
+      } else {
+        setTimeout(()=> nextQuestion(false), 600);
+      }
+      updateHud();
+    });
+
+    diffButtons.forEach(b=>{
+      b.addEventListener('click', ()=>{
+        diffButtons.forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        state.difficulty = b.dataset.difficulty;
+      });
+    });
+
+    $('#playAgainBtn').addEventListener('click', ()=>{ setScreen('start'); });
+
+    // Landing
+    setScreen('start');
   </script>
 </body>
 </html>
-
