@@ -43,24 +43,21 @@
       .diff-btn{ min-width:96px; padding:8px 12px; font-size:.95rem }
     }
 
-    /* Image grid (2×2, like your original) */
+    /* Image grid (2×2) */
     .image-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; max-width:740px; margin:0 auto 10px }
-    .img-card{ position:relative; border:2px solid var(--ring); border-radius:14px; overflow:hidden; background:#eee0cf; aspect-ratio:1/1 }
-    .img-card img{ width:100%; height:100%; object-fit:cover; display:block }
+    .img-card{ border:2px solid var(--ring); border-radius:14px; overflow:hidden; background:#eee0cf; }
+    .img-wrap{ aspect-ratio:1/1; background:#eee0cf; }
+    .img-wrap img{ width:100%; height:100%; object-fit:cover; display:block }
 
-    /* License banner under each photo — restored */
-    .license-banner{
-      position:absolute; left:6px; right:6px; bottom:6px;
-      background:rgba(255,255,255,.86);
-      border:1px solid rgba(0,0,0,.12);
-      border-radius:10px; padding:4px 8px;
-      font-size:12px; line-height:1.25; color:#5d4e37;
-      display:flex; gap:8px; align-items:center; justify-content:center;
-      backdrop-filter: blur(2px);
+    /* License caption bar under each photo (original style) */
+    .credit{
+      font-size:12px; line-height:1.25; color:var(--muted);
+      background:#efe6da; padding:6px 8px; text-align:center;
+      border-top:1px solid rgba(0,0,0,.08);
     }
     .license-badge{
       font-size:11px; font-weight:700; letter-spacing:.2px; color:#4b3a23;
-      white-space:nowrap; border:1px solid rgba(0,0,0,.12); border-radius:6px; padding:1px 6px; background:#efe6da;
+      white-space:nowrap; border:1px solid rgba(0,0,0,.12); border-radius:6px; padding:1px 6px; background:#e7dbcd; margin-left:6px;
     }
 
     /* Controls */
@@ -78,7 +75,8 @@
     @media (max-width:768px){ .answers{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
     .answer{
       background: rgba(255,248,240,.9); border:2px solid var(--ring); border-radius:12px;
-      padding:14px; text-align:center; font-weight:600; cursor:pointer
+      padding:14px; text-align:center; font-weight:600; cursor:pointer;
+      color:var(--ink-2); /* softer brown, not pure black */
     }
     .answer small{ display:block; color:var(--muted); font-weight:400 }
     .answer.correct{ background:rgba(76,175,80,.18); border-color:#4CAF50; color:#2e7d32}
@@ -92,7 +90,6 @@
     .modal.active{ display:grid }
     .modal .card{ background:var(--card); padding:24px; border-radius:12px; box-shadow:0 12px 40px rgba(0,0,0,.35); text-align:center }
     .btn{ background:linear-gradient(135deg, var(--brand-1), var(--brand-2)); color:#fff; border:none; padding:12px 22px; border-radius:999px; font-weight:700; cursor:pointer }
-
   </style>
 </head>
 <body>
@@ -400,7 +397,7 @@
       return null;
     }
 
-    /* -------- render photos (with license banner) -------- */
+    /* -------- render photos (with caption bar under image) -------- */
     function renderPhotos(observation, species){
       imageGrid.innerHTML = '';
       const good = observation.photos.filter(p => ALLOWED.has(String(p.license_code||'').toLowerCase()));
@@ -414,9 +411,11 @@
         const card = document.createElement('div');
         card.className = 'img-card';
         card.innerHTML = `
-          <img loading="lazy" decoding="async" src="${med}" srcset="${med} 1x, ${lg} 2x" alt="${species.name}">
-          <div class="license-banner">
-            <span class="attr">${p.attribution || 'iNaturalist user'}</span>
+          <div class="img-wrap">
+            <img loading="lazy" decoding="async" src="${med}" srcset="${med} 1x, ${lg} 2x" alt="${species.name}">
+          </div>
+          <div class="credit">
+            (c) ${p.attribution || 'iNaturalist user'}
             <span class="license-badge">${formatLicense(p.license_code)}</span>
           </div>
         `;
