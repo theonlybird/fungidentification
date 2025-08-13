@@ -16,7 +16,7 @@
     }
     .game{width:100%; max-width:1000px; background:var(--card); border-radius:20px; padding:24px;
       border:1px solid rgba(139,90,43,.12); box-shadow:0 10px 30px rgba(139,90,43,.15)}
-    .header{ text-align:center; margin-bottom:8px }
+    .header{ text-align:center; margin-bottom:28px } /* more breathing room */
     h1{margin:0; font-size:2.25rem; color:var(--ink-2); font-weight:700}
     .sub{color:var(--muted)}
 
@@ -32,7 +32,7 @@
     .screen.active{display:block}
 
     /* Difficulty row (3 inline, centered) */
-    .difficulty{ display:flex; justify-content:center; gap:10px; flex-wrap:nowrap; margin:12px 0 18px }
+    .difficulty{ display:flex; justify-content:center; gap:10px; flex-wrap:nowrap; margin:14px 0 24px }
     .diff-btn{
       background:#d4c8b8; color:var(--ink-2); border:1px solid #bcaea0; border-radius:999px;
       padding:10px 16px; min-width:110px; font-weight:700; cursor:pointer
@@ -83,7 +83,6 @@
 
     /* Controls */
     .actions{ text-align:center; margin:10px 0 12px }
-    #inatLink{ display:none; margin:0 0 10px; color:var(--ink-2); font-weight:700; text-decoration:underline }
     #newPhotosBtn{
       display:inline-flex; align-items:center; justify-content:center;
       background:linear-gradient(135deg, var(--brand-1), var(--brand-2)); color:#fff;
@@ -101,21 +100,21 @@
       transition: background-color .15s ease, border-color .15s ease, transform .06s ease, box-shadow .15s ease;
     }
     @media (hover: hover) and (pointer: fine){
-    .answer:hover:not(:disabled):not(.correct):not(.incorrect){
-      background: rgba(139,90,43,.16);
-      border-color: rgba(139,90,43,.38);
-      box-shadow: 0 4px 12px rgba(139,90,43,.18);
-      transform: translateY(-1px);
-  }
-  .answer:active:not(:disabled):not(.correct):not(.incorrect){
-    transform: translateY(0);
-    background: rgba(139,90,43,.22);
-  }
-  .answer:focus-visible{
-    outline: 3px solid rgba(139,90,43,.45);
-    outline-offset: 2px;
-  }
-}
+      .answer:hover:not(:disabled):not(.correct):not(.incorrect){
+        background: rgba(139,90,43,.16);
+        border-color: rgba(139,90,43,.38);
+        box-shadow: 0 4px 12px rgba(139,90,43,.18);
+        transform: translateY(-1px);
+      }
+      .answer:active:not(:disabled):not(.correct):not(.incorrect){
+        transform: translateY(0);
+        background: rgba(139,90,43,.22);
+      }
+      .answer:focus-visible{
+        outline: 3px solid rgba(139,90,43,.45);
+        outline-offset: 2px;
+      }
+    }
     .answer small{ display:block; color:var(--muted); font-weight:400 }
     .answer.correct{ background:rgba(76,175,80,.18); border-color:#4CAF50; color:#2e7d32}
     .answer.incorrect{ background:rgba(244,67,54,.18); border-color:#F44336; color:#c62828}
@@ -130,15 +129,58 @@
     .btn{ background:linear-gradient(135deg, var(--brand-1), var(--brand-2)); color:#fff; border:none; padding:12px 22px; border-radius:999px; font-weight:700; cursor:pointer }
 
     @media (max-width: 420px) {
-    .credit{ font-size: clamp(6px, 2.8vw, 9px); padding: 3px 6px; }
-    .license-badge{ font-size: 0.9em; padding: 0 5px; letter-spacing: 0; }
+      .credit{ font-size: clamp(6px, 2.8vw, 9px); padding: 3px 6px; }
+      .license-badge{ font-size: 0.9em; padding: 0 5px; letter-spacing: 0; }
     }
 
     /* Landing screen spacing tweaks */
-    .header{ margin-bottom: 28px; }
     #start h2{ margin: 24px 0 12px !important; }
     #start p{ margin: 0 0 22px !important; }
-    .difficulty{ margin: 14px 0 24px; }
+
+    /* ---------- Review table ---------- */
+    .review-wrap{
+      margin: 6px auto 0;
+      max-width: 940px;
+      background: #fffdf7;
+      border: 1px solid rgba(139,90,43,.12);
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(139,90,43,.12);
+      overflow: hidden;
+    }
+    .review-table{
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    .review-table thead th{
+      text-align: left;
+      background: rgba(139,90,43,.08);
+      color: var(--ink-2);
+      font-weight: 700;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(139,90,43,.18);
+    }
+    .review-table tbody td{
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(139,90,43,.08);
+      vertical-align: top;
+    }
+    .review-table tbody tr:nth-child(even){
+      background: rgba(139,90,43,.03);
+    }
+    .review-table .fungus-name{ font-weight:700; color:var(--ink-2) }
+    .review-table .fungus-sci{ display:block; color:var(--muted); font-style:italic }
+    .badge{
+      display:inline-block; padding:4px 8px; border-radius:999px;
+      font-size:.85em; font-weight:700; letter-spacing:.2px;
+    }
+    .badge.ok{ background:rgba(76,175,80,.15); color:#1b5e20; border:1px solid rgba(76,175,80,.35) }
+    .badge.no{ background:rgba(244,67,54,.15); color:#8a1c13; border:1px solid rgba(244,67,54,.35) }
+    .review-table a{ color:var(--brand-2); text-decoration:underline; word-break:break-word }
+    @media (max-width:640px){
+      .review-table{ font-size:.9rem }
+      .review-table thead th, .review-table tbody td{ padding:10px 12px }
+    }
   </style>
 </head>
 <body>
@@ -187,7 +229,7 @@
       <div class="image-grid" id="imageGrid"></div>
 
       <div class="actions">
-        <a id="inatLink" href="#" target="_blank" rel="noopener">View on iNaturalist</a><br />
+        <!-- per-question iNat link removed -->
         <button id="newPhotosBtn" style="display:none">New Photos (1 use)</button>
       </div>
 
@@ -199,8 +241,27 @@
       <h2 style="text-align:center;margin:10px 0;">Quiz complete!</h2>
       <div style="text-align:center">
         <p style="font-size:1.25rem;">Final Score: <span id="finalScore">0</span> / 300</p>
-        <p>Correct Answers: <span id="correctAnswers">0</span> / <span id="totalQuestions">30</span></p>
-        <p>Best Streak: <span id="bestStreak">0</span></p>
+      </div>
+
+      <h3 style="margin:18px 0 10px; text-align:center; color:var(--ink-2);">
+        Let’s review your answers below:
+      </h3>
+
+      <div class="review-wrap">
+        <table class="review-table" id="reviewTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Fungi</th>
+              <th>Correct?</th>
+              <th>iNaturalist observation(s)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div style="text-align:center; margin-top:14px;">
         <button id="playAgainBtn" class="btn">Play again</button>
       </div>
     </section>
@@ -224,7 +285,7 @@
     const screens = { start: $('#start'), loading: $('#loading'), game: $('#game'), results: $('#results') };
     const scoreEl = $('#score'), qEl = $('#questionCounter');
     const imageGrid = $('#imageGrid'), answersEl = $('#answers');
-    const newBtn = $('#newPhotosBtn'), inatLink = $('#inatLink');
+    const newBtn = $('#newPhotosBtn'); // per-question inat link removed
     const diffButtons = [...document.querySelectorAll('.diff-btn')];
 
     const state = {
@@ -234,6 +295,7 @@
       seen: new Set(),
       newPhotosUsed: false,
       current: null,
+      review: []           // stores review rows for results table
     };
 
     /* ------------- species (names only; ids resolved at runtime) ------------- */
@@ -480,9 +542,7 @@
         `;
         imageGrid.appendChild(card);
       });
-
-      inatLink.style.display = 'inline-block';
-      inatLink.href = observation.uri;
+      // (Per-question iNat link intentionally removed)
     }
 
     function renderAnswers(options, correct){
@@ -490,6 +550,28 @@
         <button class="answer" data-i="${i}">
           ${sp.name}<small><em>${sp.scientific}</em></small>
         </button>`).join('');
+    }
+
+    /* -------- review table render -------- */
+    function renderReview(){
+      const tbody = document.querySelector('#reviewTable tbody');
+      if (!tbody) return;
+      tbody.innerHTML = state.review.map(row => {
+        const links = row.uris.map((u, i) =>
+          `<a href="${u}" target="_blank" rel="noopener">Observation ${i+1}</a>`
+        ).join(' &middot; ');
+        return `
+          <tr>
+            <td>${row.n}</td>
+            <td>
+              <span class="fungus-name">${row.name}</span>
+              <span class="fungus-sci"><em>${row.scientific}</em></span>
+            </td>
+            <td>${row.correct ? '<span class="badge ok">Correct</span>' : '<span class="badge no">Incorrect</span>'}</td>
+            <td>${links}</td>
+          </tr>
+        `;
+      }).join('');
     }
 
     /* -------- round flow -------- */
@@ -503,7 +585,7 @@
       const obs = await fetchOneObservation(correct.scientific);
       if (!obs){ if (initial) throw new Error('No observation to start'); return nextQuestion(initial); }
 
-      state.current = { correct, obsId: obs.id };
+      state.current = { correct, obsId: obs.id, uris: [obs.uri] }; // track first observation link
       state.seen.add(correct.scientific);
       state.newPhotosUsed = false;
       newBtn.style.display = 'inline-flex'; newBtn.disabled = false; newBtn.textContent = 'New Photos (1 use)';
@@ -525,6 +607,7 @@
     $('#startBtn').addEventListener('click', async ()=>{
       state.isGameActive = true;
       state.score = 0; state.q = 0; state.seen.clear();
+      state.review = [];                 // reset review rows
       setScreen('loading');
       try{
         await nextQuestion(true);
@@ -544,8 +627,16 @@
       if (state.newPhotosUsed) return;
       state.newPhotosUsed = true; newBtn.disabled = true; newBtn.textContent = 'Loading…';
       const obs = await fetchOneObservation(state.current.correct.scientific, state.current.obsId);
-      if (obs){ renderPhotos(obs, state.current.correct); state.current.obsId = obs.id; newBtn.textContent = 'New Photos Used'; pushRecent(state.current.correct.scientific, obs.id); }
-      else { newBtn.textContent = 'No Alternatives Found'; }
+      if (obs){
+        renderPhotos(obs, state.current.correct);
+        state.current.obsId = obs.id;
+        // keep both links for the review table
+        if (!state.current.uris.includes(obs.uri)) state.current.uris.push(obs.uri);
+        newBtn.textContent = 'New Photos Used';
+        pushRecent(state.current.correct.scientific, obs.id);
+      } else {
+        newBtn.textContent = 'No Alternatives Found';
+      }
     });
 
     answersEl.addEventListener('click', e=>{
@@ -557,22 +648,33 @@
       const chosen = buttons[idx].textContent.trim();
       const correctName = state.current.correct.name;
 
-      if (chosen.startsWith(correctName)){
+      const wasCorrect = chosen.startsWith(correctName);
+      if (wasCorrect){
         btn.classList.add('correct'); state.score += 10;
       } else {
         btn.classList.add('incorrect');
         const i = buttons.findIndex(b => b.textContent.trim().startsWith(correctName));
         if (i>-1) buttons[i].classList.add('correct');
       }
+
+      // record review row
+      const { name, scientific } = state.current.correct;
+      state.review.push({
+        n: state.q + 1,
+        name,
+        scientific,
+        correct: wasCorrect,
+        uris: [...(state.current.uris || [])]
+      });
+
       pushRecent(state.current.correct.scientific, state.current.obsId);
 
       state.q++;
       if (state.q >= state.total){
         $('#finalScore').textContent = state.score;
-        $('#correctAnswers').textContent = Math.floor(state.score/10);
-        $('#totalQuestions').textContent = state.total;
-        $('#bestStreak').textContent = '—';
-        setScreen('results'); state.isGameActive = false;
+        setScreen('results');
+        renderReview();                 // build the table
+        state.isGameActive = false;
       } else {
         setTimeout(()=> nextQuestion(false), 600);
       }
@@ -594,7 +696,3 @@
   </script>
 </body>
 </html>
-
-
-
-
