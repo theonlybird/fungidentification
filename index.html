@@ -45,39 +45,21 @@
 
     /* Image grid (2×2 always) */
     .image-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; max-width:740px; margin:0 auto 10px }
-   /* make the image card a positioning context for the overlay */
-    .img-card{
-      border:2px solid var(--ring);
-      border-radius:14px;
-      overflow:hidden;
-      background:transparent;     /* keep this transparent */
-      position:relative;          /* NEW: needed for absolute overlay */
-    }
-
-    .img-wrap{ 
-      aspect-ratio:1/1; 
-      background:#eee0cf;
-      position:relative;
-    }
+    .img-card{ border:2px solid var(--ring); border-radius:14px; overflow:hidden; background:transparent; }
+    .img-wrap{ position:relative; aspect-ratio:1/1; background:#eee0cf; }
     .img-wrap img{ width:100%; height:100%; object-fit:cover; display:block }
 
-   /* overlay the caption ON the photo */
-    .img-card .credit{
+    /* License caption: translucent overlay ON the photo */
+    .credit{
       position:absolute;
       left:6px; right:6px; bottom:6px;
       z-index:2;
       padding:4px 8px;
+      font-size:clamp(10px, 1.1vw, 12px);
+      line-height:1.25;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+
       display:flex; gap:8px; align-items:center; justify-content:center;
-      color:var(--muted);
-      background: linear-gradient(to bottom, rgba(255,255,255,.78), rgba(255,255,255,.62));
-      -webkit-backdrop-filter: blur(4px) saturate(120%);
-      backdrop-filter: blur(4px) saturate(120%);
-      border:1px solid rgba(0,0,0,.12);
-      border-radius:10px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
-      pointer-events:none; /* don't block taps */
-    }
 
       color:var(--muted);
       background: linear-gradient(to bottom, rgba(255,255,255,.78), rgba(255,255,255,.62));
@@ -86,10 +68,8 @@
       border:1px solid rgba(0,0,0,.12);
       border-radius:10px;
       box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
-      pointer-events:none;  /* overlay won't block taps/clicks */
+      pointer-events:none; /* overlay won't block taps/clicks */
     }
-
-
     .credit .name{white-space:nowrap}
     .license-badge{
       font-size:11px; font-weight:700; letter-spacing:.2px; color:#4b3a23;
@@ -447,7 +427,7 @@
       return null;
     }
 
-    /* -------- render photos (caption under image; cleaned attribution) -------- */
+    /* -------- render photos (overlay caption inside img-wrap) -------- */
     function renderPhotos(observation, species){
       imageGrid.innerHTML = '';
       const good = observation.photos.filter(p => ALLOWED.has(String(p.license_code||'').toLowerCase()));
@@ -462,22 +442,14 @@
         const card = document.createElement('div');
         card.className = 'img-card';
         card.innerHTML = `
-         const { med, lg } = bestPhotoUrls(p);
-const name = cleanAttribution(p.attribution);
-
-card.className = 'img-card';
-card.innerHTML = `
-  <div class="img-wrap">
-    <img loading="lazy" decoding="async"
-         src="${med}" srcset="${med} 1x, ${lg} 2x"
-         alt="${species.name}">
-    <div class="credit">
-      <span class="name">(c) ${name}</span>
-      <span class="license-badge">${formatLicense(p.license_code)}</span>
-    </div>
-    </div>
-    `;
-
+          <div class="img-wrap">
+            <img loading="lazy" decoding="async" src="${med}" srcset="${med} 1x, ${lg} 2x" alt="${species.name}">
+            <div class="credit">
+              <span class="name">(c) ${name}</span>
+              <span class="license-badge">${formatLicense(p.license_code)}</span>
+            </div>
+          </div>
+        `;
         imageGrid.appendChild(card);
       });
 
@@ -594,6 +566,3 @@ card.innerHTML = `
   </script>
 </body>
 </html>
-
-
-
