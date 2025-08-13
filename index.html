@@ -97,8 +97,25 @@
     .answer{
       background: rgba(255,248,240,.9); border:2px solid var(--ring); border-radius:12px;
       padding:14px; text-align:center; font-weight:600; cursor:pointer;
-      color:var(--ink-2); /* softer tone */
+      color:var(--ink-2);
+      transition: background-color .15s ease, border-color .15s ease, transform .06s ease, box-shadow .15s ease;
     }
+    @media (hover: hover) and (pointer: fine){
+    .answer:hover:not(:disabled):not(.correct):not(.incorrect){
+      background: rgba(139,90,43,.16);
+      border-color: rgba(139,90,43,.38);
+      box-shadow: 0 4px 12px rgba(139,90,43,.18);
+      transform: translateY(-1px);
+  }
+  .answer:active:not(:disabled):not(.correct):not(.incorrect){
+    transform: translateY(0);
+    background: rgba(139,90,43,.22);
+  }
+  .answer:focus-visible{
+    outline: 3px solid rgba(139,90,43,.45);
+    outline-offset: 2px;
+  }
+}
     .answer small{ display:block; color:var(--muted); font-weight:400 }
     .answer.correct{ background:rgba(76,175,80,.18); border-color:#4CAF50; color:#2e7d32}
     .answer.incorrect{ background:rgba(244,67,54,.18); border-color:#F44336; color:#c62828}
@@ -577,6 +594,7 @@
   </script>
 </body>
 </html>
+
 
 
 
