@@ -49,21 +49,29 @@
     .img-wrap{ aspect-ratio:1/1; background:#eee0cf; }
     .img-wrap img{ width:100%; height:100%; object-fit:cover; display:block }
 
-    /* ------- License caption: under image, translucent, single line ------- */
+    /* License caption: under image, translucent "glass" look */
     .credit{
-      font-size:clamp(10px, 1.1vw, 12px); /* small but legible, scales a bit */
-      line-height:1.25; color:var(--muted);
-      background:rgba(255,255,255,.70); /* gentle translucency */
-      backdrop-filter: blur(2px);
-      padding:6px 8px; text-align:center;
+      font-size:clamp(10px, 1.1vw, 12px);
+      line-height:1.25;
+      color:var(--muted);
+      background: linear-gradient(to bottom, rgba(255,255,255,.78), rgba(255,255,255,.66));
+      -webkit-backdrop-filter: blur(3px) saturate(120%);
+      backdrop-filter: blur(3px) saturate(120%);
+      padding:6px 8px;
+      text-align:center;
       border-top:1px solid rgba(0,0,0,.08);
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; /* keep to one line */
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
       display:flex; gap:8px; align-items:center; justify-content:center;
     }
+
     .credit .name{white-space:nowrap}
     .license-badge{
       font-size:11px; font-weight:700; letter-spacing:.2px; color:#4b3a23;
-      white-space:nowrap; border:1px solid rgba(0,0,0,.12); border-radius:6px; padding:1px 6px; background:#e7dbcd;
+      white-space:nowrap;
+      border:1px solid rgba(0,0,0,.18);
+      border-radius:6px;
+      padding:1px 6px;
+      background: rgba(231,219,205,.55);
       flex:0 0 auto;
     }
 
@@ -552,3 +560,4 @@
   </script>
 </body>
 </html>
+
