@@ -52,6 +52,19 @@
       .diff-btn{ min-width:96px; padding:8px 12px; font-size:.95rem }
     }
 
+/* Bigger Start button (landing only) */
+#startBtn{
+  font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+  padding: clamp(16px, 2.6vw, 20px) clamp(32px, 6.5vw, 48px);
+  min-width: clamp(220px, 42vw, 340px);
+  border-radius: 999px;
+}
+
+/* Large gap before copyright on the landing screen */
+#start .copyright-note{
+  margin-top: 56px;   /* tweak to taste */
+}
+    
     /* Image grid (2×2 always) */
     .image-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; max-width:740px; margin:0 auto 10px }
     .img-card{ border:2px solid var(--ring); border-radius:14px; overflow:hidden; background:transparent; }
@@ -284,6 +297,7 @@
 
       <div style="text-align:center;">
         <button id="startBtn" class="btn">Start Game</button>
+      </div>
         <div class="copyright-note">
   © 2025 Theo Bird — Code & design by Theo Bird.
   Photos © their iNaturalist contributors under Creative Commons licenses.
@@ -796,6 +810,7 @@
   </script>
 </body>
 </html>
+
 
 
 
