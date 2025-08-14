@@ -60,6 +60,21 @@
   border-radius: 999px;
 }
 
+/* Welcome screen intro text */
+#start .intro{
+  max-width: 820px;
+  margin: 18px auto 28px;
+  padding: 0 12px;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.6;
+  text-align: left;
+}
+#start .intro p{ margin: 0 0 12px; }
+@media (max-width: 560px){
+  #start .intro{ font-size: .97rem; line-height: 1.55; }
+}
+
 /* Large gap before copyright on the landing screen */
 #start .copyright-note{
   margin-top: 56px;   /* tweak to taste */
@@ -875,6 +890,7 @@ const TAXON_FALLBACK = {
   </script>
 </body>
 </html>
+
 
 
 
