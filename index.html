@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Fungidentification</title>
   <style>
+    html, body { min-height: 100%; }
     :root{
       --bg:#f5e6d3; --card:#fff8f0; --ink:#3d2914; --ink-2:#5d4e37; --muted:#8b7355;
       --brand-1:#8b6f47; --brand-2:#6b5637; --ring:rgba(139,90,43,.15);
@@ -183,12 +184,24 @@
     }
 /* THEME: Mossy Woodland */
 body.theme-woodland{
-  /* forest vignette that keeps content bright */
+  /* keep your variable overrides here if you have them */
   background:
-    radial-gradient(1200px 800px at 50% -10%, rgba(255,255,255,.55), transparent 65%),
-    radial-gradient(1200px 800px at 50% 120%, rgba(0,0,0,.08), transparent 60%),
+    radial-gradient(120vmax 80vmax at 50% -10vmax,
+                    rgba(255,255,255,.55), transparent 65%),
+    radial-gradient(160vmax 120vmax at 50% 130%,
+                    rgba(0,0,0,.08), transparent 70%),
     linear-gradient(180deg, #203a2b 0%, #2d513c 45%, #375d46 100%);
+  /* pin gradients on desktop to avoid visible seams when scrolling */
+  background-attachment: fixed, fixed, fixed;
 }
+
+/* On mobile, let it scroll for better performance */
+@media (max-width: 900px){
+  body.theme-woodland{
+    background-attachment: scroll, scroll, scroll;
+  }
+}
+
 
 body.theme-woodland .game{
   background:#fbf7f0;           /* warm bark-paper */
@@ -747,6 +760,7 @@ body.theme-woodland .review-table thead th{ background:rgba(56,110,83,.08); colo
   </script>
 </body>
 </html>
+
 
 
 
