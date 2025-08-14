@@ -17,7 +17,7 @@
     }
     .game{width:100%; max-width:1000px; background:var(--card); border-radius:20px; padding:24px;
       border:1px solid rgba(139,90,43,.12); box-shadow:0 10px 30px rgba(139,90,43,.15)}
-    .header{ text-align:center; margin-bottom:28px } /* more breathing room */
+    .header{ text-align:center; margin-bottom:28px }
     h1{margin:0; font-size:2.25rem; color:var(--ink-2); font-weight:700}
     .sub{color:var(--muted)}
 
@@ -287,8 +287,16 @@
     <!-- Start -->
     <section id="start" class="screen active">
       <h2 style="text-align:center;margin:10px 0 6px;">Welcome to the Mushroom ID Challenge!</h2>
-      <p style="text-align:center;margin:0 0 10px;">You will be shown 30 mushroom species to identify. Each round shows 4 photos of the same species.</p>
 
+<div class="intro">
+  <p>You will be shown 30 different fungi and you must identify as many as you can.</p>
+
+  <p>There will be 2 to 4 photos of the fungi in each round, depending on the observation from iNaturalist. If the photos are too poor to make an attempt at identification, you can click &ldquo;New Photos&rdquo; to load another observation of the same species. You can do this a maximum of 3 times per game.</p>
+
+  <p>iNaturalist is a wonderful website I encourage everyone to be a part of. However, due to the nature of it being a citizen science website, there is no guarantee that all observation identifications are correct. This quiz is fairly accurate and a fun way to increase your knowledge of mushrooms and fungi, but it is not always going to be correct.</p>
+
+  <p>You can review each of your 30 rounds at the end of the quiz. Enjoy!</p>
+</div>
       <div class="difficulty" id="difficultyRow">
         <button class="diff-btn active" data-difficulty="beginner">Beginner</button>
         <button class="diff-btn" data-difficulty="intermediate">Intermediate</button>
@@ -867,6 +875,7 @@ const TAXON_FALLBACK = {
   </script>
 </body>
 </html>
+
 
 
 
