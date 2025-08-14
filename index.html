@@ -90,6 +90,13 @@
       border:none; padding:12px 24px; border-radius:999px; font-weight:700; cursor:pointer;
       box-shadow:0 8px 24px rgba(139,90,43,.25)
     }
+    /* GREY OUT when disabled */
+    #newPhotosBtn:disabled{
+      background:#bdb5a9 !important;
+      box-shadow:none !important;
+      cursor:not-allowed;
+      opacity:.95;
+    }
 
     /* Answers grid: 4-up desktop, 2×2 mobile; softer brown text */
     .answers{ display:grid; gap:12px; max-width:740px; margin:0 auto; grid-template-columns:repeat(4, minmax(0,1fr)); }
@@ -100,7 +107,7 @@
       color:var(--ink-2);
       transition: background-color .15s ease, border-color .15s ease, transform .06s ease, box-shadow .15s ease;
     }
-    @media (hover: hover) and (pointer: fine){
+    @media (hover: hover) and (pointer: fine)){
       .answer:hover:not(:disabled):not(.correct):not(.incorrect){
         background: rgba(139,90,43,.16);
         border-color: rgba(139,90,43,.38);
@@ -116,7 +123,7 @@
         outline-offset: 2px;
       }
     }
-    .answer small{ display:block; color:var(--muted); font-weight:400 }
+    .answer.small{ display:block; color:var(--muted); font-weight:400 }
     .answer.correct{ background:rgba(76,175,80,.18); border-color:#4CAF50; color:#2e7d32}
     .answer.incorrect{ background:rgba(244,67,54,.18); border-color:#F44336; color:#c62828}
     .answer:disabled{ opacity:.75; cursor:not-allowed }
@@ -182,76 +189,58 @@
       .review-table{ font-size:.9rem }
       .review-table thead th, .review-table tbody td{ padding:10px 12px }
     }
-/* THEME: Mossy Woodland */
-body.theme-woodland{
-  /* keep your variable overrides here if you have them */
-  background:
-    radial-gradient(120vmax 80vmax at 50% -10vmax,
-                    rgba(255,255,255,.55), transparent 65%),
-    radial-gradient(160vmax 120vmax at 50% 130%,
-                    rgba(0,0,0,.08), transparent 70%),
-    linear-gradient(180deg, #203a2b 0%, #2d513c 45%, #375d46 100%);
-  /* pin gradients on desktop to avoid visible seams when scrolling */
-  background-attachment: fixed, fixed, fixed;
-}
 
-/* On mobile, let it scroll for better performance */
-@media (max-width: 900px){
-  body.theme-woodland{
-    background-attachment: scroll, scroll, scroll;
-  }
-}
+    /* THEME: Mossy Woodland (seamless background) */
+    body.theme-woodland{
+      background:
+        radial-gradient(120vmax 80vmax at 50% -10vmax,
+                        rgba(255,255,255,.55), transparent 65%),
+        radial-gradient(160vmax 120vmax at 50% 130%,
+                        rgba(0,0,0,.08), transparent 70%),
+        linear-gradient(180deg, #203a2b 0%, #2d513c 45%, #375d46 100%);
+      background-attachment: fixed, fixed, fixed;
 
-
-body.theme-woodland .game{
-  background:#fbf7f0;           /* warm bark-paper */
-  border:1px solid #214a37;
-  box-shadow: 0 18px 50px rgba(10,35,22,.35);
-}
-
-/* accent inks lean green; keep contrast high */
-body.theme-woodland{
-  --ink:#1f2b23; --ink-2:#2d3f32; --muted:#6f846f;
-  --brand-1:#4d8b6b; --brand-2:#386e53; --ring:rgba(77,139,107,.22);
-}
-
-/* header leaf divider (tiny inline SVG, subtle, repeats) */
-body.theme-woodland .header::after{
-  content:"";
-  display:block; height:10px; margin:14px auto 0; width:min(520px,80%);
-  background:
-    url('data:image/svg+xml;utf8,\
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 10">\
-        <path d="M3 6c18-8 36 8 54 0 18-8 36 8 54 0" fill="none" stroke="%236c8f75" stroke-width="2" stroke-linecap="round"/>\
-        <circle cx="16" cy="6" r="1.2" fill="%236c8f75"/><circle cx="39" cy="6" r="1.2" fill="%236c8f75"/>\
-        <circle cx="62" cy="6" r="1.2" fill="%236c8f75"/><circle cx="85" cy="6" r="1.2" fill="%236c8f75"/>\
-      </svg>') center/contain no-repeat;
-  opacity:.8;
-}
-
-/* buttons/answers harmonize with the theme */
-body.theme-woodland .diff-btn{ background:#e3efe7; border-color:#b4ccb9; color:#2d3f32 }
-body.theme-woodland .diff-btn.active{ background:var(--brand-1) }
-body.theme-woodland #newPhotosBtn,
-body.theme-woodland .btn{
-  background:linear-gradient(135deg, var(--brand-1), var(--brand-2));
-  box-shadow:0 10px 28px rgba(56,110,83,.30);
-}
-
-/* image frame edges pick up greenish ring */
-body.theme-woodland .img-card{ border-color: rgba(77,139,107,.22) }
-
-/* review table header tint */
-body.theme-woodland .review-wrap{ background:#fffef9; border-color:rgba(56,110,83,.20) }
-body.theme-woodland .review-table thead th{ background:rgba(56,110,83,.08); color:#223329 }
-
+      /* theme variables */
+      --ink:#1f2b23; --ink-2:#2d3f32; --muted:#6f846f;
+      --brand-1:#4d8b6b; --brand-2:#386e53; --ring:rgba(77,139,107,.22);
+    }
+    @media (max-width: 900px){
+      body.theme-woodland{ background-attachment: scroll, scroll, scroll; }
+    }
+    body.theme-woodland .game{
+      background:#fbf7f0;
+      border:1px solid #214a37;
+      box-shadow: 0 18px 50px rgba(10,35,22,.35);
+    }
+    body.theme-woodland .header::after{
+      content:"";
+      display:block; height:10px; margin:14px auto 0; width:min(520px,80%);
+      background:
+        url('data:image/svg+xml;utf8,\
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 10">\
+            <path d="M3 6c18-8 36 8 54 0 18-8 36 8 54 0" fill="none" stroke="%236c8f75" stroke-width="2" stroke-linecap="round"/>\
+            <circle cx="16" cy="6" r="1.2" fill="%236c8f75"/><circle cx="39" cy="6" r="1.2" fill="%236c8f75"/>\
+            <circle cx="62" cy="6" r="1.2" fill="%236c8f75"/><circle cx="85" cy="6" r="1.2" fill="%236c8f75"/>\
+          </svg>') center/contain no-repeat;
+      opacity:.8;
+    }
+    body.theme-woodland .diff-btn{ background:#e3efe7; border-color:#b4ccb9; color:#2d3f32 }
+    body.theme-woodland .diff-btn.active{ background:var(--brand-1) }
+    body.theme-woodland #newPhotosBtn,
+    body.theme-woodland .btn{
+      background:linear-gradient(135deg, var(--brand-1), var(--brand-2));
+      box-shadow:0 10px 28px rgba(56,110,83,.30);
+    }
+    body.theme-woodland .img-card{ border-color: rgba(77,139,107,.22) }
+    body.theme-woodland .review-wrap{ background:#fffef9; border-color:rgba(56,110,83,.20) }
+    body.theme-woodland .review-table thead th{ background:rgba(56,110,83,.08); color:#223329 }
   </style>
 </head>
 <body class="theme-woodland">
   <div class="game">
     <div class="header">
       <h1>🍄 Fungidentification</h1>
-      <div class="sub">Test your mycology knowledge in nature's classroom
+      <div class="sub">Test your mycology knowledge in nature's classroom</div>
     </div>
 
     <!-- HUD (hidden until game) -->
@@ -294,7 +283,7 @@ body.theme-woodland .review-table thead th{ background:rgba(56,110,83,.08); colo
 
       <div class="actions">
         <!-- per-question iNat link removed -->
-        <button id="newPhotosBtn" style="display:none">New Photos (1 use)</button>
+        <button id="newPhotosBtn" style="display:none">New Photos</button>
       </div>
 
       <div id="answers" class="answers"></div>
@@ -357,9 +346,10 @@ body.theme-woodland .review-table thead th{ background:rgba(56,110,83,.08); colo
       score: 0, q: 0, total: 30,
       isGameActive: false,
       seen: new Set(),
-      newPhotosUsed: false,
+      newPhotosUsed: false,   // used in THIS question
+      newPhotosLeft: 3,       // <-- total remaining for the game
       current: null,
-      review: []           // stores review rows for results table
+      review: []              // stores review rows for results table
     };
 
     /* ------------- species (names only; ids resolved at runtime) ------------- */
@@ -638,6 +628,13 @@ body.theme-woodland .review-table thead th{ background:rgba(56,110,83,.08); colo
       }).join('');
     }
 
+    /* -------- New Photos helper (keeps label + enabled state in sync) -------- */
+    function refreshNewPhotosBtn(){
+      const left = state.newPhotosLeft;
+      newBtn.textContent = `New Photos (${left} remaining)`;
+      newBtn.disabled = state.newPhotosUsed || left <= 0;
+    }
+
     /* -------- round flow -------- */
     async function nextQuestion(initial=false){
       updateHud();
@@ -651,8 +648,11 @@ body.theme-woodland .review-table thead th{ background:rgba(56,110,83,.08); colo
 
       state.current = { correct, obsId: obs.id, uris: [obs.uri] }; // track first observation link
       state.seen.add(correct.scientific);
+
+      // per-round reset & show button with remaining count
       state.newPhotosUsed = false;
-      newBtn.style.display = 'inline-flex'; newBtn.disabled = false; newBtn.textContent = 'New Photos (1 use)';
+      newBtn.style.display = 'inline-flex';
+      refreshNewPhotosBtn();
 
       renderPhotos(obs, correct);
 
@@ -671,7 +671,8 @@ body.theme-woodland .review-table thead th{ background:rgba(56,110,83,.08); colo
     $('#startBtn').addEventListener('click', async ()=>{
       state.isGameActive = true;
       state.score = 0; state.q = 0; state.seen.clear();
-      state.review = [];                 // reset review rows
+      state.review = [];
+      state.newPhotosLeft = 3;       // reset pool for the new game
       setScreen('loading');
       try{
         await nextQuestion(true);
@@ -688,19 +689,34 @@ body.theme-woodland .review-table thead th{ background:rgba(56,110,83,.08); colo
     });
 
     newBtn.addEventListener('click', async ()=>{
-      if (state.newPhotosUsed) return;
-      state.newPhotosUsed = true; newBtn.disabled = true; newBtn.textContent = 'Loading…';
+      if (state.newPhotosUsed || state.newPhotosLeft <= 0) return;
+
+      // show loading
+      newBtn.disabled = true;
+      const oldLabel = newBtn.textContent;
+      newBtn.textContent = 'Loading…';
+
       const obs = await fetchOneObservation(state.current.correct.scientific, state.current.obsId);
+
       if (obs){
         renderPhotos(obs, state.current.correct);
         state.current.obsId = obs.id;
+
         // keep both links for the review table
         if (!state.current.uris.includes(obs.uri)) state.current.uris.push(obs.uri);
-        newBtn.textContent = 'New Photos Used';
+
+        // mark used for this round + decrement pool
+        state.newPhotosUsed = true;
+        state.newPhotosLeft--;
+
+        // avoid immediate reuse of the same obs
         pushRecent(state.current.correct.scientific, obs.id);
       } else {
-        newBtn.textContent = 'No Alternatives Found';
+        // no alternative found – let them try again without consuming a use
+        state.newPhotosUsed = false;
       }
+
+      refreshNewPhotosBtn();
     });
 
     answersEl.addEventListener('click', e=>{
@@ -737,7 +753,7 @@ body.theme-woodland .review-table thead th{ background:rgba(56,110,83,.08); colo
       if (state.q >= state.total){
         $('#finalScore').textContent = state.score;
         setScreen('results');
-        renderReview();                 // build the table
+        renderReview();
         state.isGameActive = false;
       } else {
         setTimeout(()=> nextQuestion(false), 600);
@@ -760,9 +776,3 @@ body.theme-woodland .review-table thead th{ background:rgba(56,110,83,.08); colo
   </script>
 </body>
 </html>
-
-
-
-
-
-
