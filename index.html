@@ -535,6 +535,8 @@
   { id: 382886, name: "Ugly Milkcap",          scientific: "Lactarius turpis",        genus: "Lactarius",   category: "Lactarius" }
 ];
 
+    const speciesList = mushroomSpecies;
+    
     /* ---------------- helpers ---------------- */
     const ALLOWED = new Set(['cc0','cc-by','cc-by-sa','cc-by-nd','cc-by-nc','cc-by-nc-sa','cc-by-nc-nd']);
     const recentObs = new Map(); // scientific -> Set of recent obs ids (avoid repeats in a session)
@@ -561,6 +563,13 @@
       return s || 'iNaturalist user';
     }
 
+    // iNat-friendly fallbacks for a few tricky names
+const TAXON_FALLBACK = {
+  "Oudemansiella mucida": "Mucidula mucida",
+  "Inocybe lilacina": "Inocybe geophylla var. lilacina",
+  "Pholiota aurivella": "Pholiota adiposa"
+};
+    
     /* -------- resolve iNat taxon id from scientific name (cached) -------- */
     async function resolveTaxonId(scientific){
       const key = `inatTaxonId:${scientific}`;
@@ -858,6 +867,7 @@
   </script>
 </body>
 </html>
+
 
 
 
