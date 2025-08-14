@@ -123,7 +123,15 @@
         outline-offset: 2px;
       }
     }
-    .answer.small{ display:block; color:var(--muted); font-weight:400 }
+    .answer small{
+  display:block;
+  margin-top:4px;
+  color:var(--muted);
+  font-weight:400;
+  font-style: italic;
+  line-height:1.2;
+  font-size:.95em;
+}
     .answer.correct{ background:rgba(76,175,80,.18); border-color:#4CAF50; color:#2e7d32}
     .answer.incorrect{ background:rgba(244,67,54,.18); border-color:#F44336; color:#c62828}
     .answer:disabled{ opacity:.75; cursor:not-allowed }
@@ -776,3 +784,4 @@
   </script>
 </body>
 </html>
+
