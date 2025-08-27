@@ -565,6 +565,60 @@
     ]);
     const beginnerSpecies = speciesList.filter(s => beginnerScientificSet.has(s.scientific));
 
+/* -------- NOVICE difficulty: Beginner set + these extras -------- */
+const noviceExtras = [
+  { id: 53778,  name: "Death Cap",             scientific: "Amanita phalloides",    genus: "Amanita",    category: "Amanita" },
+  { id: 58685,  name: "Destroying Angel",      scientific: "Amanita virosa",        genus: "Amanita",    category: "Amanita" },
+  { id: 118394, name: "Yellow Stainer",        scientific: "Agaricus xanthodermus", genus: "Agaricus",   category: "Agaricus" },
+  { id: 58646,  name: "The Prince",            scientific: "Agaricus augustus",     genus: "Agaricus",   category: "Agaricus" },
+  { id: 125683, name: "Golden Oyster",         scientific: "Pleurotus citrinopileatus",    genus: "Pleurotus",  category: "Pleurotus" },
+  { id: 51869,  name: "Crimson Waxcap",        scientific: "Hygrocybe punicea",      genus: "Hygrocybe",  category: "Waxcaps" },
+  { id: 63475,  name: "Parrot Waxcap",         scientific: "Gliophorus psittacinus", genus: "Gliophorus", category: "Waxcaps" },
+  { id: 53903,  name: "Bay Bolete",            scientific: "Imleria badia",               genus: "Imleria",     category: "Boletes" },
+  { id: 63232,  name: "Birch Bolete",          scientific: "Leccinum scabrum",            genus: "Leccinum",    category: "Boletes" },
+  { id: 54163,  name: "Red Cracking Bolete",   scientific: "Xerocomellus chrysenteron",   genus: "Xerocomellus",category: "Boletes" },
+  { id: 63446,  name: "Common Bonnet",         scientific: "Mycena galericulata",  genus: "Mycena",    category: "Mycena" },
+  { id: 63471,  name: "Clustered Bonnet",      scientific: "Mycena inclinata",     genus: "Mycena",    category: "Mycena" },
+  { id: 194437, name: "Charcoal Burner",       scientific: "Russula cyanoxantha", genus: "Russula",   category: "Russula" },
+  { id: 49446,  name: "Beechwood Sickener",    scientific: "Russula nobilis",      genus: "Russula",   category: "Russula" },
+  { id: 63188,  name: "Ochre Brittlegill",     scientific: "Russula ochroleuca",   genus: "Russula",   category: "Russula" },
+  { id: 124459, name: "Red-belted Polypore",   scientific: "Fomitopsis pinicola",  genus: "Fomitopsis",category: "Brackets & Polypores" },
+  { id: 83490,  name: "Birch Polypore",        scientific: "Fomitopsis betulina",  genus: "Fomitopsis",category: "Brackets & Polypores" },
+  { id: 410641, name: "Lumpy Bracket",         scientific: "Trametes gibbosa",     genus: "Trametes",  category: "Brackets & Polypores" },
+  { id: 55653,  name: "Beefsteak Fungus",      scientific: "Fistulina hepatica",   genus: "Fistulina", category: "Brackets & Polypores" },
+  { id: 157989, name: "Giant (Blackening) Polypore", scientific: "Meripilus giganteus",   genus: "Meripilus",  category: "Brackets & Polypores" },
+  { id: 118078, name: "Dryad's Saddle",              scientific: "Polyporus squamosus",   genus: "Polyporus",  category: "Brackets & Polypores" },
+  { id: 350511, name: "Winter Chanterelle",    scientific: "Craterellus tubaeformis",genus:"Craterellus", category:"Chanterelles & Allies" },
+  { id: 127394, name: "False Chanterelle",     scientific: "Hygrophoropsis aurantiaca",genus:"Hygrophoropsis",category:"Chanterelles & Allies" },
+  { id: 119227, name: "Trooping Funnel",       scientific: "Infundibulicybe geotropa", genus: "Infundibulicybe",category:"Funnels & Grassland" },
+  { id: 120230, name: "St. George's Mushroom", scientific: "Calocybe gambosa",         genus: "Calocybe",    category: "Funnels & Grassland" },
+  { id: 48526,  name: "Common Inkcap",         scientific: "Coprinopsis atramentaria", genus: "Coprinopsis", category: "Funnels & Grassland" },
+  { id: 55453,  name: "Magpie Inkcap",         scientific: "Coprinopsis picacea",      genus: "Coprinopsis", category: "Funnels & Grassland" },
+  { id: 54025,  name: "Liberty Cap",           scientific: "Psilocybe semilanceata",   genus: "Psilocybe",   category: "Funnels & Grassland" },
+  { id: 119945, name: "Orange Peel Fungus",    scientific: "Aleuria aurantia",        genus: "Aleuria",    category: "Cup & other Saprotrophs" },
+  { id: 119224, name: "King Alfred's Cakes",   scientific: "Daldinia concentrica",    genus: "Daldinia",   category: "Cup & other Saprotrophs" },
+  { id: 117556, name: "Jelly Ear",             scientific: "Auricularia auricula-judae",genus:"Auricularia",category:"Cup & other Saprotrophs" },
+  { id: 54743,  name: "Yellow Brain",          scientific: "Tremella mesenterica",    genus: "Tremella",  category: "Cup & other Saprotrophs" },
+  { id: 47346,  name: "Funeral Bell",          scientific: "Galerina marginata",      genus: "Galerina",  category: "Woodland Fungi" },
+  { id: 56086,  name: "False Morel",           scientific: "Gyromitra esculenta",     genus: "Gyromitra", category: "Woodland Fungi" },
+  { id: 54844,  name: "Honey Fungus",          scientific: "Armillaria mellea",       genus: "Armillaria",category: "Woodland Fungi" },
+  { id: 481482, name: "Wrinkled Peach",        scientific: "Rhodotus palmatus",       genus: "Rhodotus",  category: "Woodland Fungi" },
+  { id: 48767,  name: "Sulphur Tuft",          scientific: "Hypholoma fasciculare",   genus: "Hypholoma", category: "Woodland Fungi" },
+  { id: 57343,  name: "Giant Puffball",        scientific: "Calvatia gigantea",       genus: "Calvatia",  category: "Distinctive Oddballs" },
+  { id: 469901, name: "Devil's Fingers",       scientific: "Clathrus archeri",        genus: "Clathrus",  category: "Distinctive Oddballs" },
+  { id: 53764,  name: "Dead Man's Fingers",    scientific: "Xylaria polymorpha",      genus: "Xylaria",   category: "Distinctive Oddballs" },
+  { id: 63014,  name: "Cauliflower Fungus",    scientific: "Sparassis crispa",        genus: "Sparassis", category: "Distinctive Oddballs" },
+  { id: 54594,  name: "Stinkhorn",             scientific: "Phallus impudicus",       genus: "Phallus",   category: "Distinctive Oddballs" },
+  { id: 119152, name: "Wood Blewit",           scientific: "Lepista nuda",            genus: "Lepista",   category: "Blewits & Lookalikes" },
+  { id: 63509,  name: "Amethyst Deceiver",     scientific: "Laccaria amethystina",    genus: "Laccaria",  category: "Blewits & Lookalikes" },
+];
+
+/* Novice = Beginner + extras (deduped by id to avoid duplicates) */
+const noviceSpecies = Array.from(
+  new Map([...beginnerSpecies, ...noviceExtras].map(s => [s.id, s])).values()
+);
+
+
     /* ---------------- helpers ---------------- */
     const ALLOWED = new Set(['cc0','cc-by','cc-by-sa','cc-by-nd','cc-by-nc','cc-by-nc-sa','cc-by-nc-nd']);
     const recentObs = new Map();
@@ -773,58 +827,62 @@
       return units * 1; // intermediate & expert
     }
 
-    /* ---------- difficulty-specific option picking ---------- */
-    function pickOptions(correct){
-      const all = speciesList.filter(s => s !== correct);
+ function pickOptions(correct){
+  // Restrict the answer pool by difficulty
+  const roster =
+    (state.difficulty === 'beginner') ? beginnerSpecies :
+    (state.difficulty === 'novice')   ? noviceSpecies   :
+                                        speciesList;    // intermediate & expert unchanged
+  const all = roster.filter(s => s !== correct);
 
-      // BEGINNER: restrict whole round to beginnerSpecies roster
-      if (state.difficulty === 'beginner'){
-        const pool = beginnerSpecies.filter(s => s !== correct);
-        shuffle(pool);
-        return [correct, ...pool.slice(0,3)].sort(()=>Math.random()-.5);
-      }
+  // BEGINNER: restrict whole round to beginnerSpecies roster
+  if (state.difficulty === 'beginner'){
+    const pool = beginnerSpecies.filter(s => s !== correct);
+    shuffle(pool);
+    return [correct, ...pool.slice(0,3)].sort(()=> Math.random() - .5);
+  }
 
-      // NOVICE: decoys from other categories (easier)
-      if (state.difficulty === 'novice'){
-        const otherCats = all.filter(s => s.category !== correct.category);
-        shuffle(otherCats);
-        const picks = otherCats.slice(0,3);
-        while (picks.length < 3){
-          const extra = all.find(s => !picks.includes(s));
-          if (!extra) break; picks.push(extra);
-        }
-        return [correct, ...picks.slice(0,3)].sort(()=>Math.random()-.5);
-      }
+  // NOVICE: simple random decoys from the novice roster (no category rule)
+  if (state.difficulty === 'novice'){
+    const pool = [...all];            // already noviceSpecies minus the correct answer
+    shuffle(pool);
+    const picks = pool.slice(0,3);    // just take three random decoys
+    return [correct, ...picks].sort(()=> Math.random() - .5);
+  }
 
-      // INTERMEDIATE: decoys from same category
-      if (state.difficulty === 'intermediate'){
-        const sameCat = all.filter(s => s.category === correct.category);
-        shuffle(sameCat);
-        const picks = sameCat.slice(0,3);
-        while (picks.length < 3){
-          const extra = all.find(s => !picks.includes(s));
-          if (!extra) break; picks.push(extra);
-        }
-        return [correct, ...picks.slice(0,3)].sort(()=>Math.random()-.5);
-      }
-
-      // EXPERT: prefer same genus, then same category
-      const sameGenus = all.filter(s => s.genus === correct.genus);
-      const sameCat = all.filter(s => s.category === correct.category && s.genus !== correct.genus);
-      shuffle(sameGenus); shuffle(sameCat);
-      const picks = [...sameGenus, ...sameCat];
-      while (picks.length < 3){
-        const extra = all.find(s => !picks.includes(s));
-        if (!extra) break; picks.push(extra);
-      }
-      return [correct, ...picks.slice(0,3)].sort(()=>Math.random()-.5);
+  // INTERMEDIATE: decoys from same category
+  if (state.difficulty === 'intermediate'){
+    const sameCat = all.filter(s => s.category === correct.category);
+    shuffle(sameCat);
+    const picks = sameCat.slice(0,3);
+    while (picks.length < 3){
+      const extra = all.find(s => !picks.includes(s));
+      if (!extra) break; picks.push(extra);
     }
+    return [correct, ...picks.slice(0,3)].sort(()=> Math.random() - .5);
+  }
+
+  // EXPERT: prefer same genus, then same category
+  const sameGenus = all.filter(s => s.genus === correct.genus);
+  const sameCat   = all.filter(s => s.category === correct.category && s.genus !== correct.genus);
+  shuffle(sameGenus); shuffle(sameCat);
+  const picks = [...sameGenus, ...sameCat];
+  while (picks.length < 3){
+    const extra = all.find(s => !picks.includes(s));
+    if (!extra) break; picks.push(extra);
+  }
+  return [correct, ...picks.slice(0,3)].sort(()=> Math.random() - .5);
+}
 
     async function nextQuestion(initial=false){
       updateHud();
 
       // pool depends on difficulty
-      const pool = (state.difficulty === 'beginner') ? beginnerSpecies : speciesList;
+const pool =
+  (state.difficulty === 'beginner')   ? beginnerSpecies :
+  (state.difficulty === 'novice')     ? noviceSpecies   :
+                                        speciesList;    // Intermediate & Expert unchanged
+
       const remaining = pool.filter(s => !state.seen.has(s.scientific));
       const base = remaining.length ? remaining : pool;
       const correct = base[Math.floor(Math.random()*base.length)];
@@ -963,8 +1021,3 @@ state.q++;
   </script>
 </body>
 </html>
-
-
-
-
-
