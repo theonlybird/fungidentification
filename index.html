@@ -928,17 +928,32 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
     return [correct, ...picks].sort(()=> Math.random() - .5);
   }
 
-  // INTERMEDIATE: decoys from same category
-  if (state.difficulty === 'intermediate'){
-    const sameCat = all.filter(s => s.category === correct.category);
-    shuffle(sameCat);
-    const picks = sameCat.slice(0,3);
-    while (picks.length < 3){
-      const extra = all.find(s => !picks.includes(s));
-      if (!extra) break; picks.push(extra);
-    }
-    return [correct, ...picks.slice(0,3)].sort(()=> Math.random() - .5);
+// INTERMEDIATE: 1 look-alike decoy + 2 from other categories
+if (state.difficulty === 'intermediate'){
+  const sameGenus = all.filter(s => s.genus === correct.genus);
+  const sameCat   = all.filter(s => s.category === correct.category && s.genus !== correct.genus);
+  const otherCats = all.filter(s => s.category !== correct.category);
+
+  shuffle(sameGenus); shuffle(sameCat); shuffle(otherCats);
+
+  const picks = [];
+
+  // One look-alike decoy (prefer same genus, else same category, else anything)
+  const lookalike = sameGenus[0] || sameCat[0] || all[0];
+  if (lookalike) picks.push(lookalike);
+
+  // Two from other categories
+  picks.push(...otherCats.slice(0,2));
+
+  // Safety fill if we still have <3 decoys (small pools etc.)
+  while (picks.length < 3){
+    const extra = all.find(s => !picks.includes(s));
+    if (!extra) break;
+    picks.push(extra);
   }
+
+  return [correct, ...picks.slice(0,3)].sort(()=> Math.random() - .5);
+}
 
   // EXPERT: prefer same genus, then same category
   const sameGenus = all.filter(s => s.genus === correct.genus);
@@ -1098,3 +1113,4 @@ state.q++;
   </script>
 </body>
 </html>
+
