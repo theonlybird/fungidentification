@@ -266,7 +266,12 @@
     body.theme-woodland .img-card{ border-color: rgba(77,139,107,.22) }
     body.theme-woodland .review-wrap{ background:#fffef9; border-color:rgba(56,110,83,.20) }
     body.theme-woodland .review-table thead th{ background:rgba(56,110,83,.08); color:#223329 }
-  </style>
+  
+/* Allow horizontal scroll for results table on narrow screens */
+.table-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.table-scroll table{ min-width: 640px; } /* ensure scrolling when viewport is narrower */
+
+</style></style>
 </head>
 <body class="theme-woodland">
   <div class="game">
@@ -292,7 +297,7 @@
       <h2 style="text-align:center;margin:10px 0 6px;">Welcome to the Mushroom ID Challenge!</h2>
 
       <div class="intro">
-        <p>You can choose a quiz of <strong>10</strong>, <strong>20</strong> or <strong>30</strong> multiple choice questions. There will be 2–4 photos of a species in each round (taken from a single iNaturalist observation)</p>
+        <p>You can choose a quiz of <strong>10</strong>, <strong>20</strong> or <strong>30</strong> multiple choice questions. There will be 2–4 photos of a species in each round (taken from a single iNaturalist observation).</p>
         <p>There are four difficulty levels:</p>
 		<p><strong>Beginner</strong> - a friendly mode with a small set of iconic species</p>
 		<p><strong>Novice</strong> - a slightly larger range of species</p>
@@ -356,7 +361,8 @@
       </h3>
 
       <div class="review-wrap">
-        <table class="review-table" id="reviewTable">
+        <div class="table-scroll">
+<table class="review-table" id="reviewTable">
           <thead>
             <tr>
               <th>#</th>
@@ -367,6 +373,7 @@
           </thead>
           <tbody></tbody>
         </table>
+</div>
       </div>
 
       <div style="text-align:center; margin-top:14px;">
@@ -453,7 +460,7 @@
       { id: 179065, name: "Weeping Bolete",        scientific: "Suillus granulatus",          genus: "Suillus",     category: "Boletes" },
 
       // MYCENA
-      { id: 63460,  name: "Bleeding Bonnet",       scientific: "Mycena haematopus",    genus: "Mycena",    category: "Mycena" },
+      { id: 63460,  name: "Bleeding Fairy Helmet", scientific: "Mycena haematopus",    genus: "Mycena",    category: "Mycena" },
       { id: 63446,  name: "Common Bonnet",         scientific: "Mycena galericulata",  genus: "Mycena",    category: "Mycena" },
       { id: 63471,  name: "Clustered Bonnet",      scientific: "Mycena inclinata",     genus: "Mycena",    category: "Mycena" },
       { id: 63478,  name: "Lilac Bonnet",          scientific: "Mycena pura",          genus: "Mycena",    category: "Mycena" },
@@ -625,6 +632,98 @@ const noviceSpecies = Array.from(
     /* ---------------- helpers ---------------- */
     const ALLOWED = new Set(['cc0','cc-by','cc-by-sa','cc-by-nd','cc-by-nc','cc-by-nc-sa','cc-by-nc-nd']);
     const recentObs = new Map();
+    const perPage = 50; // page size for RG queue
+
+    /* ---- RG-only per-species queue with skip-if-empty + persistence (Option D) ---- */
+    
+    // Per-user seed for deterministic page offsets (Option B)
+    function getUserSeed(){
+      let s = localStorage.getItem('userSeed');
+      if (!s){ s = String(Math.floor(Math.random()*2147483647)); localStorage.setItem('userSeed', s); }
+      return s;
+    }
+    function hashStr(str){
+      // simple FNV-1a 32-bit hash
+      let h = 2166136261;
+      for (let i=0; i<str.length; i++){ h ^= str.charCodeAt(i); h = (h * 16777619) >>> 0; }
+      return h >>> 0;
+    }
+const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, _loaded:false, _backlog:[] }
+    function getQueue(scientific){
+      if (!speciesQueues.has(scientific)){
+        speciesQueues.set(scientific, { page: (1 + (hashStr(getUserSeed() + '|' + scientific) % 8)), items: [], exhausted: false, _loaded: false, _backlog: [] });
+      }
+      return speciesQueues.get(scientific);
+    }
+    async function fetchRGPage(taxonId, page, perPage){
+      const qs = new URLSearchParams({
+        taxon_id: String(taxonId),
+        has: 'photos',
+        quality_grade: 'research',
+        per_page: String(perPage),
+        page: String(page),
+        order: 'desc',
+        order_by: 'observed_on',
+        fields:
+          'results.id,results.uri,results.taxon.id,' +
+          'results.photos.id,results.photos.url,results.photos.medium_url,results.photos.large_url,' +
+          'results.photos.attribution,results.photos.license_code'
+      });
+      const r = await fetch(`https://api.inaturalist.org/v1/observations?${qs}`);
+      if (!r.ok) return [];
+      const j = await r.json();
+      const results = Array.isArray(j.results) ? j.results : [];
+      // Keep only observations with at least 2 allowed-license photos
+      return results.filter(o => {
+        const good = (o.photos || []).filter(p => ALLOWED.has(String(p.license_code||'').toLowerCase()));
+        return good.length >= 2;
+      });
+    }
+    // Persistence helpers (store compact list of observation IDs per species)
+    const RGQ_MAX = 30;
+    function qKey(scientific){ return `rgQueue:${scientific}`; }
+    function loadPersistedIds(scientific){
+      try { const raw = localStorage.getItem(qKey(scientific)); return raw ? JSON.parse(raw) : []; }
+      catch(e){ return []; }
+    }
+    function saveIds(scientific, ids){
+      try {
+        const existing = loadPersistedIds(scientific);
+        const merged = Array.from(new Set([...(existing||[]), ...ids]));
+        localStorage.setItem(qKey(scientific), JSON.stringify(merged.slice(0, RGQ_MAX)));
+      } catch(e){}
+    }
+    async function ensureQueue(scientific, taxonId, minNeeded=1, attempts=2){
+      const q = getQueue(scientific);
+      const recent = recentObs.get(scientific) || new Set();
+      let tries = 0;
+      while (q.items.filter(o => !recent.has(o.id)).length < minNeeded && !q.exhausted && tries < attempts){
+        const pageItems = await fetchRGPage(taxonId, q.page, perPage);
+        if (!pageItems.length){
+          if (tries === 0 && q.page > 1){ q.page = 1; tries++; continue; }
+          q.exhausted = true; break; }
+        shuffle(pageItems);
+        // append non-recent first to maximize freshness
+        const fresh = pageItems.filter(o => !recent.has(o.id));
+        const rest  = pageItems.filter(o => recent.has(o.id));
+        q.items.push(...fresh, ...rest);
+        // persist IDs for Option D
+        saveIds(scientific, pageItems.map(o=>o.id));
+        q.page += 1;
+        tries += 1;
+      }
+    }
+    function takeFromQueue(scientific, excludeId=null){
+      const q = getQueue(scientific);
+      const recent = recentObs.get(scientific) || new Set();
+      const idx = q.items.findIndex(o => o.id !== excludeId && !recent.has(o.id));
+      if (idx !== -1){ const [pick] = q.items.splice(idx, 1); return pick; }
+      // fallback: allow recent if necessary, but still not excludeId
+      const anyIdx = q.items.findIndex(o => o.id !== excludeId);
+      if (anyIdx !== -1){ const [pick] = q.items.splice(anyIdx, 1); return pick; }
+      return null;
+    }
+
     /* ---- Option A: persistent used observation IDs per species (localStorage) ---- */
     const USED_MAX = 50; // keep the last ~50 IDs per species
 
@@ -693,74 +792,50 @@ const noviceSpecies = Array.from(
       return { med, lg };
     }
 
+    
     async function fetchOneObservation(scientific, excludeId=null){
       const taxonId = await resolveTaxonId(scientific);
+      const q = getQueue(scientific);
 
-      const probeQS = new URLSearchParams({
-        taxon_id: String(taxonId),
-        has: 'photos',
-        quality_grade: 'needs_id,research',
-        per_page: '1',
-        page: '1',
-        fields: 'total_results'
-      });
-      if (excludeId) probeQS.set('not_id', String(excludeId));
-      let r = await fetch(`https://api.inaturalist.org/v1/observations?${probeQS}`);
-      if (!r.ok) return null;
-      let j = await r.json();
-      const total = j.total_results || 0;
-      if (!total) return null;
+      // Seed persisted backlog once per session
+      if (!q._loaded){ q._loaded = true; q._backlog = loadPersistedIds(scientific) || []; }
 
-      const perPage = 50;
-      const pages = Math.max(1, Math.ceil(total / perPage));
-      const tries = Math.min(6, pages);
-      const triedPages = new Set();
+      // Ensure at least one candidate in the queue
+      await ensureQueue(scientific, taxonId, 1, 2);
 
-      for (let t = 0; t < tries; t++){
-        const page = t === 0 ? 1 : (() => {
-          let p; do { p = 1 + Math.floor(Math.random() * pages); } while (triedPages.has(p) && triedPages.size < pages);
-          return p;
-        })();
-        triedPages.add(page);
-
-        const qs = new URLSearchParams({
-          taxon_id: String(taxonId),
-          has: 'photos',
-          quality_grade: 'needs_id,research',
-          per_page: String(perPage),
-          page: String(page),
-          order: 'desc',
-          order_by: 'observed_on',
-          fields:
-            'results.id,results.uri,results.taxon.id,' +
-            'results.photos.id,results.photos.url,results.photos.medium_url,results.photos.large_url,' +
-            'results.photos.attribution,results.photos.license_code'
-        });
-        if (excludeId) qs.set('not_id', String(excludeId));
-
-        r = await fetch(`https://api.inaturalist.org/v1/observations?${qs}`);
-        if (!r.ok) continue;
-        j = await r.json();
-
-        const pool = (j.results || []).filter(o =>
-          Array.isArray(o.photos) && o.photos.some(p => ALLOWED.has(String(p.license_code||'').toLowerCase()))
-        );
-        if (!pool.length) continue;
-
-        const recent = recentObs.get(scientific) || new Set();
-        const used = getUsedSet(scientific);
-        const fresh = pool.filter(o => !recent.has(o.id) && !used.has(o.id));
-        const candidates = fresh.length ? fresh : pool;
-
-        shuffle(candidates);
-        const pick =
-          candidates.find(o => o.photos.filter(p => ALLOWED.has(String(p.license_code||'').toLowerCase())).length >= 2)
-          || candidates[0];
-
-        if (pick) return pick;
+      // If queue still empty (or only has excluded), try to hydrate a few persisted IDs
+      if ((!q.items.length || (q.items.length===1 && q.items[0].id===excludeId)) && q._backlog && q._backlog.length){
+        const idsToHydrate = q._backlog.splice(0, 6);
+        for (const id of idsToHydrate){
+          try {
+            const qs = new URLSearchParams({
+              id: String(id),
+              fields: 'results.id,results.uri,results.photos.id,results.photos.url,results.photos.medium_url,results.photos.large_url,results.photos.attribution,results.photos.license_code'
+            });
+            const r = await fetch(`https://api.inaturalist.org/v1/observations?${qs}`);
+            if (!r.ok) continue;
+            const j = await r.json();
+            const o = (j.results || [])[0];
+            if (!o) continue;
+            const good = (o.photos||[]).filter(p => ALLOWED.has(String(p.license_code||'').toLowerCase()));
+            if (good.length >= 2) q.items.push(o);
+          } catch(e){}
+        }
       }
+
+      // Try to take one now
+      let pick = takeFromQueue(scientific, excludeId);
+      if (pick) return pick;
+
+      // One last attempt: fetch one more page
+      await ensureQueue(scientific, taxonId, 1, 1);
+      pick = takeFromQueue(scientific, excludeId);
+      if (pick) return pick;
+
+      // Option B: let caller skip species if empty
       return null;
     }
+
 
     function renderPhotos(observation, species){
       imageGrid.innerHTML = '';
@@ -777,7 +852,7 @@ const noviceSpecies = Array.from(
         card.className = 'img-card';
         card.innerHTML = `
           <div class="img-wrap">
-            <img loading="lazy" decoding="async" src="${med}" srcset="${med} 1x, ${lg} 2x" alt="${species.name}">
+            <img loading="lazy" decoding="async" src="${med}" srcset="${med} 1x, ${lg} 2x" alt="Mushroom photo">
             <div class="credit">
               <span class="name">(c) ${name}</span>
               <span class="license-badge">${formatLicense(p.license_code)}</span>
@@ -982,7 +1057,6 @@ state.seen.add(correct.scientific);
                   pushRecent(state.current.correct.scientific, state.current.obsId);
       rememberUsed(state.current.correct.scientific, state.current.obsId);
 state.q++;
-      updateHud();
 
       const isLast = state.q >= state.total;
       if (isLast){
@@ -1024,8 +1098,3 @@ state.q++;
   </script>
 </body>
 </html>
-
-
-
-
-
