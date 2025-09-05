@@ -336,6 +336,12 @@
     #textAnswerSubmit{ width: 100%; }
   }
   /* --- End Patch A v2 --- */
+  .question-container {
+    transition: opacity 0.25s ease-in-out;
+  }
+  .question-container.hiding {
+    opacity: 0;
+  }
   </style>
 </head>
 <body class="theme-woodland">
@@ -417,13 +423,26 @@
     <!-- Game -->
     <section id="game" class="screen">
       <h2 id="questionText" style="text-align:center; margin-bottom: 12px; display:none;"></h2>
-      <div class="image-grid" id="imageGrid"></div>
 
-      <div class="actions">
-        <button id="newPhotosBtn" style="display:none">New Photos</button>
+      <div id="classic-container" class="question-container">
+        <div class="image-grid" id="imageGrid"></div>
+        <div class="actions">
+          <button id="newPhotosBtn" style="display:none">New Photos</button>
+        </div>
+        <div id="answers" class="answers"></div>
       </div>
 
-      <div id="answers" class="answers"></div>
+      <div id="photoChoice-container" class="question-container" style="display: none;">
+        <div id="photo-choice-grid" class="image-grid"></div>
+      </div>
+
+      <div id="textInput-container" class="question-container" style="display: none;">
+        <div id="text-input-grid" class="image-grid"></div>
+        <div class="actions">
+            <button id="text-input-new-photos-btn" style="display:none;">New Photos</button>
+        </div>
+        <div id="text-input-answers" class="answers"></div>
+      </div>
     </section>
 
     <!-- Results -->
@@ -476,6 +495,14 @@
     const scoreEl = $('#score'), qEl = $('#questionCounter');
     const imageGrid = $('#imageGrid'), answersEl = $('#answers');
     const newBtn = $('#newPhotosBtn');
+    const classicContainer = $('#classic-container');
+    const photoChoiceContainer = $('#photoChoice-container');
+    const textInputContainer = $('#textInput-container');
+    const photoChoiceGrid = $('#photo-choice-grid');
+    const textInputGrid = $('#text-input-grid');
+    const textInputNewPhotosBtn = $('#text-input-new-photos-btn');
+    const textInputAnswers = $('#text-input-answers');
+    const gameScreen = $('#game');
     const diffButtons = [...document.querySelectorAll('#difficultyRow .diff-btn')];
     const lenButtons  = [...document.querySelectorAll('#lengthRow .len-btn')];
 
@@ -706,7 +733,7 @@ const noviceExtras = [
   { id: 54743,  name: "Yellow Brain",          scientific: "Tremella mesenterica",    genus: "Tremella",  category: "Cup & other Saprotrophs" },
   { id: 47346,  name: "Funeral Bell",          scientific: "Galerina marginata",      genus: "Galerina",  category: "Woodland Fungi" },
   { id: 56086,  name: "False Morel",           scientific: "Gyromitra esculenta",     genus: "Gyromitra", category: "Woodland Fungi" },
-  { id: 54844,  name: "Honey Fungus",          scientific: "Armillaria mellea",       genus: "Armillaria",category: "Woodland Fungi" },
+  { id: 54844,  name: "Honey Fungus",        scientific: "Armillaria mellea",       genus: "Armillaria",category: "Woodland Fungi" },
   { id: 481482, name: "Wrinkled Peach",        scientific: "Rhodotus palmatus",       genus: "Rhodotus",  category: "Woodland Fungi" },
   { id: 48767,  name: "Sulphur Tuft",          scientific: "Hypholoma fasciculare",   genus: "Hypholoma", category: "Woodland Fungi" },
   { id: 57343,  name: "Giant Puffball",        scientific: "Calvatia gigantea",       genus: "Calvatia",  category: "Distinctive Oddballs" },
@@ -932,9 +959,28 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
       return null;
     }
 
+    function switchQuestionContainer(nextContainer) {
+        const currentContainer = document.querySelector('.question-container[style*="display: block"]');
 
-    function renderPhotos(observation, species){
-      imageGrid.innerHTML = '';
+        if (currentContainer && currentContainer !== nextContainer) {
+            currentContainer.classList.add('hiding');
+            setTimeout(() => {
+                currentContainer.style.display = 'none';
+
+                nextContainer.style.display = 'block';
+                // Force a reflow before removing the class to ensure the transition plays
+                void nextContainer.offsetWidth;
+                nextContainer.classList.remove('hiding');
+            }, 250); // Match CSS transition duration
+        } else if (!currentContainer || currentContainer !== nextContainer) {
+            document.querySelectorAll('.question-container').forEach(c => c.style.display = 'none');
+            nextContainer.classList.remove('hiding');
+            nextContainer.style.display = 'block';
+        }
+    }
+
+    function renderPhotos(observation, species, grid = imageGrid){
+      grid.innerHTML = '';
       const good = observation.photos.filter(p => ALLOWED.has(String(p.license_code||'').toLowerCase()));
       const pick = good.slice(0, 3);
       const four = pick.length === 3 ? [...pick, pick[0]] :
@@ -955,17 +1001,17 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
             </div>
           </div>
         `;
-        imageGrid.appendChild(card);
+        grid.appendChild(card);
       });
     }
 
-    function renderAnswers(options){
-  answersEl.innerHTML = options.map((sp, i)=>{
-    const onlyLatin = state.scientificMode === true;
-    const label = onlyLatin ? `<em>${sp.scientific}</em>` : `${sp.name}<small><em>${sp.scientific}</em></small>`;
-    return `<button class="answer" data-i="${i}" data-id="${sp.id}" data-name="${sp.name}" data-sci="${sp.scientific}">${label}</button>`;
-  }).join('');
-}
+    function renderAnswers(options, target = answersEl){
+      target.innerHTML = options.map((sp, i)=>{
+        const onlyLatin = state.scientificMode === true;
+        const label = onlyLatin ? `<em>${sp.scientific}</em>` : `${sp.name}<small><em>${sp.scientific}</em></small>`;
+        return `<button class="answer" data-i="${i}" data-id="${sp.id}" data-name="${sp.name}" data-sci="${sp.scientific}">${label}</button>`;
+      }).join('');
+    }
     function renderReview(){
       const tbody = document.querySelector('#reviewTable tbody');
       if (!tbody) return;
@@ -987,10 +1033,10 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
       }).join('');
     }
 
-    function refreshNewPhotosBtn(){
+    function refreshNewPhotosBtn(btn = newBtn){
       const left = state.newPhotosLeft;
-      newBtn.textContent = `New Photos (${left} remaining)`;
-      newBtn.disabled = state.newPhotosUsed || left <= 0;
+      btn.textContent = `New Photos (${left} remaining)`;
+      btn.disabled = state.newPhotosUsed || left <= 0;
     }
 
     // Difficulty-aware New Photos quota (per 10 questions)
@@ -1043,18 +1089,15 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
       const questionName = state.scientificMode ? `<em>${correctSpecies.scientific}</em>` : correctSpecies.name;
       $('#questionText').innerHTML = `Which of these shows a ${questionName}?`;
       $('#questionText').style.display = 'block';
-      imageGrid.style.display = 'none';
-      newBtn.style.display = 'none';
 
-      answersEl.innerHTML = '';
-      answersEl.className = 'image-grid';
+      photoChoiceGrid.innerHTML = ''; // Clear previous
 
       observations.forEach((obs, index) => {
         const photo = obs.photos[0];
         const { med, lg } = bestPhotoUrls(photo);
         const name = cleanAttribution(photo.attribution);
         const card = document.createElement('button');
-        card.className = 'img-card answer';
+        card.className = 'img-card answer'; // Use answer class for delegation
         card.dataset.index = index;
         card.innerHTML = `
           <div class="img-wrap">
@@ -1065,7 +1108,7 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
             </div>
           </div>
         `;
-        answersEl.appendChild(card);
+        photoChoiceGrid.appendChild(card);
       });
 
       state.current = {
@@ -1096,18 +1139,18 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
 
     function renderTextInputQuestion(data) {
       const { correct, obs } = data;
-      renderPhotos(obs, correct);
-      newBtn.style.display = 'inline-flex';
-      refreshNewPhotosBtn();
+      renderPhotos(obs, correct, textInputGrid);
+
+      textInputNewPhotosBtn.style.display = 'inline-flex';
+      refreshNewPhotosBtn(textInputNewPhotosBtn); // Pass the button to refresh
 
       const placeholder = state.scientificMode ? "Enter latin name..." : "Enter common or latin name...";
-      answersEl.innerHTML = `
+      textInputAnswers.innerHTML = `
         <div class="text-input-row">
           <input type="text" id="textAnswerInput" class="answer text-input" placeholder="${placeholder}">
           <button id="textAnswerSubmit" class="btn answer">Submit</button>
         </div>
       `;
-      answersEl.className = 'answers';
     }
 
  function pickOptions(correct){
@@ -1163,24 +1206,21 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
 
     async function nextQuestion(initial=false){
       updateHud();
-      if (state.difficulty === 'expert') {
-        imageGrid.innerHTML = '';
-        answersEl.innerHTML = '';
-      }
 
-      // For expert mode, randomly pick a question style. Otherwise, classic.
       if (state.difficulty === 'expert') {
         const questionTypes = ['classic', 'photoChoice', 'textInput'];
         state.questionType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
-        console.log(`Expert mode: selected question type: ${state.questionType}`);
       } else {
         state.questionType = 'classic';
       }
 
-      // Reset UI elements
+      let container = classicContainer;
+      if (state.questionType === 'photoChoice') container = photoChoiceContainer;
+      else if (state.questionType === 'textInput') container = textInputContainer;
+
+      switchQuestionContainer(container);
+
       $('#questionText').style.display = 'none';
-      imageGrid.style.display = 'grid';
-      answersEl.className = 'answers'; // Reset to default styles
 
       if (state.questionType === 'photoChoice') {
         const data = await fetchPhotoChoiceData();
@@ -1188,7 +1228,6 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
         return;
       }
 
-      // For classic and textInput, we fetch one observation
       const pool =
         (state.difficulty === 'beginner')   ? beginnerSpecies :
         (state.difficulty === 'novice')     ? noviceSpecies   :
@@ -1244,27 +1283,32 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
       setScreen('start');
     });
 
-    newBtn.addEventListener('click', async ()=>{
-      if (state.newPhotosUsed || state.newPhotosLeft <= 0) return;
+    gameScreen.addEventListener('click', async e => {
+      const btn = e.target.closest('.answer');
+      const newPhotosButton = e.target.closest('#newPhotosBtn, #text-input-new-photos-btn');
 
-      newBtn.disabled = true;
-      const obs = await fetchOneObservation(state.current.correct.scientific, state.current.obsId);
+      if (newPhotosButton) {
+          if (state.newPhotosUsed || state.newPhotosLeft <= 0) return;
 
-      if (obs){
-        renderPhotos(obs, state.current.correct);
-        state.current.obsId = obs.id;
-        if (!state.current.uris.includes(obs.uri)) state.current.uris.push(obs.uri);
-        state.newPhotosUsed = true;
-        state.newPhotosLeft--;
-                pushRecent(state.current.correct.scientific, obs.id);
-        rememberUsed(state.current.correct.scientific, obs.id);
-        }
+          newPhotosButton.disabled = true;
+          const obs = await fetchOneObservation(state.current.correct.scientific, state.current.obsId);
 
-      refreshNewPhotosBtn();
-    });
+          if (obs){
+              const grid = state.questionType === 'textInput' ? textInputGrid : imageGrid;
+              renderPhotos(obs, state.current.correct, grid);
+              state.current.obsId = obs.id;
+              if (!state.current.uris.includes(obs.uri)) state.current.uris.push(obs.uri);
+              state.newPhotosUsed = true;
+              state.newPhotosLeft--;
+              pushRecent(state.current.correct.scientific, obs.id);
+              rememberUsed(state.current.correct.scientific, obs.id);
+          }
+          refreshNewPhotosBtn(newBtn);
+          refreshNewPhotosBtn(textInputNewPhotosBtn);
+          return; // Stop processing here for new photos click
+      }
 
-    answersEl.addEventListener('click', e=>{
-      const btn = e.target.closest('.answer'); if (!btn) return;
+      if (!btn) return;
 
       let wasCorrect = false;
       let chose = '';
@@ -1290,7 +1334,7 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
         rememberUsed(state.current.correct.scientific, state.current.obsId);
 
       } else if (state.questionType === 'photoChoice') {
-        const buttons = [...answersEl.querySelectorAll('.answer')];
+        const buttons = [...photoChoiceGrid.querySelectorAll('.answer')];
         buttons.forEach(b=>b.disabled = true);
         const chosenIndex = Number(btn.dataset.index);
         wasCorrect = chosenIndex === state.current.correctIndex;
