@@ -178,6 +178,10 @@
     .answer.incorrect{ background:rgba(244,67,54,.18); border-color:#F44336; color:#c62828}
     .answer:disabled:not(.correct):not(.incorrect){ opacity:.75; cursor:not-allowed }
 
+    /* Text input layout and styling */
+    .text-input-row{ grid-column:1 / -1; max-width:900px; margin:0 auto; display:flex; gap:10px; }
+    .text-input{ flex-grow:1; text-align:left; cursor:text; padding:16px; font-size:1.1rem; }
+
     .footnote{ text-align:center; color:var(--muted); margin-top:10px }
 
     /* Modal */
@@ -1053,8 +1057,8 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
 
       const placeholder = state.scientificMode ? "Enter latin name..." : "Enter common or latin name...";
       answersEl.innerHTML = `
-        <div style="grid-column: 1 / -1; max-width: 900px; margin: 0 auto; display: flex; gap: 10px;">
-          <input type="text" id="textAnswerInput" class="answer" style="flex-grow: 1; text-align: left; cursor: text;" placeholder="${placeholder}">
+        <div class="text-input-row">
+          <input type="text" id="textAnswerInput" class="answer text-input" placeholder="${placeholder}">
           <button id="textAnswerSubmit" class="btn answer">Submit</button>
         </div>
       `;
@@ -1277,22 +1281,17 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
           wasCorrect = (distCommon <= thresholdCommon) || (distScientific <= thresholdScientific);
         }
 
+        const correctAnswer = state.scientificMode
+          ? state.current.correct.scientific
+          : `${state.current.correct.name} (${state.current.correct.scientific})`;
+
         inputEl.disabled = true;
         btn.disabled = true;
-
-        if (wasCorrect) {
-          inputEl.classList.add('correct');
-        } else {
-          inputEl.classList.add('incorrect');
-          if (state.scientificMode) {
-            inputEl.value = state.current.correct.scientific;
-          } else {
-            inputEl.value = `${state.current.correct.name} (${state.current.correct.scientific})`;
-          }
-        }
+        inputEl.value = correctAnswer;
+        inputEl.classList.add(wasCorrect ? 'correct' : 'incorrect');
         pushRecent(state.current.correct.scientific, state.current.obsId);
         rememberUsed(state.current.correct.scientific, state.current.obsId);
-        timeout = 1200;
+        timeout = 1000;
       }
 
       if (wasCorrect) {
@@ -1323,6 +1322,24 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
       }
     });
 
+
+    // Keyboard shortcuts for Expert mode
+    document.addEventListener('keydown', (e)=>{
+      if (!state.isGameActive || state.difficulty !== 'expert') return;
+      const key = e.key.toLowerCase();
+      const active = document.activeElement;
+
+      if (state.questionType === 'textInput' && key === 'enter') {
+        const submit = $('#textAnswerSubmit');
+        if (submit && !submit.disabled) { e.preventDefault(); submit.click(); }
+      } else if (key === 'n' && active && active.id !== 'textAnswerInput') {
+        if (newBtn.style.display !== 'none' && !newBtn.disabled) newBtn.click();
+      } else if (state.questionType === 'photoChoice' && ['1','2','3','4'].includes(key) && active && active.id !== 'textAnswerInput') {
+        const idx = Number(key) - 1;
+        const btn = answersEl.querySelector(`.answer[data-index="${idx}"]`);
+        if (btn && !btn.disabled) btn.click();
+      }
+    });
 
     // Scientific Mode toggle (Latin-only answers)
     const sciToggle = document.getElementById('scientificToggle');
