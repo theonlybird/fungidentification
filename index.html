@@ -176,7 +176,7 @@
     }
     .answer.correct{ background:rgba(76,175,80,.18); border-color:#4CAF50; color:#2e7d32}
     .answer.incorrect{ background:rgba(244,67,54,.18); border-color:#F44336; color:#c62828}
-    .answer:disabled{ opacity:.75; cursor:not-allowed }
+    .answer:disabled:not(.correct):not(.incorrect){ opacity:.75; cursor:not-allowed }
 
     .footnote{ text-align:center; color:var(--muted); margin-top:10px }
 
@@ -266,7 +266,7 @@
     body.theme-woodland .img-card{ border-color: rgba(77,139,107,.22) }
     body.theme-woodland .review-wrap{ background:#fffef9; border-color:rgba(56,110,83,.20) }
     body.theme-woodland .review-table thead th{ background:rgba(56,110,83,.08); color:#223329 }
-  
+
 /* Allow horizontal scroll for results table on narrow screens */
 .table-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
 .table-scroll table{ min-width: 640px; } /* ensure scrolling when viewport is narrower */
@@ -367,6 +367,7 @@
 
     <!-- Game -->
     <section id="game" class="screen">
+      <h2 id="questionText" style="text-align:center; margin-bottom: 12px; display:none;"></h2>
       <div class="image-grid" id="imageGrid"></div>
 
       <div class="actions">
@@ -432,6 +433,7 @@
     const state = {
       difficulty: 'beginner',
       scientificMode: false,  // default
+      questionType: 'classic',
       score: 0, q: 0, total: 10,
       isGameActive: false,
       seen: new Set(),
@@ -601,7 +603,7 @@
       { id: 1039729,  name: "Blackening Brittlegill", scientific: "Russula nigricans", genus: "Russula", category: "Russula" },
       { id: 1039730,  name: "Geranium Brittlegill", scientific: "Russula fellea", genus: "Russula", category: "Russula" },
       { id: 1039731,  name: "Burnt Knight", scientific: "Tricholoma ustale", genus: "Tricholoma", category: "Webcaps & Darker" },
-      { id: 1039732,  name: "Stocking Webcaps", scientific: "Cortinarius torvus", genus: "Cortinarius", category: "Webcaps & Darker" },
+      { id: 1039732,  name: "Stocking Webcap", scientific: "Cortinarius torvus", genus: "Cortinarius", category: "Webcaps & Darker" },
       { id: 1039733,  name: "Plums and Custard", scientific: "Tricholomopsis rutilans", genus: "Tricholomopsis", category: "Webcaps & Darker" },
       { id: 1039734,  name: "Dappled Webcap", scientific: "Cortinarius bolaris", genus: "Cortinarius", category: "Webcaps & Darker" },
       { id: 1039735,  name: "Deadly Webcap", scientific: "Cortinarius rubellus", genus: "Cortinarius", category: "Webcaps & Darker" },
@@ -680,7 +682,7 @@ const advancedSpecies = speciesList.filter(s => !beginnerScientificSet.has(s.sci
     const perPage = 50; // page size for RG queue
 
     /* ---- RG-only per-species queue with skip-if-empty + persistence (Option D) ---- */
-    
+
     // Per-user seed for deterministic page offsets (Option B)
     function getUserSeed(){
       let s = localStorage.getItem('userSeed');
@@ -837,7 +839,7 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
       return { med, lg };
     }
 
-    
+
     async function fetchOneObservation(scientific, excludeId=null){
       const taxonId = await resolveTaxonId(scientific);
       const q = getQueue(scientific);
@@ -950,6 +952,115 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
       return units * 1; // intermediate & expert
     }
 
+    async function fetchPhotoChoiceData(retryCount = 0) {
+      if (retryCount > 3) {
+        throw new Error("Failed to fetch photo choice data after multiple retries.");
+      }
+      const pool = advancedSpecies;
+      const remaining = pool.filter(s => !state.seen.has(s.scientific));
+      const base = remaining.length ? remaining : pool;
+      const correctSpecies = base[Math.floor(Math.random() * base.length)];
+
+      const options = pickOptions(correctSpecies);
+
+      const observationPromises = options.map(species => fetchOneObservation(species.scientific));
+      const observations = await Promise.all(observationPromises);
+
+      const validObservations = observations.every(obs => obs !== null);
+      if (!validObservations || observations.length < 4) {
+        console.error("Could not fetch 4 observations for photo choice question. Retrying...");
+        return fetchPhotoChoiceData(retryCount + 1);
+      }
+
+      const correctIndex = options.findIndex(s => s.id === correctSpecies.id);
+
+      options.forEach((s, i) => {
+        rememberUsed(s.scientific, observations[i].id);
+        pushRecent(s.scientific, observations[i].id);
+      });
+      state.seen.add(correctSpecies.scientific);
+
+      return {
+        correctSpecies,
+        observations,
+        correctIndex,
+        options
+      };
+    }
+
+    function renderPhotoChoiceQuestion(data) {
+      const { correctSpecies, observations, correctIndex } = data;
+
+      const questionName = state.scientificMode ? `<em>${correctSpecies.scientific}</em>` : correctSpecies.name;
+      $('#questionText').innerHTML = `Which of these shows a ${questionName}?`;
+      $('#questionText').style.display = 'block';
+      imageGrid.style.display = 'none';
+      newBtn.style.display = 'none';
+
+      answersEl.innerHTML = '';
+      answersEl.className = 'image-grid';
+
+      observations.forEach((obs, index) => {
+        const photo = obs.photos[0];
+        const { med, lg } = bestPhotoUrls(photo);
+        const name = cleanAttribution(photo.attribution);
+        const card = document.createElement('button');
+        card.className = 'img-card answer';
+        card.dataset.index = index;
+        card.innerHTML = `
+          <div class="img-wrap">
+            <img loading="lazy" decoding="async" src="${med}" srcset="${med} 1x, ${lg} 2x" alt="Mushroom photo">
+            <div class="credit">
+              <span class="name">(c) ${name}</span>
+              <span class="license-badge">${formatLicense(photo.license_code)}</span>
+            </div>
+          </div>
+        `;
+        answersEl.appendChild(card);
+      });
+
+      state.current = {
+        correct: correctSpecies,
+        correctIndex: correctIndex,
+        uris: observations.map(o => o.uri),
+        options: data.options
+      };
+    }
+
+    function levenshtein(a, b) {
+      if (a.length === 0) return b.length;
+      if (b.length === 0) return a.length;
+      const matrix = [];
+      for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+      for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+      for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+          if (b.charAt(i - 1) === a.charAt(j - 1)) {
+            matrix[i][j] = matrix[i - 1][j - 1];
+          } else {
+            matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1));
+          }
+        }
+      }
+      return matrix[b.length][a.length];
+    }
+
+    function renderTextInputQuestion(data) {
+      const { correct, obs } = data;
+      renderPhotos(obs, correct);
+      newBtn.style.display = 'inline-flex';
+      refreshNewPhotosBtn();
+
+      const placeholder = state.scientificMode ? "Enter latin name..." : "Enter common or latin name...";
+      answersEl.innerHTML = `
+        <div style="grid-column: 1 / -1; max-width: 900px; margin: 0 auto; display: flex; gap: 10px;">
+          <input type="text" id="textAnswerInput" class="answer" style="flex-grow: 1; text-align: left; cursor: text;" placeholder="${placeholder}">
+          <button id="textAnswerSubmit" class="btn answer">Submit</button>
+        </div>
+      `;
+      answersEl.className = 'answers';
+    }
+
  function pickOptions(correct){
   // Determine roster by difficulty for decoy sourcing
   const roster =
@@ -1003,13 +1114,36 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
 
     async function nextQuestion(initial=false){
       updateHud();
+      if (state.difficulty === 'expert') {
+        imageGrid.innerHTML = '';
+        answersEl.innerHTML = '';
+      }
 
-      // pool depends on difficulty
-const pool =
-  (state.difficulty === 'beginner')   ? beginnerSpecies :
-  (state.difficulty === 'novice')     ? noviceSpecies   :
-                                        advancedSpecies;    // Intermediate & Expert exclude beginner & cups
+      // For expert mode, randomly pick a question style. Otherwise, classic.
+      if (state.difficulty === 'expert') {
+        const questionTypes = ['classic', 'photoChoice', 'textInput'];
+        state.questionType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+        console.log(`Expert mode: selected question type: ${state.questionType}`);
+      } else {
+        state.questionType = 'classic';
+      }
 
+      // Reset UI elements
+      $('#questionText').style.display = 'none';
+      imageGrid.style.display = 'grid';
+      answersEl.className = 'answers'; // Reset to default styles
+
+      if (state.questionType === 'photoChoice') {
+        const data = await fetchPhotoChoiceData();
+        renderPhotoChoiceQuestion(data);
+        return;
+      }
+
+      // For classic and textInput, we fetch one observation
+      const pool =
+        (state.difficulty === 'beginner')   ? beginnerSpecies :
+        (state.difficulty === 'novice')     ? noviceSpecies   :
+                                              advancedSpecies;
       const remaining = pool.filter(s => !state.seen.has(s.scientific));
       const base = remaining.length ? remaining : pool;
       const correct = base[Math.floor(Math.random()*base.length)];
@@ -1017,16 +1151,19 @@ const pool =
       const obs = await fetchOneObservation(correct.scientific);
       if (!obs){ if (initial) throw new Error('No observation to start'); return nextQuestion(initial); }
 
-                  state.current = { correct, obsId: obs.id, uris: [obs.uri] };
-      rememberUsed(correct.scientific, obs.id);
-state.seen.add(correct.scientific);
-
+      state.current = { correct, obsId: obs.id, uris: [obs.uri] };
+      state.seen.add(correct.scientific);
       state.newPhotosUsed = false;
+
+      if (state.questionType === 'textInput') {
+        renderTextInputQuestion({ correct, obs });
+        return;
+      }
+
+      // Classic question logic
       newBtn.style.display = 'inline-flex';
       refreshNewPhotosBtn();
-
       renderPhotos(obs, correct);
-
       const options = pickOptions(correct);
       renderAnswers(options);
     }
@@ -1079,47 +1216,110 @@ state.seen.add(correct.scientific);
 
     answersEl.addEventListener('click', e=>{
       const btn = e.target.closest('.answer'); if (!btn) return;
-      const idx = Number(btn.dataset.i);
-      const buttons = [...answersEl.querySelectorAll('.answer')];
-      buttons.forEach(b=>b.disabled = true);
 
-      const chosenId = Number(buttons[idx].dataset.id);
-      const correctId = Number(state.current.correct.id);
-      const wasCorrect = chosenId === correctId;
+      let wasCorrect = false;
+      let chose = '';
+      let uris = [...(state.current.uris || [])];
+      let timeout = 450;
 
-      if (wasCorrect){
-        btn.classList.add('correct'); state.score += 10;
-      } else {
-        btn.classList.add('incorrect');
-        const i = buttons.findIndex(b => Number(b.dataset.id) === correctId);
-        if (i>-1) buttons[i].classList.add('correct');
+      if (state.questionType === 'classic') {
+        const buttons = [...answersEl.querySelectorAll('.answer')];
+        buttons.forEach(b=>b.disabled = true);
+        const chosenId = Number(btn.dataset.id);
+        const correctId = Number(state.current.correct.id);
+        wasCorrect = chosenId === correctId;
+        chose = btn.textContent.trim();
+
+        if (wasCorrect) {
+          btn.classList.add('correct');
+        } else {
+          btn.classList.add('incorrect');
+          const correctBtn = buttons.find(b => Number(b.dataset.id) === correctId);
+          if (correctBtn) correctBtn.classList.add('correct');
+        }
+        pushRecent(state.current.correct.scientific, state.current.obsId);
+        rememberUsed(state.current.correct.scientific, state.current.obsId);
+
+      } else if (state.questionType === 'photoChoice') {
+        const buttons = [...answersEl.querySelectorAll('.answer')];
+        buttons.forEach(b=>b.disabled = true);
+        const chosenIndex = Number(btn.dataset.index);
+        wasCorrect = chosenIndex === state.current.correctIndex;
+        chose = `Photo of ${state.current.options[chosenIndex].name}`;
+        uris = state.current.uris;
+
+        if (wasCorrect){
+          btn.classList.add('correct');
+        } else {
+          btn.classList.add('incorrect');
+          buttons[state.current.correctIndex].classList.add('correct');
+        }
+      } else if (state.questionType === 'textInput') {
+        if (btn.id !== 'textAnswerSubmit') return;
+
+        const inputEl = $('#textAnswerInput');
+        const userInput = inputEl.value.trim();
+        if (!userInput) return;
+
+        chose = userInput;
+        const userInputLower = userInput.toLowerCase();
+        const correctCommon = state.current.correct.name.toLowerCase();
+        const correctScientific = state.current.correct.scientific.toLowerCase();
+
+        const distScientific = levenshtein(userInputLower, correctScientific);
+        const thresholdScientific = Math.max(1, Math.floor(correctScientific.length / 4));
+
+        if (state.scientificMode) {
+          wasCorrect = distScientific <= thresholdScientific;
+        } else {
+          const distCommon = levenshtein(userInputLower, correctCommon);
+          const thresholdCommon = Math.max(1, Math.floor(correctCommon.length / 4));
+          wasCorrect = (distCommon <= thresholdCommon) || (distScientific <= thresholdScientific);
+        }
+
+        inputEl.disabled = true;
+        btn.disabled = true;
+
+        if (wasCorrect) {
+          inputEl.classList.add('correct');
+        } else {
+          inputEl.classList.add('incorrect');
+          if (state.scientificMode) {
+            inputEl.value = state.current.correct.scientific;
+          } else {
+            inputEl.value = `${state.current.correct.name} (${state.current.correct.scientific})`;
+          }
+        }
+        pushRecent(state.current.correct.scientific, state.current.obsId);
+        rememberUsed(state.current.correct.scientific, state.current.obsId);
+        timeout = 1200;
       }
 
-      // For review table later
+      if (wasCorrect) {
+        state.score += 10;
+      }
+
       state.review.push({
         n: state.q + 1,
         name: state.current.correct.name,
         scientific: state.current.correct.scientific,
-        chose: btn.textContent.trim(),
+        chose: chose,
         correct: wasCorrect,
-        uris: [...(state.current.uris || [])]
+        uris: uris
       });
 
-                  pushRecent(state.current.correct.scientific, state.current.obsId);
-      rememberUsed(state.current.correct.scientific, state.current.obsId);
-state.q++;
-
+      state.q++;
       const isLast = state.q >= state.total;
+
       if (isLast){
-        // Show the green/red state for a short moment before summary
         setTimeout(()=>{
           $('#finalScore').textContent = state.score;
           $('#finalScoreTotal').textContent = String(state.total * 10);
           setScreen('results');
           renderReview();
-        }, 450);
+        }, timeout);
       } else {
-        setTimeout(()=>nextQuestion(), 350);
+        setTimeout(()=>nextQuestion(), timeout);
       }
     });
 
