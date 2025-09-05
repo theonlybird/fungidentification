@@ -292,6 +292,51 @@
 }
 
 </style>
+
+  <style>
+  /* --- Patch A: responsive text-input row --- */
+  .text-input-row{
+    align-items: stretch;
+  }
+  .text-input-row .text-input{
+    flex: 1 1 0;
+    min-width: 0;
+    width: 100%;
+  }
+  #textAnswerSubmit{ flex: 0 0 auto; }
+  @media (max-width: 520px){
+    .text-input-row{ flex-wrap: wrap; }
+    #textAnswerSubmit{ width: 100%; }
+  }
+  /* --- End Patch A --- */
+  </style>
+
+  <style>
+  /* --- Patch A v2: make input row exactly as wide as the 4-photo grid and keep it inside on mobile --- */
+  .text-input-row{
+    grid-column: 1 / -1;
+    max-width: 740px !important;  /* match .answers grid */
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .text-input-row .text-input{
+    flex: 1 1 auto;
+    min-width: 0;                 /* allow shrinking instead of overflowing */
+    width: auto;
+  }
+  #textAnswerSubmit{ 
+    flex: 0 0 auto; 
+    white-space: nowrap;
+  }
+  @media (max-width: 520px){
+    .text-input-row{ flex-wrap: wrap; }
+    #textAnswerSubmit{ width: 100%; }
+  }
+  /* --- End Patch A v2 --- */
+  </style>
 </head>
 <body class="theme-woodland">
   <div class="game">
@@ -1285,7 +1330,7 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
           ? state.current.correct.scientific
           : `${state.current.correct.name} (${state.current.correct.scientific})`;
 
-        inputEl.disabled = true;
+        inputEl.readOnly = true;
         btn.disabled = true;
         inputEl.value = correctAnswer;
         inputEl.classList.add(wasCorrect ? 'correct' : 'incorrect');
