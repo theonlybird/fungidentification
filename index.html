@@ -336,11 +336,64 @@
     #textAnswerSubmit{ width: 100%; }
   }
   /* --- End Patch A v2 --- */
-  .question-container {
-    transition: opacity 0.25s ease-in-out;
+
+  /* --- Animated Transitions --- */
+  .game-content-wrapper {
+    position: relative;
+    min-height: 500px; /* Prevent layout collapse during transition */
   }
-  .question-container.hiding {
-    opacity: 0;
+
+  @keyframes slide-out-up {
+    from {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(-30px);
+      opacity: 0;
+    }
+  }
+
+  @keyframes slide-in-down {
+    from {
+      transform: translateY(30px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .is-exiting {
+    animation: slide-out-up 0.3s ease-out forwards;
+  }
+
+  .is-entering {
+    animation: slide-in-down 0.3s ease-in forwards;
+    /* Start with content hidden to prevent flash */
+    visibility: hidden;
+  }
+  .is-entering.visible {
+    visibility: visible;
+  }
+
+  /* --- Results Difficulty Pill --- */
+  .difficulty-pill {
+    display: inline-block;
+    margin: 0 auto 8px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: rgba(139,90,43,.1);
+    border: 1px solid rgba(139,90,43,.2);
+    color: var(--ink-2);
+    font-weight: 700;
+    text-transform: capitalize;
+  }
+  .difficulty-pill.scientific {
+    background: rgba(77,139,107,.15);
+    border-color: rgba(77,139,107,.3);
+    color: #223329;
   }
   </style>
 </head>
@@ -400,7 +453,7 @@
         </label>
         <div class="sci-copy">
           <span class="sci-title">Scientific Mode</span>
-          <span class="sci-desc">Up for a challenge? This only shows Latin names in the answers.</span>
+          <span class="sci-desc">Want double points? This mode only shows Latin names in the answers.</span>
         </div>
       </div>
 
@@ -422,34 +475,26 @@
 
     <!-- Game -->
     <section id="game" class="screen">
-      <h2 id="questionText" style="text-align:center; margin-bottom: 12px; display:none;"></h2>
-
-      <div id="classic-container" class="question-container">
+      <div id="gameContent" class="game-content-wrapper">
+        <h2 id="questionText" style="text-align:center; margin-bottom: 12px; display:none;"></h2>
         <div class="image-grid" id="imageGrid"></div>
+
         <div class="actions">
           <button id="newPhotosBtn" style="display:none">New Photos</button>
         </div>
+
         <div id="answers" class="answers"></div>
-      </div>
-
-      <div id="photoChoice-container" class="question-container" style="display: none;">
-        <div id="photo-choice-grid" class="image-grid"></div>
-      </div>
-
-      <div id="textInput-container" class="question-container" style="display: none;">
-        <div id="text-input-grid" class="image-grid"></div>
-        <div class="actions">
-            <button id="text-input-new-photos-btn" style="display:none;">New Photos</button>
-        </div>
-        <div id="text-input-answers" class="answers"></div>
       </div>
     </section>
 
     <!-- Results -->
     <section id="results" class="screen">
-      <h2 style="text-align:center;margin:10px 0;">Quiz complete!</h2>
+      <h2 style="text-align:center;margin:10px 0 16px;">Quiz complete!</h2>
+      <div style="text-align:center;">
+        <div id="resultsDifficulty" class="difficulty-pill"></div>
+      </div>
       <div style="text-align:center">
-        <p style="font-size:1.25rem;">Final Score: <span id="finalScore">0</span> / <span id="finalScoreTotal">300</span></p>
+        <p style="font-size:1.25rem; margin:0;">Final Score: <span id="finalScore">0</span> / <span id="finalScoreTotal">300</span></p>
       </div>
 
       <h3 style="margin:18px 0 10px; text-align:center; color:var(--ink-2);">
@@ -464,6 +509,7 @@
               <th>#</th>
               <th>Fungi</th>
               <th>Correct?</th>
+              <th>Your Answer</th>
               <th>iNaturalist observation(s)</th>
             </tr>
           </thead>
@@ -495,14 +541,6 @@
     const scoreEl = $('#score'), qEl = $('#questionCounter');
     const imageGrid = $('#imageGrid'), answersEl = $('#answers');
     const newBtn = $('#newPhotosBtn');
-    const classicContainer = $('#classic-container');
-    const photoChoiceContainer = $('#photoChoice-container');
-    const textInputContainer = $('#textInput-container');
-    const photoChoiceGrid = $('#photo-choice-grid');
-    const textInputGrid = $('#text-input-grid');
-    const textInputNewPhotosBtn = $('#text-input-new-photos-btn');
-    const textInputAnswers = $('#text-input-answers');
-    const gameScreen = $('#game');
     const diffButtons = [...document.querySelectorAll('#difficultyRow .diff-btn')];
     const lenButtons  = [...document.querySelectorAll('#lengthRow .len-btn')];
 
@@ -516,7 +554,8 @@
       newPhotosUsed: false,   // used in THIS question
       newPhotosLeft: 3,       // total remaining for the game (set at start from length+difficulty)
       current: null,
-      review: []
+      review: [],
+      questionTypeQueue: []
     };
 
     /* ------------- species (names only; ids resolved at runtime) ------------- */
@@ -733,7 +772,7 @@ const noviceExtras = [
   { id: 54743,  name: "Yellow Brain",          scientific: "Tremella mesenterica",    genus: "Tremella",  category: "Cup & other Saprotrophs" },
   { id: 47346,  name: "Funeral Bell",          scientific: "Galerina marginata",      genus: "Galerina",  category: "Woodland Fungi" },
   { id: 56086,  name: "False Morel",           scientific: "Gyromitra esculenta",     genus: "Gyromitra", category: "Woodland Fungi" },
-  { id: 54844,  name: "Honey Fungus",        scientific: "Armillaria mellea",       genus: "Armillaria",category: "Woodland Fungi" },
+  { id: 54844,  name: "Honey Fungus",          scientific: "Armillaria mellea",       genus: "Armillaria",category: "Woodland Fungi" },
   { id: 481482, name: "Wrinkled Peach",        scientific: "Rhodotus palmatus",       genus: "Rhodotus",  category: "Woodland Fungi" },
   { id: 48767,  name: "Sulphur Tuft",          scientific: "Hypholoma fasciculare",   genus: "Hypholoma", category: "Woodland Fungi" },
   { id: 57343,  name: "Giant Puffball",        scientific: "Calvatia gigantea",       genus: "Calvatia",  category: "Distinctive Oddballs" },
@@ -959,28 +998,9 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
       return null;
     }
 
-    function switchQuestionContainer(nextContainer) {
-        const currentContainer = document.querySelector('.question-container[style*="display: block"]');
 
-        if (currentContainer && currentContainer !== nextContainer) {
-            currentContainer.classList.add('hiding');
-            setTimeout(() => {
-                currentContainer.style.display = 'none';
-
-                nextContainer.style.display = 'block';
-                // Force a reflow before removing the class to ensure the transition plays
-                void nextContainer.offsetWidth;
-                nextContainer.classList.remove('hiding');
-            }, 250); // Match CSS transition duration
-        } else if (!currentContainer || currentContainer !== nextContainer) {
-            document.querySelectorAll('.question-container').forEach(c => c.style.display = 'none');
-            nextContainer.classList.remove('hiding');
-            nextContainer.style.display = 'block';
-        }
-    }
-
-    function renderPhotos(observation, species, grid = imageGrid){
-      grid.innerHTML = '';
+    function renderPhotos(observation, species){
+      imageGrid.innerHTML = '';
       const good = observation.photos.filter(p => ALLOWED.has(String(p.license_code||'').toLowerCase()));
       const pick = good.slice(0, 3);
       const four = pick.length === 3 ? [...pick, pick[0]] :
@@ -1001,17 +1021,17 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
             </div>
           </div>
         `;
-        grid.appendChild(card);
+        imageGrid.appendChild(card);
       });
     }
 
-    function renderAnswers(options, target = answersEl){
-      target.innerHTML = options.map((sp, i)=>{
-        const onlyLatin = state.scientificMode === true;
-        const label = onlyLatin ? `<em>${sp.scientific}</em>` : `${sp.name}<small><em>${sp.scientific}</em></small>`;
-        return `<button class="answer" data-i="${i}" data-id="${sp.id}" data-name="${sp.name}" data-sci="${sp.scientific}">${label}</button>`;
-      }).join('');
-    }
+    function renderAnswers(options){
+  answersEl.innerHTML = options.map((sp, i)=>{
+    const onlyLatin = state.scientificMode === true;
+    const label = onlyLatin ? `<em>${sp.scientific}</em>` : `${sp.name}<small><em>${sp.scientific}</em></small>`;
+    return `<button class="answer" data-i="${i}" data-id="${sp.id}" data-name="${sp.name}" data-sci="${sp.scientific}">${label}</button>`;
+  }).join('');
+}
     function renderReview(){
       const tbody = document.querySelector('#reviewTable tbody');
       if (!tbody) return;
@@ -1019,6 +1039,19 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
         const links = row.uris.map((u, i) =>
           `<a href="${u}" target="_blank" rel="noopener">Observation ${i+1}</a>`
         ).join(' &middot; ');
+
+        let yourAnswerHtml = '';
+        if (typeof row.chose === 'object' && row.chose !== null) {
+          // It's a species object from a photo choice question
+          yourAnswerHtml = `
+            <span class="fungus-name">${row.chose.name}</span>
+            <span class="fungus-sci"><em>${row.chose.scientific}</em></span>
+          `;
+        } else {
+          // It's a string from a classic or text input question
+          yourAnswerHtml = row.chose;
+        }
+
         return `
           <tr>
             <td>${row.n}</td>
@@ -1027,16 +1060,17 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
               <span class="fungus-sci"><em>${row.scientific}</em></span>
             </td>
             <td>${row.correct ? '<span class="badge ok">Correct</span>' : '<span class="badge no">Incorrect</span>'}</td>
+            <td>${yourAnswerHtml}</td>
             <td>${links}</td>
           </tr>
         `;
       }).join('');
     }
 
-    function refreshNewPhotosBtn(btn = newBtn){
+    function refreshNewPhotosBtn(){
       const left = state.newPhotosLeft;
-      btn.textContent = `New Photos (${left} remaining)`;
-      btn.disabled = state.newPhotosUsed || left <= 0;
+      newBtn.textContent = `New Photos (${left} remaining)`;
+      newBtn.disabled = state.newPhotosUsed || left <= 0;
     }
 
     // Difficulty-aware New Photos quota (per 10 questions)
@@ -1087,17 +1121,22 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
       const { correctSpecies, observations, correctIndex } = data;
 
       const questionName = state.scientificMode ? `<em>${correctSpecies.scientific}</em>` : correctSpecies.name;
-      $('#questionText').innerHTML = `Which of these shows a ${questionName}?`;
+      const startsWithThe = !state.scientificMode && correctSpecies.name.startsWith('The ');
+      const questionTemplate = startsWithThe ? `Which of these shows ${questionName}?` : `Which of these shows a ${questionName}?`;
+      $('#questionText').innerHTML = questionTemplate;
       $('#questionText').style.display = 'block';
+      imageGrid.style.display = 'none';
+      newBtn.style.display = 'none';
 
-      photoChoiceGrid.innerHTML = ''; // Clear previous
+      answersEl.innerHTML = '';
+      answersEl.className = 'image-grid';
 
       observations.forEach((obs, index) => {
         const photo = obs.photos[0];
         const { med, lg } = bestPhotoUrls(photo);
         const name = cleanAttribution(photo.attribution);
         const card = document.createElement('button');
-        card.className = 'img-card answer'; // Use answer class for delegation
+        card.className = 'img-card answer';
         card.dataset.index = index;
         card.innerHTML = `
           <div class="img-wrap">
@@ -1108,7 +1147,7 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
             </div>
           </div>
         `;
-        photoChoiceGrid.appendChild(card);
+        answersEl.appendChild(card);
       });
 
       state.current = {
@@ -1139,18 +1178,18 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
 
     function renderTextInputQuestion(data) {
       const { correct, obs } = data;
-      renderPhotos(obs, correct, textInputGrid);
+      renderPhotos(obs, correct);
+      newBtn.style.display = 'inline-flex';
+      refreshNewPhotosBtn();
 
-      textInputNewPhotosBtn.style.display = 'inline-flex';
-      refreshNewPhotosBtn(textInputNewPhotosBtn); // Pass the button to refresh
-
-      const placeholder = state.scientificMode ? "Enter latin name..." : "Enter common or latin name...";
-      textInputAnswers.innerHTML = `
+      const placeholder = state.scientificMode ? "Enter Latin name..." : "Enter common or Latin name...";
+      answersEl.innerHTML = `
         <div class="text-input-row">
           <input type="text" id="textAnswerInput" class="answer text-input" placeholder="${placeholder}">
           <button id="textAnswerSubmit" class="btn answer">Submit</button>
         </div>
       `;
+      answersEl.className = 'answers';
     }
 
  function pickOptions(correct){
@@ -1204,78 +1243,105 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
   }
 }
 
-    async function nextQuestion(initial=false){
-      updateHud();
+    async function renderNewQuestion() {
+        updateHud();
+        // Clear previous content before fetching new data
+        imageGrid.innerHTML = '';
+        answersEl.innerHTML = '';
 
-      if (state.difficulty === 'expert') {
-        const questionTypes = ['classic', 'photoChoice', 'textInput'];
-        state.questionType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
-      } else {
-        state.questionType = 'classic';
-      }
+        // Determine question type
+        if (state.difficulty === 'expert') {
+            if (state.questionTypeQueue.length > 0) {
+                state.questionType = state.questionTypeQueue.pop();
+            } else {
+                console.error("Expert question queue depleted unexpectedly.");
+                state.questionType = 'classic'; // Fallback
+            }
+        } else {
+            state.questionType = 'classic';
+        }
 
-      let container = classicContainer;
-      if (state.questionType === 'photoChoice') container = photoChoiceContainer;
-      else if (state.questionType === 'textInput') container = textInputContainer;
+        // Reset UI elements to a clean state
+        $('#questionText').style.display = 'none';
+        imageGrid.style.display = 'grid';
+        answersEl.className = 'answers';
 
-      switchQuestionContainer(container);
+        // Fetch and render based on type
+        if (state.questionType === 'photoChoice') {
+            const data = await fetchPhotoChoiceData();
+            renderPhotoChoiceQuestion(data);
+        } else {
+            const pool = (state.difficulty === 'beginner') ? beginnerSpecies :
+                         (state.difficulty === 'novice') ? noviceSpecies :
+                         advancedSpecies;
+            const remaining = pool.filter(s => !state.seen.has(s.scientific));
+            const base = remaining.length ? remaining : pool;
+            const correct = base[Math.floor(Math.random() * base.length)];
 
-      $('#questionText').style.display = 'none';
+            const obs = await fetchOneObservation(correct.scientific);
+            if (!obs) {
+                console.error("Failed to fetch observation, trying again.");
+                return renderNewQuestion(); // Retry if fetch fails
+            }
 
-      if (state.questionType === 'photoChoice') {
-        const data = await fetchPhotoChoiceData();
-        renderPhotoChoiceQuestion(data);
-        return;
-      }
+            state.current = { correct, obsId: obs.id, uris: [obs.uri] };
+            state.seen.add(correct.scientific);
+            state.newPhotosUsed = false;
 
-      const pool =
-        (state.difficulty === 'beginner')   ? beginnerSpecies :
-        (state.difficulty === 'novice')     ? noviceSpecies   :
-                                              advancedSpecies;
-      const remaining = pool.filter(s => !state.seen.has(s.scientific));
-      const base = remaining.length ? remaining : pool;
-      const correct = base[Math.floor(Math.random()*base.length)];
-
-      const obs = await fetchOneObservation(correct.scientific);
-      if (!obs){ if (initial) throw new Error('No observation to start'); return nextQuestion(initial); }
-
-      state.current = { correct, obsId: obs.id, uris: [obs.uri] };
-      state.seen.add(correct.scientific);
-      state.newPhotosUsed = false;
-
-      if (state.questionType === 'textInput') {
-        renderTextInputQuestion({ correct, obs });
-        return;
-      }
-
-      // Classic question logic
-      newBtn.style.display = 'inline-flex';
-      refreshNewPhotosBtn();
-      renderPhotos(obs, correct);
-      const options = pickOptions(correct);
-      renderAnswers(options);
+            if (state.questionType === 'textInput') {
+                renderTextInputQuestion({ correct, obs });
+            } else {
+                newBtn.style.display = 'inline-flex';
+                refreshNewPhotosBtn();
+                renderPhotos(obs, correct);
+                const options = pickOptions(correct);
+                state.current.options = options; // Store options for later
+                renderAnswers(options);
+            }
+        }
     }
 
     /* Start game */
-    $('#startBtn').addEventListener('click', async ()=>{
-      state.isGameActive = true;
-      state.score = 0; state.q = 0; state.seen.clear();
-      state.review = [];
+    $('#startBtn').addEventListener('click', async () => {
+        state.isGameActive = true;
+        state.score = 0; state.q = 0; state.seen.clear();
+        state.review = [];
+        state.newPhotosLeft = computeNewPhotoQuota(state.total, state.difficulty);
+        qEl.textContent = `0 / ${state.total}`;
 
-      // New Photos pool based on selected length + difficulty
-      state.newPhotosLeft = computeNewPhotoQuota(state.total, state.difficulty);
+        state.questionTypeQueue = [];
+        if (state.difficulty === 'expert') {
+            const numSets = state.total / 10;
+            const classicCount = 3 * numSets;
+            const photoChoiceCount = 3 * numSets;
+            const textInputCount = 4 * numSets;
+            const queue = [
+                ...Array(classicCount).fill('classic'),
+                ...Array(photoChoiceCount).fill('photoChoice'),
+                ...Array(textInputCount).fill('textInput')
+            ];
+            state.questionTypeQueue = shuffle(queue);
+        }
 
-      // Ensure HUD denominator matches chosen length before first round
-      qEl.textContent = `0 / ${state.total}`;
-
-      setScreen('loading');
-      try{
-        await nextQuestion(true);
-        setScreen('game');
-      }catch(e){
-        $('#errorMsg').textContent = 'Could not load the first mushroom question. Please try again.';
-        $('#errorModal').classList.add('active');
-      }
+        setScreen('loading');
+        try {
+            await renderNewQuestion();
+            setScreen('game');
+            const gameContent = $('#gameContent');
+            // Use rAF to ensure the animation plays on the first question
+            requestAnimationFrame(() => {
+              gameContent.classList.add('is-entering');
+              requestAnimationFrame(() => {
+                gameContent.classList.add('visible');
+                gameContent.addEventListener('animationend', () => {
+                    gameContent.classList.remove('is-entering', 'visible');
+                }, { once: true });
+              });
+            });
+        } catch (e) {
+            $('#errorMsg').textContent = 'Could not load the first mushroom question. Please try again.';
+            $('#errorModal').classList.add('active');
+        }
     });
 
     $('#retryBtn').addEventListener('click', ()=>{
@@ -1283,32 +1349,27 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
       setScreen('start');
     });
 
-    gameScreen.addEventListener('click', async e => {
-      const btn = e.target.closest('.answer');
-      const newPhotosButton = e.target.closest('#newPhotosBtn, #text-input-new-photos-btn');
+    newBtn.addEventListener('click', async ()=>{
+      if (state.newPhotosUsed || state.newPhotosLeft <= 0) return;
 
-      if (newPhotosButton) {
-          if (state.newPhotosUsed || state.newPhotosLeft <= 0) return;
+      newBtn.disabled = true;
+      const obs = await fetchOneObservation(state.current.correct.scientific, state.current.obsId);
 
-          newPhotosButton.disabled = true;
-          const obs = await fetchOneObservation(state.current.correct.scientific, state.current.obsId);
+      if (obs){
+        renderPhotos(obs, state.current.correct);
+        state.current.obsId = obs.id;
+        if (!state.current.uris.includes(obs.uri)) state.current.uris.push(obs.uri);
+        state.newPhotosUsed = true;
+        state.newPhotosLeft--;
+                pushRecent(state.current.correct.scientific, obs.id);
+        rememberUsed(state.current.correct.scientific, obs.id);
+        }
 
-          if (obs){
-              const grid = state.questionType === 'textInput' ? textInputGrid : imageGrid;
-              renderPhotos(obs, state.current.correct, grid);
-              state.current.obsId = obs.id;
-              if (!state.current.uris.includes(obs.uri)) state.current.uris.push(obs.uri);
-              state.newPhotosUsed = true;
-              state.newPhotosLeft--;
-              pushRecent(state.current.correct.scientific, obs.id);
-              rememberUsed(state.current.correct.scientific, obs.id);
-          }
-          refreshNewPhotosBtn(newBtn);
-          refreshNewPhotosBtn(textInputNewPhotosBtn);
-          return; // Stop processing here for new photos click
-      }
+      refreshNewPhotosBtn();
+    });
 
-      if (!btn) return;
+    answersEl.addEventListener('click', e=>{
+      const btn = e.target.closest('.answer'); if (!btn) return;
 
       let wasCorrect = false;
       let chose = '';
@@ -1319,26 +1380,26 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
         const buttons = [...answersEl.querySelectorAll('.answer')];
         buttons.forEach(b=>b.disabled = true);
         const chosenId = Number(btn.dataset.id);
-        const correctId = Number(state.current.correct.id);
-        wasCorrect = chosenId === correctId;
-        chose = btn.textContent.trim();
+        wasCorrect = chosenId === state.current.correct.id;
+        const chosenObject = state.current.options.find(opt => opt.id === chosenId);
+        chose = chosenObject || { name: 'Unknown', scientific: 'Unknown' };
 
         if (wasCorrect) {
           btn.classList.add('correct');
         } else {
           btn.classList.add('incorrect');
-          const correctBtn = buttons.find(b => Number(b.dataset.id) === correctId);
+          const correctBtn = buttons.find(b => Number(b.dataset.id) === state.current.correct.id);
           if (correctBtn) correctBtn.classList.add('correct');
         }
         pushRecent(state.current.correct.scientific, state.current.obsId);
         rememberUsed(state.current.correct.scientific, state.current.obsId);
 
       } else if (state.questionType === 'photoChoice') {
-        const buttons = [...photoChoiceGrid.querySelectorAll('.answer')];
+        const buttons = [...answersEl.querySelectorAll('.answer')];
         buttons.forEach(b=>b.disabled = true);
         const chosenIndex = Number(btn.dataset.index);
         wasCorrect = chosenIndex === state.current.correctIndex;
-        chose = `Photo of ${state.current.options[chosenIndex].name}`;
+        chose = state.current.options[chosenIndex]; // Store the full species object
         uris = state.current.uris;
 
         if (wasCorrect){
@@ -1384,7 +1445,7 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
       }
 
       if (wasCorrect) {
-        state.score += 10;
+        state.score += state.scientificMode ? 20 : 10;
       }
 
       state.review.push({
@@ -1401,13 +1462,52 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
 
       if (isLast){
         setTimeout(()=>{
+          const pointsPerQ = state.scientificMode ? 20 : 10;
           $('#finalScore').textContent = state.score;
-          $('#finalScoreTotal').textContent = String(state.total * 10);
+          $('#finalScoreTotal').textContent = String(state.total * pointsPerQ);
+
+          const diffPill = $('#resultsDifficulty');
+          let pillText = state.difficulty;
+          if (state.scientificMode) {
+            diffPill.classList.add('scientific');
+            pillText += ' &middot; Scientific Mode';
+          } else {
+            diffPill.classList.remove('scientific');
+          }
+          diffPill.innerHTML = pillText;
+
           setScreen('results');
           renderReview();
         }, timeout);
       } else {
-        setTimeout(()=>nextQuestion(), timeout);
+        // Use timeout to allow correct/incorrect styles to be seen
+        setTimeout(() => {
+          const gameContent = $('#gameContent');
+          gameContent.classList.add('is-exiting');
+
+          gameContent.addEventListener('animationend', async function onExit() {
+            gameContent.removeEventListener('animationend', onExit);
+
+            // 1. Render the new content
+            await renderNewQuestion();
+
+            // 2. Animate the new content in
+            gameContent.classList.remove('is-exiting');
+            gameContent.classList.add('is-entering');
+
+            // Use requestAnimationFrame to ensure the 'visible' class is applied after 'is-entering'
+            requestAnimationFrame(() => {
+              gameContent.classList.add('visible');
+            });
+
+            // 3. Clean up classes after the enter animation finishes
+            gameContent.addEventListener('animationend', function onEnter() {
+              gameContent.removeEventListener('animationend', onEnter);
+              gameContent.classList.remove('is-entering', 'visible');
+            }, { once: true });
+
+          }, { once: true });
+        }, timeout);
       }
     });
 
