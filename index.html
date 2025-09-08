@@ -395,6 +395,36 @@
     border-color: rgba(77,139,107,.3);
     color: #223329;
   }
+
+  /* --- Share Modal --- */
+  #shareText {
+    border: 1px solid rgba(139,90,43,.12);
+    user-select: all;
+    font-family: monospace, monospace; /* Monospace fallback */
+  }
+
+  body.theme-woodland #shareText {
+    background: #fbf7f0;
+    border-color: rgba(56,110,83,.20);
+  }
+
+  #closeShareModalBtn {
+    background-image: none; /* To override the linear-gradient on .btn */
+  }
+
+  /* Add a hover effect for the muted button */
+  @media (hover: hover) and (pointer: fine){
+    #closeShareModalBtn:hover {
+      background: var(--ink-2);
+      background-image: none;
+    }
+  }
+
+  #copyBtn.copied {
+    background: #4CAF50; /* A success green */
+    background-image: none;
+    color: white;
+  }
   </style>
 </head>
 <body class="theme-woodland">
@@ -518,8 +548,9 @@
 </div>
       </div>
 
-      <div style="text-align:center; margin-top:14px;">
+      <div style="text-align:center; margin-top:20px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
         <button id="playAgainBtn" class="btn">Play again</button>
+        <button id="shareScoreBtn" class="btn">Share your score &#x1F4E4;</button>
       </div>
     </section>
   </div>
@@ -532,6 +563,18 @@
       <button id="retryBtn" class="btn">Try again</button>
     </div>
   </div>
+
+      <!-- Share modal -->
+      <div id="shareModal" class="modal">
+        <div class="card">
+          <h3 style="margin-top:0;">Share your score</h3>
+          <p id="shareText" style="background:#f0eadd; padding:12px; border-radius:8px; margin:16px 0; white-space: pre-wrap; word-wrap: break-word; text-align:left;"></p>
+          <div style="display: flex; justify-content: center; gap: 12px;">
+            <button id="copyBtn" class="btn">Copy &#x1F4CB;</button>
+            <button id="closeShareModalBtn" class="btn" style="background:var(--muted)">Close</button>
+          </div>
+        </div>
+      </div>
 
   <script>
     /* ---------------- DOM & state ---------------- */
@@ -1121,8 +1164,17 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
       const { correctSpecies, observations, correctIndex } = data;
 
       const questionName = state.scientificMode ? `<em>${correctSpecies.scientific}</em>` : correctSpecies.name;
-      const startsWithThe = !state.scientificMode && correctSpecies.name.startsWith('The ');
-      const questionTemplate = startsWithThe ? `Which of these shows ${questionName}?` : `Which of these shows a ${questionName}?`;
+      const plainName = state.scientificMode ? correctSpecies.scientific : correctSpecies.name;
+
+      let questionTemplate;
+      // Handle "The" for common names, otherwise use a/an
+      if (!state.scientificMode && plainName.toLowerCase().startsWith('the ')) {
+        questionTemplate = `Which of these shows ${questionName}?`;
+      } else {
+        const firstLetter = plainName.charAt(0).toLowerCase();
+        const article = ['a', 'e', 'i', 'o', 'u'].includes(firstLetter) ? 'an' : 'a';
+        questionTemplate = `Which of these shows ${article} ${questionName}?`;
+      }
       $('#questionText').innerHTML = questionTemplate;
       $('#questionText').style.display = 'block';
       imageGrid.style.display = 'none';
@@ -1558,6 +1610,75 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
     });
 
     $('#playAgainBtn').addEventListener('click', ()=>{ setScreen('start'); });
+
+    // --- Share Score Feature ---
+    const shareModal = $('#shareModal');
+    const shareScoreBtn = $('#shareScoreBtn');
+    const closeShareModalBtn = $('#closeShareModalBtn');
+    const copyBtn = $('#copyBtn');
+    const shareTextEl = $('#shareText');
+
+    if (shareScoreBtn) {
+      shareScoreBtn.addEventListener('click', () => {
+        // Format difficulty text
+        let difficultyText = state.difficulty.charAt(0).toUpperCase() + state.difficulty.slice(1);
+        if (state.scientificMode) {
+          difficultyText += ' (Scientific)';
+        }
+
+        // Generate share text
+        const text = `Know your mushrooms? Try playing Fungidentification! 🍄\n\nI scored ${state.score} on ${difficultyText} mode.\n\nSee if you can beat me at https://fungidentification.xyz`;
+        shareTextEl.innerText = text;
+
+        // Show modal
+        shareModal.classList.add('active');
+      });
+    }
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const textToCopy = shareTextEl.innerText.replace(/\n\n/g, '\n');
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          // Provide feedback
+          const originalText = 'Copy &#x1F4CB;';
+          copyBtn.innerHTML = 'Copied! &#x2705;';
+          copyBtn.classList.add('copied');
+          copyBtn.disabled = true;
+
+          setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+            copyBtn.classList.remove('copied');
+            copyBtn.disabled = false;
+          }, 2000);
+        }).catch(err => {
+          console.error('Failed to copy text: ', err);
+          const originalText = copyBtn.innerHTML;
+          copyBtn.innerHTML = 'Failed to copy';
+          setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+          }, 2000);
+        });
+      });
+    }
+
+    function closeShareModal() {
+      shareModal.classList.remove('active');
+    }
+
+    if (closeShareModalBtn) {
+      closeShareModalBtn.addEventListener('click', closeShareModal);
+    }
+
+    // Close modal on overlay click
+    if (shareModal) {
+      shareModal.addEventListener('click', (e) => {
+        // e.target is the element that was clicked
+        // We only want to close if the outer modal background was clicked
+        if (e.target === shareModal) {
+          closeShareModal();
+        }
+      });
+    }
 
     setScreen('start');
   </script>
