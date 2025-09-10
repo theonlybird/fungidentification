@@ -677,14 +677,14 @@
       { id: 118063, name: "Crimped Gill",          scientific: "Plicaturopsis crispa", genus: "Plicaturopsis",category:"Brackets & Polypores" },
       { id: 55265,  name: "Chicken of the Woods",  scientific: "Laetiporus sulphureus", genus: "Laetiporus", category: "Brackets & Polypores" },
       { id: 84613,  name: "Hen of the Woods",      scientific: "Grifola frondosa",      genus: "Grifola",    category: "Brackets & Polypores" },
-      { id: 157989, name: "Giant (Blackening) Polypore", scientific: "Meripilus giganteus",   genus: "Meripilus",  category: "Brackets & Polypores" },
-      { id: 118078, name: "Dryad's Saddle",              scientific: "Polyporus squamosus",   genus: "Polyporus",  category: "Brackets & Polypores" },
+      { id: 157989, name: "Giant (Blackening) Polypore", scientific: "Meripilus giganteus",   genus: "Meripilus",  category: "Brackets & Polypores", altNames: ["giant polypore", "blackening polypore"] },
+      { id: 118078, name: "Dryad's Saddle",              scientific: "Polyporus squamosus",   genus: "Polyporus",  category: "Brackets & Polypores", altNames: ["pheasant's back"] },
       { id: 124102, name: "Blushing Bracket",            scientific: "Daedaleopsis confragosa",genus: "Daedaleopsis",category:"Brackets & Polypores" },
       { id: 55501,  name: "Hairy Curtain Crust",         scientific: "Stereum hirsutum",      genus: "Stereum",    category: "Brackets & Polypores" },
 
       // CHANTERELLES & ALLIES
       { id: 47347,  name: "Golden Chanterelle",    scientific: "Cantharellus cibarius",  genus: "Cantharellus",category: "Chanterelles & Allies" },
-      { id: 175283, name: "Horn of Plenty",        scientific: "Craterellus cornucopioides",genus:"Craterellus",category:"Chanterelles & Allies" },
+      { id: 175283, name: "Horn of Plenty",        scientific: "Craterellus cornucopioides",genus:"Craterellus",category:"Chanterelles & Allies", altNames: ["black trumpet", "trumpet of the dead"] },
       { id: 350511, name: "Winter Chanterelle",    scientific: "Craterellus tubaeformis",genus:"Craterellus", category:"Chanterelles & Allies" },
       { id: 127394, name: "False Chanterelle",     scientific: "Hygrophoropsis aurantiaca",genus:"Hygrophoropsis",category:"Chanterelles & Allies" },
       { id: 58857,  name: "Hedgehog Fungus",       scientific: "Hydnum repandum",        genus: "Hydnum",    category: "Chanterelles & Allies" },
@@ -1128,7 +1128,7 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
       if (retryCount > 3) {
         throw new Error("Failed to fetch photo choice data after multiple retries.");
       }
-      const pool = advancedSpecies;
+      const pool = advancedSpecies.filter(s => s.category !== 'Distinctive Oddballs');
       const remaining = pool.filter(s => !state.seen.has(s.scientific));
       const base = remaining.length ? remaining : pool;
       const correctSpecies = base[Math.floor(Math.random() * base.length)];
@@ -1323,9 +1323,12 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
             const data = await fetchPhotoChoiceData();
             renderPhotoChoiceQuestion(data);
         } else {
-            const pool = (state.difficulty === 'beginner') ? beginnerSpecies :
+            let pool = (state.difficulty === 'beginner') ? beginnerSpecies :
                          (state.difficulty === 'novice') ? noviceSpecies :
                          advancedSpecies;
+            if (state.difficulty === 'expert') {
+                pool = pool.filter(s => s.category !== 'Distinctive Oddballs');
+            }
             const remaining = pool.filter(s => !state.seen.has(s.scientific));
             const base = remaining.length ? remaining : pool;
             const correct = base[Math.floor(Math.random() * base.length)];
@@ -1481,6 +1484,18 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
           const distCommon = levenshtein(userInputLower, correctCommon);
           const thresholdCommon = Math.max(1, Math.floor(correctCommon.length / 4));
           wasCorrect = (distCommon <= thresholdCommon) || (distScientific <= thresholdScientific);
+
+          if (!wasCorrect && state.current.correct.altNames) {
+            for (const altName of state.current.correct.altNames) {
+              const altNameLower = altName.toLowerCase();
+              const distAlt = levenshtein(userInputLower, altNameLower);
+              const thresholdAlt = Math.max(1, Math.floor(altNameLower.length / 4));
+              if (distAlt <= thresholdAlt) {
+                wasCorrect = true;
+                break;
+              }
+            }
+          }
         }
 
         const correctAnswer = state.scientificMode
