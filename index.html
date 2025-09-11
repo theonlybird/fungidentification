@@ -1496,18 +1496,28 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
         if (state.scientificMode) {
           wasCorrect = equalsWithAliases(userInput, state.current.correct.scientific);
         } else {
-          const distCommon = levenshtein(userInputLower, correctCommon);
-          const thresholdCommon = Math.max(1, Math.floor(correctCommon.length / 4));
-          wasCorrect = (distCommon <= thresholdCommon) || equalsWithAliases(userInput, state.current.correct.scientific);
+          // First, check if the input is an exact match for another species' common name.
+          const isOtherSpecies = speciesList.some(s =>
+            s.name.toLowerCase() === userInputLower && s.name.toLowerCase() !== correctCommon
+          );
 
-          if (!wasCorrect && state.current.correct.altNames) {
-            for (const altName of state.current.correct.altNames) {
-              const altNameLower = altName.toLowerCase();
-              const distAlt = levenshtein(userInputLower, altNameLower);
-              const thresholdAlt = Math.max(1, Math.floor(altNameLower.length / 4));
-              if (distAlt <= thresholdAlt) {
-                wasCorrect = true;
-                break;
+          if (isOtherSpecies) {
+            wasCorrect = false;
+          } else {
+            // If not, proceed with the Levenshtein check for typos.
+            const distCommon = levenshtein(userInputLower, correctCommon);
+            const thresholdCommon = Math.max(1, Math.floor(correctCommon.length / 4));
+            wasCorrect = (distCommon <= thresholdCommon) || equalsWithAliases(userInput, state.current.correct.scientific);
+
+            if (!wasCorrect && state.current.correct.altNames) {
+              for (const altName of state.current.correct.altNames) {
+                const altNameLower = altName.toLowerCase();
+                const distAlt = levenshtein(userInputLower, altNameLower);
+                const thresholdAlt = Math.max(1, Math.floor(altNameLower.length / 4));
+                if (distAlt <= thresholdAlt) {
+                  wasCorrect = true;
+                  break;
+                }
               }
             }
           }
