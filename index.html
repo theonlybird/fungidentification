@@ -617,7 +617,7 @@
       { id: 118394, name: "Yellow Stainer",        scientific: "Agaricus xanthodermus", genus: "Agaricus",   category: "Agaricus" },
       { id: 58699,  name: "Horse Mushroom",        scientific: "Agaricus arvensis",     genus: "Agaricus",   category: "Agaricus" },
       { id: 58696,  name: "Pavement Mushroom",     scientific: "Agaricus bitorquis",    genus: "Agaricus",   category: "Agaricus" },
-      { id: 60506,  name: "Scaly Wood Mushroom",   scientific: "Agaricus silvaticus",   genus: "Agaricus",   category: "Agaricus" },
+      { id: 60506,  name: "Scaly Wood Mushroom", scientific: "Agaricus sylvaticus",   genus: "Agaricus",   category: "Agaricus" },
       { id: 58646,  name: "The Prince",            scientific: "Agaricus augustus",     genus: "Agaricus",   category: "Agaricus" },
 
       // PLEUROTUS / SARCOMYXA
@@ -678,7 +678,7 @@
       { id: 55265,  name: "Chicken of the Woods",  scientific: "Laetiporus sulphureus", genus: "Laetiporus", category: "Brackets & Polypores" },
       { id: 84613,  name: "Hen of the Woods",      scientific: "Grifola frondosa",      genus: "Grifola",    category: "Brackets & Polypores" },
       { id: 157989, name: "Giant (Blackening) Polypore", scientific: "Meripilus giganteus",   genus: "Meripilus",  category: "Brackets & Polypores", altNames: ["giant polypore", "blackening polypore"] },
-      { id: 118078, name: "Dryad's Saddle",              scientific: "Polyporus squamosus",   genus: "Polyporus",  category: "Brackets & Polypores", altNames: ["pheasant's back"] },
+      { id: 118078, name: "Dryad's Saddle",  scientific: "Cerioporus squamosus",  genus: "Cerioporus", category: "Brackets & Polypores", altNames: ["pheasant's back"] },
       { id: 124102, name: "Blushing Bracket",            scientific: "Daedaleopsis confragosa",genus: "Daedaleopsis",category:"Brackets & Polypores" },
       { id: 55501,  name: "Hairy Curtain Crust",         scientific: "Stereum hirsutum",      genus: "Stereum",    category: "Brackets & Polypores" },
 
@@ -724,7 +724,7 @@
       { id: 417180, name: "Common Rustgill",       scientific: "Gymnopilus penetrans",    genus: "Gymnopilus",category: "Woodland Fungi" },
       { id: 56021,  name: "Velvet Shank",          scientific: "Flammulina velutipes",    genus: "Flammulina",category: "Woodland Fungi" },
       { id: 481482, name: "Wrinkled Peach",        scientific: "Rhodotus palmatus",       genus: "Rhodotus",  category: "Woodland Fungi" },
-      { id: 55964,  name: "Porcelain Fungus",      scientific: "Oudemansiella mucida",    genus: "Oudemansiella", category: "Woodland Fungi" },
+      { id: 55964,  name: "Porcelain Fungus", scientific: "Mucidula mucida",      genus: "Mucidula",      category: "Woodland Fungi" },
       { id: 58682,  name: "Morel",                 scientific: "Morchella esculenta",     genus: "Morchella", category: "Woodland Fungi" },
       { id: 48767,  name: "Sulphur Tuft",          scientific: "Hypholoma fasciculare",   genus: "Hypholoma", category: "Woodland Fungi" },
       { id: 63433,  name: "Golden Scalycap",       scientific: "Pholiota aurivella",      genus: "Pholiota",  category: "Woodland Fungi" },
@@ -739,11 +739,11 @@
       { id: 54594,  name: "Stinkhorn",             scientific: "Phallus impudicus",       genus: "Phallus",   category: "Distinctive Oddballs" },
 
       // BLEWITS & LOOKALIKES
-      { id: 119152, name: "Wood Blewit",           scientific: "Lepista nuda",            genus: "Lepista",   category: "Blewits & Lookalikes" },
-      { id: 1039723,name: "Field Blewit",          scientific: "Lepista saeva",           genus: "Lepista",   category: "Blewits & Lookalikes" },
-      { id: 417492, name: "Lilac Fibrecap",        scientific: "Inocybe lilacina",        genus: "Inocybe",   category: "Blewits & Lookalikes" },
+      { id: 119152, name: "Wood Blewit",    scientific: "Collybia nuda",  genus: "Collybia",  category: "Blewits & Lookalikes" },
+      { id: 1039723, name: "Field Blewit",  scientific: "Collybia personata",  genus: "Collybia",   category: "Blewits & Lookalikes" },
+      { id: 417492, name: "Lilac Fibrecap", scientific: "Inocybe lilacina", genus: "Inocybe", category: "Blewits & Lookalikes" },
       { id: 63509,  name: "Amethyst Deceiver",     scientific: "Laccaria amethystina",    genus: "Laccaria",  category: "Blewits & Lookalikes" },
-      { id: 55254,  name: "Bruising Webcap",       scientific: "Cortinarius purpurascens",genus: "Cortinarius",category:"Blewits & Lookalikes" },
+      { id: 55254,  name: "Bruising Webcap", scientific: "Thaxterogaster purpurascens", genus: "Thaxterogaster", category:"Blewits & Lookalikes" },
 
       // LACTARIUS category
       { id: 155197, name: "Saffron Milkcap",       scientific: "Lactarius deliciosus",    genus: "Lactarius", category: "Lactarius" },
@@ -768,6 +768,17 @@
       { id: 1039736,  name: "Deadly Fibrecap", scientific: "Inosperma erubescens", genus: "Inosperma", category: "Webcaps & Darker" },
       { id: 1039737,  name: "Dewdrop Mottlegill", scientific: "Panaeolus acuminatus", genus: "Panaeolus", category: "Inkcaps and LBMs" },
     ];;
+
+    const NAME_ALIASES = new Map([
+      ["Collybia personata", ["Lepista saeva","Lepista personata","Clitocybe saeva","Tricholoma personatum"]],
+      ["Collybia nuda",      ["Lepista nuda","Clitocybe nuda"]],
+      ["Mucidula mucida",    ["Oudemansiella mucida"]],
+      ["Cerioporus squamosus", ["Polyporus squamosus"]],
+      ["Inocybe lilacina", ["Inocybe geophylla", "Inocybe geophylla var. lilacina"]],
+      ["Thaxterogaster purpurascens", ["Cortinarius purpurascens","Phlegmacium purpurascens"]],
+      ["Agaricus sylvaticus", ["Agaricus silvaticus"]]
+    ]);
+
     const speciesList = mushroomSpecies;
 
     /* Beginner curated set — easiest iconic species */
@@ -835,6 +846,13 @@ const advancedSpecies = speciesList.filter(s => !beginnerScientificSet.has(s.sci
 
 
     /* ---------------- helpers ---------------- */
+    function equalsWithAliases(guess, target){
+      const canon = target.trim();
+      const aliases = NAME_ALIASES.get(canon) || [];
+      const allOK = new Set([canon, ...aliases].map(s => s.toLowerCase()));
+      return allOK.has(guess.trim().toLowerCase());
+    }
+
     const ALLOWED = new Set(['cc0','cc-by','cc-by-sa','cc-by-nd','cc-by-nc','cc-by-nc-sa','cc-by-nc-nd']);
     const recentObs = new Map();
     const perPage = 50; // page size for RG queue
@@ -1475,15 +1493,12 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
         const correctCommon = state.current.correct.name.toLowerCase();
         const correctScientific = state.current.correct.scientific.toLowerCase();
 
-        const distScientific = levenshtein(userInputLower, correctScientific);
-        const thresholdScientific = Math.max(1, Math.floor(correctScientific.length / 4));
-
         if (state.scientificMode) {
-          wasCorrect = distScientific <= thresholdScientific;
+          wasCorrect = equalsWithAliases(userInput, state.current.correct.scientific);
         } else {
           const distCommon = levenshtein(userInputLower, correctCommon);
           const thresholdCommon = Math.max(1, Math.floor(correctCommon.length / 4));
-          wasCorrect = (distCommon <= thresholdCommon) || (distScientific <= thresholdScientific);
+          wasCorrect = (distCommon <= thresholdCommon) || equalsWithAliases(userInput, state.current.correct.scientific);
 
           if (!wasCorrect && state.current.correct.altNames) {
             for (const altName of state.current.correct.altNames) {
