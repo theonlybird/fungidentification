@@ -1494,7 +1494,20 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
         const correctScientific = state.current.correct.scientific.toLowerCase();
 
         if (state.scientificMode) {
-          wasCorrect = equalsWithAliases(userInput, state.current.correct.scientific);
+          const userInputLower = userInput.toLowerCase();
+          const correctScientific = state.current.correct.scientific;
+          const scientificNames = [correctScientific, ...(NAME_ALIASES.get(correctScientific) || [])];
+
+          wasCorrect = false;
+          for (const name of scientificNames) {
+            const nameLower = name.toLowerCase();
+            const dist = levenshtein(userInputLower, nameLower);
+            const threshold = Math.max(1, Math.floor(nameLower.length / 4));
+            if (dist <= threshold) {
+              wasCorrect = true;
+              break;
+            }
+          }
         } else {
           // First, check if the input is an exact match for another species' common name.
           const isOtherSpecies = speciesList.some(s =>
