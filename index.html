@@ -140,6 +140,75 @@
       opacity:.95;
     }
 
+    /* Mushroom fact card */
+    .fact-box{
+      position:fixed;
+      left:50%;
+      bottom:20px;
+      transform:translate(-50%, 120%);
+      opacity:0;
+      transition:transform .35s ease, opacity .35s ease;
+      background:rgba(255,248,240,.96);
+      border:1px solid var(--ring);
+      border-radius:16px;
+      box-shadow:0 14px 30px rgba(61,41,20,.28);
+      padding:16px 18px;
+      max-width:min(90vw, 420px);
+      color:var(--ink-2);
+      z-index:950;
+      pointer-events:none;
+      visibility:hidden;
+    }
+    .fact-box.visible{
+      transform:translate(-50%, 0);
+      opacity:1;
+      pointer-events:auto;
+      visibility:visible;
+    }
+    .fact-box .fact-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:8px;
+    }
+    .fact-box .fact-label{
+      font-size:.85rem;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-weight:700;
+      color:var(--muted);
+    }
+    .fact-box .fact-close{
+      background:transparent;
+      border:none;
+      color:var(--muted);
+      font-size:1.1rem;
+      line-height:1;
+      cursor:pointer;
+      padding:4px;
+    }
+    .fact-box .fact-close:focus-visible{
+      outline:2px solid var(--brand-1);
+      outline-offset:2px;
+    }
+    .fact-box .fact-body{
+      margin:0;
+      font-size:1rem;
+      line-height:1.45;
+      color:var(--ink-2);
+    }
+    @media (max-width:520px){
+      .fact-box{
+        padding:14px 16px;
+        bottom:14px;
+        border-radius:14px;
+      }
+      .fact-box .fact-body{
+        font-size:.95rem;
+      }
+    }
+
     /* Answers grid */
     .answers{ display:grid; gap:12px; max-width:740px; margin:0 auto; grid-template-columns:repeat(4, minmax(0,1fr)); }
     @media (max-width:768px){ .answers{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
@@ -515,6 +584,13 @@
 
         <div id="answers" class="answers"></div>
       </div>
+      <div id="factBox" class="fact-box" role="status" aria-live="polite" aria-hidden="true">
+        <div class="fact-header">
+          <span class="fact-label">Mushroom fact</span>
+          <button type="button" id="factCloseBtn" class="fact-close" aria-label="Dismiss fact">&#x2715;</button>
+        </div>
+        <p id="factText" class="fact-body"></p>
+      </div>
     </section>
 
     <!-- Results -->
@@ -584,6 +660,8 @@
     const scoreEl = $('#score'), qEl = $('#questionCounter');
     const imageGrid = $('#imageGrid'), answersEl = $('#answers');
     const newBtn = $('#newPhotosBtn');
+    const factBox = $('#factBox'), factText = $('#factText');
+    const factCloseBtn = $('#factCloseBtn');
     const diffButtons = [...document.querySelectorAll('#difficultyRow .diff-btn')];
     const lenButtons  = [...document.querySelectorAll('#lengthRow .len-btn')];
 
@@ -598,8 +676,16 @@
       newPhotosLeft: 3,       // total remaining for the game (set at start from length+difficulty)
       current: null,
       review: [],
-      questionTypeQueue: []
+      questionTypeQueue: [],
+      factTimer: null
     };
+
+    if (factCloseBtn){
+      factCloseBtn.addEventListener('click', (e)=>{
+        e.preventDefault();
+        hideFact();
+      });
+    }
 
     /* ------------- species (names only; ids resolved at runtime) ------------- */
     const mushroomSpecies = [
@@ -838,6 +924,356 @@ const noviceExtras = [
   { id: 63509,  name: "Amethyst Deceiver",     scientific: "Laccaria amethystina",    genus: "Laccaria",  category: "Blewits & Lookalikes" },
 ];
 
+const SPECIES_FACTS = {
+  "Agaricus augustus": [
+    "Nicknamed 'The Prince', this large Agaricus has a sweet almond or anise scent when fresh.",
+    "Its tawny cap is covered in brown scales that contrast with the pale background.",
+    "Fruits in late summer on nutrient-rich soil near conifers and ornamental plantings."
+  ],
+  "Agaricus xanthodermus": [
+    "Cuts and bruises quickly flash chrome-yellow, especially at the base of the stem.",
+    "Produces an unpleasant ink or iodine-like odour when the flesh is heated.",
+    "Responsible for many mild poisonings because it resembles edible field mushrooms."
+  ],
+  "Aleuria aurantia": [
+    "Forms bright orange, saucer-like cups that resemble discarded citrus peel.",
+    "Often carpets disturbed soil, paths, or roadside banks in late summer.",
+    "The inner cup surface bears the spore layer while the outer surface stays pale and slightly fuzzy."
+  ],
+  "Amanita muscaria": [
+    "Iconic scarlet cap dotted with white warts earned it a starring role in folklore and art.",
+    "Contains the psychoactive compounds ibotenic acid and muscimol, making it poisonous when raw.",
+    "Forms mycorrhizal partnerships with birch, pine, and spruce across the northern hemisphere."
+  ],
+  "Amanita phalloides": [
+    "One mature cap can contain enough amatoxins to cause fatal liver failure.",
+    "Typically shows an olive-green cap above a white, free-gilled underside.",
+    "Emerges from a white sack-like volva at the base, a key Amanita identification feature."
+  ],
+  "Amanita virosa": [
+    "A pure white Amanita whose amatoxins can be lethal even in small amounts.",
+    "Gills, stem, and cap remain snow-white, lacking the colour cues many collectors rely on.",
+    "Prefers damp woodlands and often appears later in the season than the colourful Fly Agaric."
+  ],
+  "Armillaria mellea": [
+    "Clusters of honey-brown caps emerge from stumps and buried roots in autumn.",
+    "Produces black bootlace-like rhizomorphs that spread through soil to infect new hosts.",
+    "Armillaria colonies can become enormous underground networks spanning many hectares."
+  ],
+  "Auricularia auricula-judae": [
+    "Gelatinous, ear-shaped fruit bodies cling to elder and other broadleaf wood.",
+    "Tissue can dry out and then rehydrate to resume spore production after rain.",
+    "Long used in Asian cuisine and traditional medicine for its crunchy texture."
+  ],
+  "Boletus edulis": [
+    "Prized worldwide as the porcini or cep, with a thick, bun-like brown cap.",
+    "Pore surface starts white then turns yellow-olive but never bruises blue.",
+    "Forms mycorrhizal symbioses with both conifers and hardwoods, especially spruce and beech."
+  ],
+  "Calocera viscosa": [
+    "Forms vivid yellow, antler-like branches on decaying conifer wood.",
+    "Has a jelly-like texture that becomes brittle when dry.",
+    "Produces spores across its outer surface rather than on gills or pores."
+  ],
+  "Calocybe gambosa": [
+    "Often fruits around St George's Day in late April, ahead of many other mushrooms.",
+    "Smells pleasantly of fresh meal or cucumber when broken.",
+    "Forms stout fairy rings in old pastures and grassy verges."
+  ],
+  "Calvatia gigantea": [
+    "Can swell to the size of a football or larger, weighing several kilograms.",
+    "Edible when the interior flesh is pure white and firm, turning yellow as spores mature.",
+    "Releases billions of spores that puff out through surface cracks once fully ripe."
+  ],
+  "Cantharellus cibarius": [
+    "Displays blunt, forked ridges instead of true gills, running down the stem.",
+    "Has a fruity apricot aroma that intensifies when cooked.",
+    "Forms long-lived mycorrhizal partnerships with birch, beech, and Scots pine."
+  ],
+  "Clathrus archeri": [
+    "Erupts from an egg into four to eight lurid red arms resembling tentacles.",
+    "Surface is coated in foul-smelling slime that attracts flies to disperse spores.",
+    "Native to Australasia but introduced to Europe during the early twentieth century."
+  ],
+  "Coprinopsis atramentaria": [
+    "Delicate grey caps quickly liquefy into black ink as the gills autodigest.",
+    "Contains coprine, a compound that causes flushing and nausea when combined with alcohol.",
+    "Often appears in dense tufts on buried wood, lawns, or garden beds after rain."
+  ],
+  "Coprinopsis picacea": [
+    "Cap displays striking black and white patches resembling the plumage of a magpie.",
+    "Like other inkcaps, it deliquesces into inky droplets as spores mature.",
+    "Prefers nutrient-rich woodland soils and often fruits singly or in small groups."
+  ],
+  "Coprinus comatus": [
+    "Young caps are covered in shaggy, upturned scales that inspired the name 'lawyer's wig'.",
+    "Considered edible when still white and cylindrical, before the gills turn black.",
+    "Autodigests from the margin upward, dripping black spore-laden liquid."
+  ],
+  "Craterellus cornucopioides": [
+    "Trumpet-shaped fruit bodies are hollow and dark, blending in with leaf litter.",
+    "Has a smooth, spore-bearing outer surface instead of gills or pores.",
+    "Highly prized for its smoky, intense flavour when dried."
+  ],
+  "Craterellus tubaeformis": [
+    "Features a grey-brown funnel cap with a contrasting yellow hollow stem.",
+    "Fruits late into winter in damp mossy conifer woods.",
+    "Underside shows blunt, forked ridges similar to true chanterelles."
+  ],
+  "Daldinia concentrica": [
+    "Forms hard, charcoal-like spheres with concentric growth rings inside.",
+    "Traditionally used as tinder because the embers smoulder slowly when ignited.",
+    "Commonly colonises dead ash wood, sometimes persisting for years."
+  ],
+  "Fistulina hepatica": [
+    "Juicy, tongue-shaped brackets look like raw meat, inspiring the common name.",
+    "Exudes red, acidic droplets that can stain surrounding bark.",
+    "Parasitises old oak and sweet chestnut trees, causing a brown rot."
+  ],
+  "Fomes fomentarius": [
+    "Perennial brackets resemble horse hooves attached to birch or beech trunks.",
+    "Inner trama can be processed into amadou, a traditional tinder material.",
+    "Produces new spore layers annually, creating pale growth bands on older brackets."
+  ],
+  "Fomitopsis betulina": [
+    "Almost exclusively fruits on dead or dying birch trunks in temperate forests.",
+    "Was carried by Ötzi the Iceman, likely for medicinal or tinder uses.",
+    "Fresh pores are white and bruise brown when handled."
+  ],
+  "Fomitopsis pinicola": [
+    "Displays a striking red to orange band near the margin of its multi-year brackets.",
+    "Primarily decomposes conifer logs, contributing to brown rot in forest stands.",
+    "Upper surface becomes hard and zoned, while the white margin marks current-year growth."
+  ],
+  "Galerina marginata": [
+    "A small brown mushroom whose amatoxins are as potent as those of the Death Cap.",
+    "Usually fruits on rotting conifer wood, often alongside edible lookalikes.",
+    "Has a rusty-brown spore print and a delicate ring that may vanish with age."
+  ],
+  "Gliophorus psittacinus": [
+    "Fresh caps are vividly green and slimy, fading to yellow-orange as they dry.",
+    "Belongs to waxcap grassland communities that thrive in unimproved, mossy turf.",
+    "Produces thick, widely spaced gills that run slightly down the stem."
+  ],
+  "Grifola frondosa": [
+    "Massive clusters of spoon-shaped fronds emerge at the base of mature oaks.",
+    "Can reappear from the same root butt each autumn for many years.",
+    "Esteemed in cuisine and traditional medicine for its meaty texture."
+  ],
+  "Gyromitra esculenta": [
+    "Cap is irregular and brain-like, lacking the neat pits of true morels.",
+    "Contains gyromitrin, a toxin that can cause serious liver damage when eaten raw.",
+    "Fruits in spring on sandy soils, often near conifers."
+  ],
+  "Hericium erinaceus": [
+    "Composed of cascading white spines instead of caps or gills.",
+    "Typically grows on wounded beech or oak trunks as a saprotroph and weak parasite.",
+    "Cultivated for food and studied for potential neuroprotective compounds."
+  ],
+  "Hydnum repandum": [
+    "Underside bears soft, brittle spines that easily break off when handled.",
+    "Flesh stays pale even when cooked, unlike many other mushrooms.",
+    "Forms mycorrhiza with both conifers and broadleaf trees in mossy woods."
+  ],
+  "Hygrocybe punicea": [
+    "One of the largest waxcaps, with a brilliant scarlet cap and yellowish stem.",
+    "Prefers unfertilised, moss-rich grasslands and upland meadows.",
+    "Colours can fade to orange as the mushroom ages or dries."
+  ],
+  "Hygrophoropsis aurantiaca": [
+    "Displays thin, forked gills rather than blunt ridges, helping separate it from true chanterelles.",
+    "Cap is often fuzzy at the centre and deep orange with a rolled margin.",
+    "Usually grows on well-rotted conifer litter instead of directly on soil."
+  ],
+  "Hypholoma fasciculare": [
+    "Forms dense tufts of sulphur-yellow caps on stumps and buried wood.",
+    "Gills quickly darken to greenish black as spores mature.",
+    "Possesses a very bitter taste and causes gastrointestinal upset if eaten."
+  ],
+  "Imleria badia": [
+    "Chestnut-brown cap often shows a greasy sheen after rain.",
+    "Pores bruise slowly blue when pressed, then fade to brown.",
+    "Common under spruce and pine on acidic soils."
+  ],
+  "Infundibulicybe geotropa": [
+    "Tall, funnel-shaped mushroom with decurrent white gills.",
+    "Often appears in long troops or arcs along woodland rides.",
+    "Emits a sweet, perfumed aroma when fresh."
+  ],
+  "Laccaria amethystina": [
+    "Brilliant violet colour fades to buff as the fruit body weathers.",
+    "Gills are widely spaced and the whole mushroom feels fibrous.",
+    "Grows among leaf litter in both coniferous and deciduous woods."
+  ],
+  "Laetiporus sulphureus": [
+    "Produces overlapping shelves in vivid orange and yellow hues.",
+    "Young flesh has a texture reminiscent of cooked chicken when sautéed.",
+    "Parasitic on oaks and other hardwoods, causing a brown cubical rot."
+  ],
+  "Leccinum scabrum": [
+    "Stem is speckled with dark 'scabers' that darken as it ages.",
+    "Always associates with birch trees, appearing on moors and woodland edges.",
+    "Flesh may slowly grey or pink when cut but rarely stains strongly blue."
+  ],
+  "Lepista nuda": [
+    "Lilac cap and gills often persist even after a light frost.",
+    "Frequently fruits in late autumn on compost heaps and deep leaf litter.",
+    "Edible when thoroughly cooked, as raw specimens can upset digestion."
+  ],
+  "Lycoperdon perlatum": [
+    "Covered in small pearly spines that rub off to reveal a net-like pattern.",
+    "Releases a puff of olive-brown spores through an apical pore when tapped.",
+    "Young, white interiors are edible; older specimens become powdery and inedible."
+  ],
+  "Macrolepiota procera": [
+    "Towering stem shows a snakeskin pattern beneath a broad, scaly cap.",
+    "Has a freely sliding ring that can be moved up and down the stem.",
+    "Prefers grassy clearings and forest edges in late summer."
+  ],
+  "Meripilus giganteus": [
+    "Forms vast rosettes of thin brackets that can cover the base of beech trees.",
+    "Pores and flesh bruise dark brown to black within minutes of handling.",
+    "Associated with root rot on beech, sometimes causing large trees to topple."
+  ],
+  "Morchella esculenta": [
+    "Pitted, honeycomb cap is attached to a completely hollow stem.",
+    "Appears in spring after warm rains, often near ash, elm, or disturbed ground.",
+    "Highly valued for its nutty flavour but must be cooked before eating."
+  ],
+  "Mycena galericulata": [
+    "Commonly forms troops of grey-brown bells on decaying hardwood logs.",
+    "Cap often shows a translucent-striate margin when moist.",
+    "Gills are adnate to slightly decurrent and become pale grey with age."
+  ],
+  "Mycena inclinata": [
+    "Grows in tight clusters on oak stumps, with caps that often tilt to one side.",
+    "Stem bases are connected by a mass of white mycelial strands.",
+    "Gives off a radish-like odour when crushed."
+  ],
+  "Phallus impudicus": [
+    "Emerges overnight from a whitish egg, reaching full height within hours.",
+    "Cap is coated in foul-smelling gleba that attracts flies for spore dispersal.",
+    "Often betrayed by its carrion odour even before the fruit body is visible."
+  ],
+  "Pleurotus citrinopileatus": [
+    "Produces canary-yellow caps in cascading shelves on hardwood logs.",
+    "Cultivated widely because it fruits quickly on pasteurised straw or sawdust.",
+    "Caps fade and become brittle within a couple of days of harvest, so they are best eaten fresh."
+  ],
+  "Pleurotus ostreatus": [
+    "Fan-shaped caps overlap like oyster shells on dead hardwood.",
+    "Decurrent gills run well down the short lateral stem.",
+    "Tolerates cold weather and often fruits during winter thaws."
+  ],
+  "Polyporus squamosus": [
+    "Large, saddle-shaped brackets are patterned with dark brown scales.",
+    "Flesh smells distinctly of cucumber or watermelon rind when fresh.",
+    "Common on wounded hardwoods in spring and early summer."
+  ],
+  "Psilocybe semilanceata": [
+    "Small conical cap bears a pointed umbo that persists even when moist.",
+    "Contains the psychoactive compound psilocybin, making it illegal to collect in many regions.",
+    "Thrives in unimproved, grazed grasslands enriched by livestock manure."
+  ],
+  "Rhodotus palmatus": [
+    "Peach-coloured cap is covered in a striking network of raised veins.",
+    "Gelatinous outer layer helps it resist drying on the decaying logs it inhabits.",
+    "Most often found on fallen elm trunks, especially where Dutch elm disease has left debris."
+  ],
+  "Russula cyanoxantha": [
+    "Cap colour varies widely from violet-green to brown, inspiring the name 'charcoal burner'.",
+    "Gills are unusually flexible for a Russula and do not crumble easily.",
+    "A choice edible that commonly partners with beech forests."
+  ],
+  "Russula nobilis": [
+    "Brilliant red cap stays glossy and unblemished when fresh.",
+    "Tastes hot and acrid, causing stomach upset if swallowed.",
+    "Forms mycorrhiza with beech, carpeting the leaf litter in late summer."
+  ],
+  "Russula ochroleuca": [
+    "Shows a matte ochre cap with a paler margin and cream gills.",
+    "Like other brittlegills, the gills snap like chalk when bent.",
+    "One of the most frequent Russula species in mixed woodland."
+  ],
+  "Sarcoscypha austriaca": [
+    "Scarlet cups brighten damp woodland floors from late winter onward.",
+    "Outer surface is covered in fine white hairs best seen with a hand lens.",
+    "Grows on buried sticks of willow, hazel, and other broadleaves."
+  ],
+  "Sparassis crispa": [
+    "Resembles a ruffled cauliflower with numerous folded lobes.",
+    "Usually fruits at the base of Scots pine and other conifers.",
+    "Can weigh several kilograms yet grows from a single underground attachment point."
+  ],
+  "Trametes gibbosa": [
+    "Bracket displays a lumpy, uneven cap with concentric pale zones.",
+    "Underside pores are angular and elongate toward the margin.",
+    "Common on beech logs, where it causes a white rot."
+  ],
+  "Trametes versicolor": [
+    "Forms thin, overlapping fans with concentric bands resembling a turkey's tail.",
+    "Pore surface is white to cream and finely pored.",
+    "Extensively studied for polysaccharides with potential medicinal properties."
+  ],
+  "Tremella mesenterica": [
+    "Bright yellow, brain-like folds appear on dead deciduous branches after rain.",
+    "A parasitic jelly fungus that attacks the mycelium of crust fungi such as Stereum.",
+    "Can dry to an orange crust and revive to full size when rehydrated."
+  ],
+  "Xerocomellus chrysenteron": [
+    "Dry brown cap develops distinctive cracks that reveal crimson flesh beneath.",
+    "Yellow pores bruise blue when handled, then slowly fade.",
+    "Associates mainly with beech and oak on light soils."
+  ],
+  "Xylaria polymorpha": [
+    "Black, club-shaped stromata poke up from decaying stumps like skeletal fingers.",
+    "Surface is initially pale and powdery, darkening as the embedded perithecia mature.",
+    "Persists year-round, releasing spores from tiny openings near the tips."
+  ]
+};
+
+for (const species of mushroomSpecies) {
+  const facts = SPECIES_FACTS[species.scientific];
+  if (facts) species.facts = facts;
+}
+
+for (const species of noviceExtras) {
+  const facts = SPECIES_FACTS[species.scientific];
+  if (facts) species.facts = facts;
+}
+
+const FACT_DISPLAY_MS = 6500;
+
+function hideFact(){
+  if (state.factTimer){
+    clearTimeout(state.factTimer);
+    state.factTimer = null;
+  }
+  if (!factBox) return;
+  factBox.classList.remove('visible');
+  factBox.setAttribute('aria-hidden', 'true');
+}
+
+function showFact(species){
+  if (!factBox || !factText || !species) return;
+  const pool = Array.isArray(species.facts) ? species.facts : [];
+  if (!pool.length){
+    hideFact();
+    return;
+  }
+  const fact = pool[Math.floor(Math.random() * pool.length)];
+  if (!fact) return;
+  factText.textContent = fact;
+  factBox.classList.add('visible');
+  factBox.setAttribute('aria-hidden', 'false');
+  if (state.factTimer){
+    clearTimeout(state.factTimer);
+  }
+  state.factTimer = setTimeout(() => {
+    hideFact();
+  }, FACT_DISPLAY_MS);
+}
+
 /* Novice = Beginner + extras (deduped by id to avoid duplicates) */
 const noviceSpecies = Array.from(
   new Map([...beginnerSpecies, ...noviceExtras].map(s => [s.id, s])).values()
@@ -985,6 +1421,7 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
       Object.values(screens).forEach(s=>s.classList.remove('active'));
       screens[name].classList.add('active');
       hud.style.display = (name === 'game') ? 'flex' : 'none';
+      if (name !== 'game') hideFact();
     }
     function updateHud(){ scoreEl.textContent = state.score; qEl.textContent = `${state.q+1} / ${state.total}`; }
     function formatLicense(code){ return code ? String(code).toUpperCase().replace(/_/g,'-') : 'ALL RIGHTS RESERVED'; }
@@ -1315,6 +1752,7 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
 
     async function renderNewQuestion() {
         updateHud();
+        hideFact();
         // Clear previous content before fetching new data
         imageGrid.innerHTML = '';
         answersEl.innerHTML = '';
@@ -1561,6 +1999,12 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
         correct: wasCorrect,
         uris: uris
       });
+
+      if (state.difficulty === 'beginner' || state.difficulty === 'novice') {
+        showFact(state.current.correct);
+      } else {
+        hideFact();
+      }
 
       state.q++;
       const isLast = state.q >= state.total;
