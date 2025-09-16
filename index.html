@@ -661,6 +661,7 @@
     const imageGrid = $('#imageGrid'), answersEl = $('#answers');
     const newBtn = $('#newPhotosBtn');
     const factBox = $('#factBox'), factText = $('#factText');
+    const factLabel = $('#factBox .fact-label');
     const factCloseBtn = $('#factCloseBtn');
     const diffButtons = [...document.querySelectorAll('#difficultyRow .diff-btn')];
     const lenButtons  = [...document.querySelectorAll('#lengthRow .len-btn')];
@@ -1242,8 +1243,6 @@ for (const species of noviceExtras) {
   if (facts) species.facts = facts;
 }
 
-const FACT_DISPLAY_MS = 6500;
-
 function hideFact(){
   if (state.factTimer){
     clearTimeout(state.factTimer);
@@ -1263,15 +1262,22 @@ function showFact(species){
   }
   const fact = pool[Math.floor(Math.random() * pool.length)];
   if (!fact) return;
+  if (factLabel) factLabel.textContent = `${species.name.toUpperCase()} FACT`;
   factText.textContent = fact;
   factBox.classList.add('visible');
   factBox.setAttribute('aria-hidden', 'false');
   if (state.factTimer){
     clearTimeout(state.factTimer);
   }
+
+  const words = fact.split(' ').length;
+  const msPerWord = 400;
+  const baseTime = 3000;
+  const displayDuration = baseTime + (words * msPerWord);
+
   state.factTimer = setTimeout(() => {
     hideFact();
-  }, FACT_DISPLAY_MS);
+  }, displayDuration);
 }
 
 /* Novice = Beginner + extras (deduped by id to avoid duplicates) */
@@ -1752,7 +1758,6 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
 
     async function renderNewQuestion() {
         updateHud();
-        hideFact();
         // Clear previous content before fetching new data
         imageGrid.innerHTML = '';
         answersEl.innerHTML = '';
