@@ -1272,7 +1272,7 @@ function showFact(species){
 
   const words = fact.split(' ').length;
   const msPerWord = 400;
-  const baseTime = 3000;
+  const baseTime = 1000;
   const displayDuration = baseTime + (words * msPerWord);
 
   state.factTimer = setTimeout(() => {
