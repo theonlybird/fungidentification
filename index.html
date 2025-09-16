@@ -661,6 +661,7 @@
     const imageGrid = $('#imageGrid'), answersEl = $('#answers');
     const newBtn = $('#newPhotosBtn');
     const factBox = $('#factBox'), factText = $('#factText');
+    const factLabel = $('#factBox .fact-label');
     const factCloseBtn = $('#factCloseBtn');
     const diffButtons = [...document.querySelectorAll('#difficultyRow .diff-btn')];
     const lenButtons  = [...document.querySelectorAll('#lengthRow .len-btn')];
@@ -1261,6 +1262,7 @@ function showFact(species){
   }
   const fact = pool[Math.floor(Math.random() * pool.length)];
   if (!fact) return;
+  if (factLabel) factLabel.textContent = `${species.name.toUpperCase()} FACT`;
   factText.textContent = fact;
   factBox.classList.add('visible');
   factBox.setAttribute('aria-hidden', 'false');
@@ -1756,7 +1758,6 @@ const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, 
 
     async function renderNewQuestion() {
         updateHud();
-        hideFact();
         // Clear previous content before fetching new data
         imageGrid.innerHTML = '';
         answersEl.innerHTML = '';
