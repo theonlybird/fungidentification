@@ -1242,8 +1242,6 @@ for (const species of noviceExtras) {
   if (facts) species.facts = facts;
 }
 
-const FACT_DISPLAY_MS = 6500;
-
 function hideFact(){
   if (state.factTimer){
     clearTimeout(state.factTimer);
@@ -1269,9 +1267,15 @@ function showFact(species){
   if (state.factTimer){
     clearTimeout(state.factTimer);
   }
+
+  const words = fact.split(' ').length;
+  const msPerWord = 400;
+  const baseTime = 3000;
+  const displayDuration = baseTime + (words * msPerWord);
+
   state.factTimer = setTimeout(() => {
     hideFact();
-  }, FACT_DISPLAY_MS);
+  }, displayDuration);
 }
 
 /* Novice = Beginner + extras (deduped by id to avoid duplicates) */
