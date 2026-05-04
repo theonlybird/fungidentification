@@ -1387,9 +1387,9 @@
       { id: 63508, name: "The Deceiver", scientific: "Laccaria laccata", genus: "Laccaria", category: "Blewits & Lookalikes" },
       { id: 63434, name: "Shaggy Scalycap", scientific: "Pholiota squarrosa", genus: "Pholiota", category: "Woodland Fungi" },
       { id: 47351, name: "Brown Rollrim", scientific: "Paxillus involutus", genus: "Paxillus", category: "Woodland Fungi" },
-      { id: 63298, name: "Poisonpie", scientific: "Hebeloma crustuliniforme", genus: "Hebeloma", category: "Woodland Fungi" },
+      { id: 63298, name: "Poison Pie", scientific: "Hebeloma crustuliniforme", genus: "Hebeloma", category: "Woodland Fungi" },
       { id: 125427, name: "Butter Cap", scientific: "Rhodocollybia butyracea", genus: "Rhodocollybia", category: "Funnels & Grassland" },
-      { id: 63019, name: "Collared Earthstar", scientific: "Geastrum triplex", genus: "Geastrum", category: "Distinctive Oddballs" },
+      { id: 63019, name: "Collared Earthstar", scientific: "Geastrum michelianum", genus: "Geastrum", category: "Distinctive Oddballs" },
       { id: 350032, name: "Tawny Grisette", scientific: "Amanita fulva", genus: "Amanita", category: "Amanita" },
       { id: 128873, name: "Snowy Waxcap", scientific: "Cuphophyllus virgineus", genus: "Cuphophyllus", category: "Waxcaps" },
       { id: 553908, name: "Lurid Bolete", scientific: "Suillellus luridus", genus: "Suillellus", category: "Boletes" },
@@ -1402,6 +1402,7 @@
       ["Collybia nuda", ["Lepista nuda", "Clitocybe nuda"]],
       ["Mucidula mucida", ["Oudemansiella mucida"]],
       ["Cerioporus squamosus", ["Polyporus squamosus"]],
+      ["Geastrum michelianum", ["Geastrum triplex"]],
       ["Inocybe lilacina", ["Inocybe geophylla", "Inocybe geophylla var. lilacina"]],
       ["Thaxterogaster purpurascens", ["Cortinarius purpurascens", "Phlegmacium purpurascens"]],
       ["Agaricus sylvaticus", ["Agaricus silvaticus"]]
@@ -1468,366 +1469,364 @@
 
     const SPECIES_FACTS = {
       "Agaricus augustus": [
-        "Nicknamed 'The Prince', this large Agaricus has a sweet almond or anise scent when fresh.",
-        "Its tawny cap is covered in brown scales that contrast with the pale background.",
-        "Fruits in late summer on nutrient-rich soil near conifers and ornamental plantings."
+        "This large Agaricus has the smell of bitter almonds or anise.",
+        "The cap is covered in brown scales and can grow up to 25cm in diameter.",
+        "Often found on roadsides or under park trees, particularly conifers."
       ],
       "Agaricus xanthodermus": [
-        "Cuts and bruises quickly flash chrome-yellow, especially at the base of the stem.",
-        "Produces an unpleasant ink or iodine-like odour when the flesh is heated.",
-        "Responsible for many mild poisonings because it resembles edible field mushrooms."
+        "This mushroom won’t kill you but it will make you very sick and looks similar to several edible species.",
+        "If you bruise this mushroom anywhere on the cap or stem it should turn bright chrome yellow.",
+        "This mushroom has a horrible chemical phenol smell, especially if cooked or microwaved (remember it is poisonous!)."
       ],
       "Aleuria aurantia": [
-        "Forms bright orange, saucer-like cups that resemble discarded citrus peel.",
-        "Often carpets disturbed soil, paths, or roadside banks in late summer.",
+        "It sadly doesn’t taste of oranges, although it could brighten up a salad.",
+        "Usually growing in clusters on disturbed soil or roadside banks in late summer.",
         "The inner cup surface bears the spore layer while the outer surface stays pale and slightly fuzzy."
       ],
       "Amanita muscaria": [
-        "Iconic scarlet cap dotted with white warts earned it a starring role in folklore and art.",
-        "Contains the psychoactive compounds ibotenic acid and muscimol, making it poisonous when raw.",
-        "Forms mycorrhizal partnerships with birch, pine, and spruce across the northern hemisphere."
+        "The most iconic of all the mushrooms, more commonly found growing under birch and pine trees.",
+        "The common name is thought to come from centuries before when it was added to milk to kill the flies.",
+        "Look up the folk tale about Fly Agaric, reindeer urine and Santa…"
       ],
       "Amanita phalloides": [
-        "One mature cap can contain enough amatoxins to cause fatal liver failure.",
+        "The most poisonous mushroom in the world, eating just half can kill an adult.",
         "Typically shows an olive-green cap above a white, free-gilled underside.",
-        "Emerges from a white sack-like volva at the base, a key Amanita identification feature."
+        "It emerges from a white egg-like volva at the base, so they can be difficult to correctly identify when very young."
       ],
       "Amanita virosa": [
-        "A pure white Amanita whose amatoxins can be lethal even in small amounts.",
-        "Gills, stem, and cap remain snow-white, lacking the colour cues many collectors rely on.",
-        "Prefers damp woodlands and often appears later in the season than the colourful Fly Agaric."
+        "Don’t be fooled by its innocent appearance, this is one of Britain’s deadliest mushrooms. Just half a cap can prove fatal.",
+        "Pure and brilliant white from top to toe, including gills. Like all Amanitas it grows out of an egg-like volva.",
+        "Loves damp birch and pine woods and tends to appear later in the autumn than its showier cousin the Fly Agaric."
       ],
       "Armillaria mellea": [
-        "Clusters of honey-brown caps emerge from stumps and buried roots in autumn.",
-        "Produces black bootlace-like rhizomorphs that spread through soil to infect new hosts.",
-        "Armillaria colonies can become enormous underground networks spanning many hectares."
+        "Huge clusters of honey-brown caps emerge from stumps and buried roots in autumn.",
+        "You can sometimes see black bootlace-like ‘rhizomorphs’ from this mushroom spread out along trunks or the woodland floor.",
+        "An Armillaria species in Michigan is thought to be the largest living organism in the world, covering 9.1km² and weighing over 31,000 tonnes."
       ],
       "Auricularia auricula-judae": [
-        "Gelatinous, ear-shaped fruit bodies cling to elder and other broadleaf wood.",
-        "Tissue can dry out and then rehydrate to resume spore production after rain.",
-        "Long used in Asian cuisine and traditional medicine for its crunchy texture."
+        "Wood Ears mostly grow on elder trees and unlike other fungi can be found all through the winter.",
+        "Wood Ears are very much edible and can be added to soups and stir fries.",
+        "If you dehydrate Wood Ears you can keep them indefinitely. When ready to consume you can rehydrate them with a stock."
       ],
       "Boletus edulis": [
-        "Prized worldwide as the porcini or cep, with a thick, bun-like brown cap.",
+        "A prized edible worldwide, this mushroom is also known as the porcini or cep.",
         "Pore surface starts white then turns yellow-olive but never bruises blue.",
-        "Forms mycorrhizal symbioses with both conifers and hardwoods, especially spruce and beech."
+        "Fairly common in woodland, especially with oak or beech, but also with conifers."
       ],
       "Calocera viscosa": [
-        "Forms vivid yellow, antler-like branches on decaying conifer wood.",
-        "Has a jelly-like texture that becomes brittle when dry.",
-        "Produces spores across its outer surface rather than on gills or pores."
+        "Looks like tiny golden antlers poking out of mossy stumps, especially rotten conifer logs.",
+        "Despite its jelly-like look, it’s surprisingly tough and rubbery between the fingers, drying brittle in warm spells.",
+        "Not edible, but worth a photo."
       ],
       "Calocybe gambosa": [
-        "Often fruits around St George's Day in late April, ahead of many other mushrooms.",
-        "Smells pleasantly of fresh meal or cucumber when broken.",
-        "Forms stout fairy rings in old pastures and grassy verges."
+        "Named after St George’s Day, around the 23rd of April, when it traditionally pops up — one of the first proper edibles of the year.",
+        "Has a wonderful “mealy” smell like raw dough or pastry.",
+        "Look for chunky off-white fairy rings in old pasture and grassy verges, but don’t eat anything you aren’t 100% sure of!"
       ],
       "Calvatia gigantea": [
-        "Can swell to the size of a football or larger, weighing several kilograms.",
-        "Edible when the interior flesh is pure white and firm, turning yellow as spores mature.",
-        "Releases billions of spores that puff out through surface cracks once fully ripe."
+        "These things sometimes look like someone left their football in a field.",
+        "Edible only when the inside is pure white and firm; once it starts to yellow/brown, the show is over and you’re left with a bag of spores.",
+        "A single fully ripe puffball is reckoned to release several trillion spores, which is in theory enough to seed the entire planet."
       ],
       "Cantharellus cibarius": [
-        "Displays blunt, forked ridges instead of true gills, running down the stem.",
-        "Has a fruity apricot aroma that intensifies when cooked.",
-        "Forms long-lived mycorrhizal partnerships with birch, beech, and Scots pine."
+        "Has blunt, forked ridges instead of true gills, and these run a short way down the stem.",
+        "Also known as the Girolle, many people say they smell strongly of apricots when fresh.",
+        "Found in moss and leaf litter of forests with oak, beech, spruce, pine and birch."
       ],
       "Clathrus archeri": [
-        "Erupts from an egg into four to eight lurid red arms resembling tentacles.",
-        "Surface is coated in foul-smelling slime that attracts flies to disperse spores.",
-        "Native to Australasia but introduced to Europe during the early twentieth century."
+        "Erupts dramatically from a slimy egg into bright red ‘fingers’. This fungus really can look like something out of a horror film.",
+        "Stinks of rotting meat to lure flies, which then carry the spores away on their feet.",
+        "Originally from Australia and New Zealand, it hitched a ride to Europe around the First World War and is now spreading happily across the south of England."
       ],
       "Coprinopsis atramentaria": [
-        "Delicate grey caps quickly liquefy into black ink as the gills autodigest.",
-        "Contains coprine, a compound that causes flushing and nausea when combined with alcohol.",
-        "Often appears in dense tufts on buried wood, lawns, or garden beds after rain."
+        "The “ink” from these mushrooms was once used for writing in centuries past.",
+        "These mushrooms will start liquifying to a sort of black goop once picked.",
+        "Often appears in dense tufts on lawns and garden beds after rain, fed by buried wood you can’t see."
       ],
       "Coprinopsis picacea": [
-        "Cap displays striking black and white patches resembling the plumage of a magpie.",
-        "Like other inkcaps, it deliquesces into inky droplets as spores mature.",
-        "Prefers nutrient-rich woodland soils and often fruits singly or in small groups."
+        "An often beautiful mushroom, named after the magpie for its striking patches of black and white.",
+        "Like other inkcaps, the cap melts away into black inky droplets as the spores ripen.",
+        "A real woodland gem, usually fruiting alone or in small groups in nutrient-rich beech woods."
       ],
       "Coprinus comatus": [
-        "Young caps are covered in shaggy, upturned scales that inspired the name 'lawyer's wig'.",
-        "Considered edible when still white and cylindrical, before the gills turn black.",
-        "Autodigests from the margin upward, dripping black spore-laden liquid."
+        "Often called the ‘Lawyer’s Wig’ for the shaggy white scales on its tall cylindrical cap.",
+        "A tasty edible but only if they are picked young, when tightly closed and pure white.",
+        "Strong enough to push up through tarmac and concrete pavements as it grows."
       ],
       "Craterellus cornucopioides": [
-        "Trumpet-shaped fruit bodies are hollow and dark, blending in with leaf litter.",
-        "Has a smooth, spore-bearing outer surface instead of gills or pores.",
-        "Highly prized for its smoky, intense flavour when dried."
+        "Also known as the ‘Trumpet of the Dead’, this is one of the most prized edibles in Britain.",
+        "Almost invisible against fallen leaves. However, the moment you spot one stop where you are – there are usually dozens nearby.",
+        "Dries beautifully and the flavour intensifies, so a small handful can level up a soup, broth or winter stew."
       ],
       "Craterellus tubaeformis": [
-        "Features a grey-brown funnel cap with a contrasting yellow hollow stem.",
-        "Fruits late into winter in damp mossy conifer woods.",
-        "Underside shows blunt, forked ridges similar to true chanterelles."
+        "Not as prized as its relative, the Chanterelle, but still a great edible and can cover a forest floor.",
+        "Often fruits well into November and December in mossy conifer woods, when most other mushrooms have long since packed up.",
+        "Also known as the Trumpet Chanterelle, the cap is a grey/brown with a long, thin yellow/brown stem."
       ],
       "Daldinia concentrica": [
-        "Forms hard, charcoal-like spheres with concentric growth rings inside.",
-        "Traditionally used as tinder because the embers smoulder slowly when ignited.",
-        "Commonly colonises dead ash wood, sometimes persisting for years."
+        "Legend has it that King Alfred burnt his cakes and tried to hide them in the ash trees.",
+        "Fun to split open with a knife and reveal the silvery concentric rings inside, like the growth rings of a tiny tree.",
+        "These cakes make brilliant tinder, with evidence of their use to transport fire dating back 7,000 years to the Stone Age."
       ],
       "Fistulina hepatica": [
-        "Juicy, tongue-shaped brackets look like raw meat, inspiring the common name.",
-        "Exudes red, acidic droplets that can stain surrounding bark.",
-        "Parasitises old oak and sweet chestnut trees, causing a brown rot."
+        "Looks remarkably like a slab of raw liver hanging from an old oak. It even bleeds red juice when cut!",
+        "The Latin name ‘hepatica’ means ‘liver-like’, telling you exactly what the early naturalists thought of it.",
+        "Edible but can be acidic and tough. Some foragers are experts in making it tasty!"
       ],
       "Fomes fomentarius": [
-        "Perennial brackets resemble horse hooves attached to birch or beech trunks.",
-        "Inner trama can be processed into amadou, a traditional tinder material.",
-        "Produces new spore layers annually, creating pale growth bands on older brackets."
+        "These hoof-shaped brackets really do look like they belong on a horse’s foot, glued onto birch trunks.",
+        "The inner flesh, when boiled and beaten, becomes ‘amadou’ — a velvety material once used for fire-starting, fly-fishing flies and even hat making.",
+        "A new pale band of pores grows each year, so you can age an old bracket much like a tree."
       ],
       "Fomitopsis betulina": [
-        "Almost exclusively fruits on dead or dying birch trunks in temperate forests.",
-        "Was carried by Ötzi the Iceman, likely for medicinal or tinder uses.",
-        "Fresh pores are white and bruise brown when handled."
+        "Almost always found on dead and dying birch trees — if you see birch, it pays to look up.",
+        "Ötzi the Iceman, found preserved in the Alps, was carrying pieces of this fungus over 5,000 years ago, possibly as a parasite remedy.",
+        "Once used by barbers to strop their cut-throat razors, hence the old name Razorstrop Fungus."
       ],
       "Fomitopsis pinicola": [
-        "Displays a striking red to orange band near the margin of its multi-year brackets.",
-        "Primarily decomposes conifer logs, contributing to brown rot in forest stands.",
-        "Upper surface becomes hard and zoned, while the white margin marks current-year growth."
+        "Look for the striking red-orange band near the edge of these multi-year brackets — like a sunset stripe across the wood.",
+        "Mostly found on conifer logs, where it slowly turns the wood into brown crumbly cubes.",
+        "Each year a fresh pale band of growth appears around the rim, giving you a built-in calendar."
       ],
       "Galerina marginata": [
-        "A small brown mushroom whose amatoxins are as potent as those of the Death Cap.",
-        "Usually fruits on rotting conifer wood, often alongside edible lookalikes.",
-        "Has a rusty-brown spore print and a delicate ring that may vanish with age."
+        "A small, innocent-looking brown mushroom that contains exactly the same deadly amatoxins as the Death Cap.",
+        "Often grows on rotting wood right alongside edible species like Honey Fungus, so always double-check before eating any little brown mushrooms.",
+        "Aptly named the ‘Funeral Bell’, this mushroom is sadly responsible for fatal poisonings of magic-mushroom hunters who confused it with Psilocybes."
       ],
       "Gliophorus psittacinus": [
-        "Fresh caps are vividly green and slimy, fading to yellow-orange as they dry.",
-        "Belongs to waxcap grassland communities that thrive in unimproved, mossy turf.",
-        "Produces thick, widely spaced gills that run slightly down the stem."
+        "A beautiful mushroom which has a striking palette of green, yellow and pink that shifts as the cap ages.",
+        "A fantastic indicator of high-quality, unimproved grassland. If you find one it means the meadow has likely been undisturbed for many decades.",
+        "Its slimy, glossy cap can look almost neon when fresh."
       ],
       "Grifola frondosa": [
-        "Massive clusters of spoon-shaped fronds emerge at the base of mature oaks.",
-        "Can reappear from the same root butt each autumn for many years.",
-        "Esteemed in cuisine and traditional medicine for its meaty texture."
+        "Forms huge feathery bouquets of overlapping caps at the base of old oaks. A single cluster can weigh several kilograms.",
+        "Faithfully reappears at the same oak base each autumn for many years, so a good find is the gift that keeps on giving.",
+        "Highly prized in Japan as ‘maitake’ (the dancing mushroom) and increasingly popular with British foragers as a meaty edible."
       ],
       "Gyromitra esculenta": [
-        "Cap is irregular and brain-like, lacking the neat pits of true morels.",
-        "Contains gyromitrin, a toxin that can cause serious liver damage when eaten raw.",
-        "Fruits in spring on sandy soils, often near conifers."
+        "Unlike the Morel, this is NOT an edible. It contains a toxin called gyromitrin which can cause severe liver damage.",
+        "Wrinkled, brain-like and red-brown, this fungi is quite different from the neat honeycomb pits of a true Morel.",
+        "The mushroom is found under pine trees and is mostly hollow."
       ],
       "Hericium erinaceus": [
-        "Composed of cascading white spines instead of caps or gills.",
-        "Typically grows on wounded beech or oak trunks as a saprotroph and weak parasite.",
-        "Cultivated for food and studied for potential neuroprotective compounds."
+        "Looks like a cascading shaggy white pom-pom hanging from a tree. Also sometimes called the Bearded Tooth for its long dangling spines.",
+        "Found on old beech and oak trunks, but very rare in Britain and protected. You can admire and photograph but please don’t pick the wild ones.",
+        "Studied for compounds that may support nerve growth and brain health, Lion’s Mane is increasingly cultivated for supplements."
       ],
       "Hydnum repandum": [
-        "Underside bears soft, brittle spines that easily break off when handled.",
-        "Flesh stays pale even when cooked, unlike many other mushrooms.",
-        "Forms mycorrhiza with both conifers and broadleaf trees in mossy woods."
+        "Super easy to identify. Turn it over and you’ll see why it’s called the ‘Hedgehog’.",
+        "A great mushroom for beginners as it is not only delicious, but there is nothing poisonous that looks like it with spines.",
+        "Stays pleasingly white when cooked and has a slightly peppery taste that mellows beautifully with butter and garlic."
       ],
       "Hygrocybe punicea": [
-        "One of the largest waxcaps, with a brilliant scarlet cap and yellowish stem.",
-        "Prefers unfertilised, moss-rich grasslands and upland meadows.",
-        "Colours can fade to orange as the mushroom ages or dries."
+        "One of the largest waxcaps in Britain, this can be a real burst of scarlet against the autumn grass.",
+        "Like many waxcaps it is often found in old, fairly untouched meadows.",
+        "The colour can fade to a duller orange in dry sunshine, but a fresh, dewy specimen is not shy in brightness."
       ],
       "Hygrophoropsis aurantiaca": [
-        "Displays thin, forked gills rather than blunt ridges, helping separate it from true chanterelles.",
-        "Cap is often fuzzy at the centre and deep orange with a rolled margin.",
-        "Usually grows on well-rotted conifer litter instead of directly on soil."
+        "The classic Chanterelle imposter! Also orange and trumpet-shaped, but orange on the inside, not pure white.",
+        "It won’t kill you, but some people get a really upset stomach from this mushroom.",
+        "Tends to grow on rotted conifer needles and stumps rather than on the mossy woodland soil where true Chanterelles live."
       ],
       "Hypholoma fasciculare": [
-        "Forms dense tufts of sulphur-yellow caps on stumps and buried wood.",
-        "Gills quickly darken to greenish black as spores mature.",
-        "Possesses a very bitter taste and causes gastrointestinal upset if eaten."
+        "Bright sulphur-yellow caps and green gills which grow in dense clusters on stumps. Super common.",
+        "Bitter beyond belief and mildly poisonous. A single cautious nibble (and spit!) is usually enough to put anyone off for life.",
+        "These mushrooms glow under UV light — transforming from ordinary, orange-capped clusters into a bright green, alien-looking spectacle."
       ],
       "Imleria badia": [
-        "Chestnut-brown cap often shows a greasy sheen after rain.",
-        "Pores bruise slowly blue when pressed, then fade to brown.",
-        "Common under spruce and pine on acidic soils."
+        "As with all boletes, the Bay Bolete has pores instead of gills under the cap.",
+        "Common from late summer onwards under spruce and pine. Keep an eye on the damp edges of conifer woods.",
+        "Not as popular as the Penny Bun, but still meaty and nutty when cooked. Also dries beautifully for the winter store cupboard."
       ],
       "Infundibulicybe geotropa": [
-        "Tall, funnel-shaped mushroom with decurrent white gills.",
-        "Often appears in long troops or arcs along woodland rides.",
-        "Emits a sweet, perfumed aroma when fresh."
+        "This mushroom can be really tall, sometimes reaching 30cm!",
+        "Named the ‘Trooping Funnel’ for the way it marches in formation across the woodland floor.",
+        "Edible, but easily confused with toxic Clitocybe species, so really one to leave to experienced foragers."
       ],
       "Laccaria amethystina": [
-        "Brilliant violet colour fades to buff as the fruit body weathers.",
-        "Gills are widely spaced and the whole mushroom feels fibrous.",
-        "Grows among leaf litter in both coniferous and deciduous woods."
+        "A mycorrhizal species, partnered chiefly with living oak and beech.",
+        "The colour is much stronger when young but eventually fades to a drab brown with age. Called the Deceiver because they vary so much in appearance.",
+        "Edible but stem can be tough and cap is rather unremarkable in flavour. More for show than sustenance!"
       ],
       "Laetiporus sulphureus": [
-        "Produces overlapping shelves in vivid orange and yellow hues.",
-        "Young flesh has a texture reminiscent of cooked chicken when sautéed.",
-        "Parasitic on oaks and other hardwoods, causing a brown cubical rot."
+        "Glowing bright orange and yellow shelves on old oaks. If you’re unsure if it is COTW or not, then it probably isn’t.",
+        "A great edible. Tastes uncannily like chicken when cooked young, but try a small amount first as some people react to it.",
+        "The edge of the shelf tiers are the best part to harvest as they are more succulent. You can leave the rest to spread it."
       ],
       "Leccinum scabrum": [
-        "Stem is speckled with dark 'scabers' that darken as it ages.",
-        "Always associates with birch trees, appearing on moors and woodland edges.",
-        "Flesh may slowly grey or pink when cut but rarely stains strongly blue."
+        "As the name suggests, this mushroom is always partnered with birch trees, so look up to help ID.",
+        "The stem is covered in small dark scales or floccules, giving it a dirty appearance.",
+        "Not as tasty as some other boletes but still edible and very common so good for beginners."
       ],
-      "Lepista nuda": [
-        "Lilac cap and gills often persist even after a light frost.",
-        "Frequently fruits in late autumn on compost heaps and deep leaf litter.",
-        "Edible when thoroughly cooked, as raw specimens can upset digestion."
+      "Collybia nuda": [
+        "A glorious lilac mushroom that often appears very late in the season in October/November, even after a frost has killed off most other fungi.",
+        "Loves leaf litter and compost heaps and sometimes pops up unannounced in the garden after a wet spell.",
+        "A cracking edible, but perhaps not one for the novice forager as can be confused with the toxic Bruising Webcap."
       ],
       "Lycoperdon perlatum": [
-        "Covered in small pearly spines that rub off to reveal a net-like pattern.",
-        "Releases a puff of olive-brown spores through an apical pore when tapped.",
-        "Young, white interiors are edible; older specimens become powdery and inedible."
+        "Covered in tiny spines that break off easily when touched.",
+        "When old, give it a gentle tap and watch a puff of brown smoke escape from the top: that’s billions of spores on their way.",
+        "Edible while young and pure white inside, though it tastes of very little — more curiosity than feast."
       ],
       "Macrolepiota procera": [
-        "Towering stem shows a snakeskin pattern beneath a broad, scaly cap.",
-        "Has a freely sliding ring that can be moved up and down the stem.",
-        "Prefers grassy clearings and forest edges in late summer."
+        "Can be a monster of a mushroom, almost as high as your knee!",
+        "The ring slides freely up and down the stem, which is a useful trick for confirming you’ve got the right mushroom.",
+        "The cap can reach the size of a dinner plate when fully open, which is helpful as it’s also a great edible. Can be breaded and pan-fried like a schnitzel."
       ],
       "Meripilus giganteus": [
-        "Forms vast rosettes of thin brackets that can cover the base of beech trees.",
-        "Pores and flesh bruise dark brown to black within minutes of handling.",
-        "Associated with root rot on beech, sometimes causing large trees to topple."
+        "Forms enormous rosettes that can encircle the base of oak or beech trees.",
+        "The pores quickly bruise dark brown to black when handled. So a useful trick to ID is to look at your fingers after touching!",
+        "Sadly, often a sign that a beautiful old tree is being eaten alive at the roots and may topple in the next storm."
       ],
       "Morchella esculenta": [
-        "Pitted, honeycomb cap is attached to a completely hollow stem.",
-        "Appears in spring after warm rains, often near ash, elm, or disturbed ground.",
-        "Highly valued for its nutty flavour but must be cooked before eating."
+        "Has a pitted, honeycomb cap attached to a completely hollow stem. Slice one open lengthways to check.",
+        "One of the few mushrooms that fruits in spring, often near disturbed ground, ash trees, or even old bonfire sites.",
+        "Highly prized in cuisine but as with all Morels, must always be cooked thoroughly."
       ],
       "Mycena galericulata": [
-        "Commonly forms troops of grey-brown bells on decaying hardwood logs.",
-        "Cap often shows a translucent-striate margin when moist.",
-        "Gills are adnate to slightly decurrent and become pale grey with age."
+        "Forms charming little troops of grey bell-shaped caps on rotting hardwood logs.",
+        "When the cap is damp you can see fine lines running down the edge which are the gills showing through translucent flesh.",
+        "The name Mycena comes from the ancient Greek ‘mykes’, simply meaning ‘fungus’."
       ],
       "Mycena inclinata": [
-        "Grows in tight clusters on oak stumps, with caps that often tilt to one side.",
-        "Stem bases are connected by a mass of white mycelial strands.",
-        "Gives off a radish-like odour when crushed."
+        "Grows in tight clusters on oak stumps, often with caps tilted at jaunty angles — hence the Latin name ‘inclinata’.",
+        "The bases of the stems are bound together by a dense mass of white mycelial fibres.",
+        "Smells faintly of radish or rancid fat when crushed which can be a useful identification clue if the cluster doesn’t give it away."
       ],
       "Phallus impudicus": [
-        "Emerges overnight from a whitish egg, reaching full height within hours.",
-        "Cap is coated in foul-smelling gleba that attracts flies for spore dispersal.",
-        "Often betrayed by its carrion odour even before the fruit body is visible."
+        "Often smelt long before it’s seen! The stink can be picked up from many metres downwind on a still day.",
+        "Erupts overnight from a ‘witch’s egg’ and reaches full height in just a few hours. This makes it one of the fastest-growing fungi in Britain.",
+        "Attracted to the awful smell, flies get coated in spore slime and then carry the spores far and wide."
       ],
       "Pleurotus citrinopileatus": [
-        "Produces canary-yellow caps in cascading shelves on hardwood logs.",
-        "Cultivated widely because it fruits quickly on pasteurised straw or sawdust.",
-        "Caps fade and become brittle within a couple of days of harvest, so they are best eaten fresh."
+        "Native to Russia, Japan and China so technically an invasive species in Britain.",
+        "Cultivated commercially at scale for its taste but increasingly found in the wild from waste or escaped spores.",
+        "Caps fade and become brittle within a couple of days of harvest, so they really are best eaten fresh."
       ],
       "Pleurotus ostreatus": [
-        "Fan-shaped caps overlap like oyster shells on dead hardwood.",
-        "Decurrent gills run well down the short lateral stem.",
-        "Tolerates cold weather and often fruits during winter thaws."
+        "Fan-shaped caps overlapping like oyster shells on dead hardwood, often still fruiting through winter and during mild spells.",
+        "One of the easiest wild mushrooms to identify and a delicious edible so great for beginners. Commonly found on willow, beech and poplar.",
+        "The decurrent gills run all the way down to a short, often off-centre stem."
       ],
       "Cerioporus squamosus": [
-        "Large, saddle-shaped brackets are patterned with dark brown scales.",
-        "Flesh smells distinctly of cucumber or watermelon rind when fresh.",
-        "Common on wounded hardwoods in spring and early summer."
+        "One of the largest capped mushrooms in the UK, arriving as early in the year as May.",
+        "Called the Pheasant’s Back mushroom in America and you can see why.",
+        "Edible while very young and tender, but quickly turns to corky shoe leather as it matures."
       ],
       "Psilocybe semilanceata": [
-        "Small conical cap bears a pointed umbo that persists even when moist.",
-        "Contains the psychoactive compound psilocybin, making it illegal to collect in many regions.",
-        "Thrives in unimproved, grazed grasslands enriched by livestock manure."
+        "The classic ‘Liberty Cap’, with a distinctive pointed nipple-shaped tip that even stays pointy when the cap is fully open.",
+        "This mushroom contains psilocybin and so is illegal to pick, dry or possess in the UK.",
+        "Loves grazed sheep pastures with old, undisturbed turf, and pops up in autumn after a wet spell."
       ],
       "Rhodotus palmatus": [
-        "Peach-coloured cap is covered in a striking network of raised veins.",
-        "Gelatinous outer layer helps it resist drying on the decaying logs it inhabits.",
-        "Most often found on fallen elm trunks, especially where Dutch elm disease has left debris."
+        "A peachy-pink cap covered in a striking lacy network of raised veins.",
+        "Almost exclusively found on dead elm trunks, so its fortunes have followed the painful decline of British elms to Dutch elm disease.",
+        "Considered rare so best to admire and photograph but do not disturb."
       ],
       "Russula cyanoxantha": [
-        "Cap colour varies widely from violet-green to brown, inspiring the name 'charcoal burner'.",
-        "Gills are unusually flexible for a Russula and do not crumble easily.",
-        "A choice edible that commonly partners with beech forests."
+        "Not the easiest mushroom to ID as the cap colour ranges from violet to green to brown to grey, sometimes all on the same mushroom!",
+        "Brittlegill by name… but not by nature. The gills are unusually flexible for a Russula and won’t crumble like chalk when bent.",
+        "A cracking edible Russula, found among beech, with a mild nutty flavour."
       ],
       "Russula nobilis": [
-        "Brilliant red cap stays glossy and unblemished when fresh.",
-        "Tastes hot and acrid, causing stomach upset if swallowed.",
-        "Forms mycorrhiza with beech, carpeting the leaf litter in late summer."
+        "A glossy cap which can be bright crimson red, pale red or occasionally white.",
+        "A tiny nibble (and spit!) will burn like chilli, confirming this is a Beechwood Sickener and not for eating!",
+        "Lives only with beech, so always look at the trees above you when identifying."
       ],
       "Russula ochroleuca": [
-        "Shows a matte ochre cap with a paler margin and cream gills.",
-        "Like other brittlegills, the gills snap like chalk when bent.",
-        "One of the most frequent Russula species in mixed woodland."
+        "This yellow or pale ochre capped mushroom is the most common Russula in the UK.",
+        "Like all brittlegills, the gills snap cleanly like chalk which is very satisfying to test gently with your thumb.",
+        "Whilst this mushroom is edible it can be confused with the Geranium Brittlegill which is also yellow and toxic."
       ],
       "Sarcoscypha austriaca": [
-        "Scarlet cups brighten damp woodland floors from late winter onward.",
-        "Outer surface is covered in fine white hairs best seen with a hand lens.",
-        "Grows on buried sticks of willow, hazel, and other broadleaves."
+        "You could have found the Scarlet Elfcup or you could have found the Ruby Elfcup, they are almost impossible to tell apart. Not a problem for the forager though as both are edible.",
+        "Grows on damp buried sticks of willow and hazel, especially in old riverside woodland.",
+        "Tradition has it that elves drink dew from the cups! They add a delightful splash of colour to a salad but not much in the way of sustenance."
       ],
       "Sparassis crispa": [
-        "Resembles a ruffled cauliflower with numerous folded lobes.",
-        "Usually fruits at the base of Scots pine and other conifers.",
-        "Can weigh several kilograms yet grows from a single underground attachment point."
+        "A small frilly cauliflower, a brain or a sea sponge nestled at the base of pine trees in particular.",
+        "A choice edible but they need a good wash to remove all the pine needles and grit from the lobes.",
+        "Once you find one you can be confident that it will grow from the same spot year after year."
       ],
       "Trametes gibbosa": [
-        "Bracket displays a lumpy, uneven cap with concentric pale zones.",
-        "Underside pores are angular and elongate toward the margin.",
-        "Common on beech logs, where it causes a white rot."
+        "A lumpy, uneven, white or off-white cap with concentric pale zones.",
+        "Very common but sadly way too tough to be edible.",
+        "Common on old beech logs in British woodland, where it slowly works its way through the wood."
       ],
       "Trametes versicolor": [
-        "Forms thin, overlapping fans with concentric bands resembling a turkey's tail.",
-        "Pore surface is white to cream and finely pored.",
-        "Extensively studied for polysaccharides with potential medicinal properties."
+        "Thin overlapping fans with sometimes striking concentric coloured bands. Much like a turkey’s tail in miniature!",
+        "One of the most studied mushrooms in the world for compounds that may support the immune system.",
+        "Tough and inedible to chew, so best used in teas and tinctures for the health benefits."
       ],
       "Tremella mesenterica": [
-        "Bright yellow, brain-like folds appear on dead deciduous branches after rain.",
-        "A parasitic jelly fungus that attacks the mycelium of crust fungi such as Stereum.",
-        "Can dry to an orange crust and revive to full size when rehydrated."
+        "Bright yellow folded jelly that pops up after rain on dead deciduous branches.",
+        "A clever parasite that doesn’t rot wood itself, but feeds on the mycelium of crust fungi like Stereum.",
+        "Can dry to a crisp orange shell and bounce right back to full glory after the next shower."
       ],
       "Xerocomellus chrysenteron": [
-        "Dry brown cap develops distinctive cracks that reveal crimson flesh beneath.",
-        "Yellow pores bruise blue when handled, then slowly fade.",
-        "Associates mainly with beech and oak on light soils."
+        "The cap surface cracks like a parched riverbed, revealing crimson flesh beneath.",
+        "As with all Boletes it has pores instead of gills. These ones are yellow but can green slightly with age.",
+        "Common under beech and oak on light soils; edible but rather soft and mushy when cooked."
       ],
       "Xylaria polymorpha": [
-        "Black, club-shaped stromata poke up from decaying stumps like skeletal fingers.",
-        "Surface is initially pale and powdery, darkening as the embedded perithecia mature.",
-        "Persists year-round, releasing spores from tiny openings near the tips."
+        "Black, club-shaped fungi poking up from old stumps. Sometimes their common name is scarily apt.",
+        "The surface starts pale and powdery before darkening to black as the spore-pockets mature inside.",
+        "Persists year-round, slowly puffing spores from tiny pores near the tips."
       ],
-
-      // Priority 2: Facts for new UK species
       "Laccaria laccata": [
-        "Highly variable in colour, earning the name 'The Deceiver' due to its confusing appearance.",
-        "Gills are widely spaced, thick, and often dusted with white spores.",
-        "Common in deciduous and coniferous woodlands from summer to late autumn."
+        "Highly variable in colour and shape, hence the name ‘Deceiver’. Every specimen seems to be wearing a different costume.",
+        "The gills are widely spaced, broad and irregular with shorter gills in between.",
+        "Common from summer to late autumn in both deciduous and coniferous woods."
       ],
       "Pholiota squarrosa": [
-        "Covered in distinctive shaggy, upturned scales on both cap and stem.",
-        "Grows in dense clusters at the base of living or dead broadleaf trees.",
-        "Has a strong smell often described as similar to radish or garlic."
+        "Cap and stem are covered in distinctive shaggy upturned scales which can be quite tempting to pull off.",
+        "Grows in dense clusters at the base of broadleaf trees, often a sign that the host is in some trouble.",
+        "Smells strongly of radish or garlic when crushed which is distinctive, but sadly this mushroom is not edible."
       ],
       "Paxillus involutus": [
-        "Now known to be seriously toxic, causing potentially fatal immune reactions after repeated consumption.",
-        "Cap margin is strongly inrolled and the gills bruise brown when damaged.",
-        "Forms mycorrhiza with birch and other trees on acidic soils."
+        "This mushroom was once considered edible, but it is now known that it can be deadly poisonous!",
+        "Poisonous but thankfully easy to ID: the cap margin is strongly inrolled, and the gills bruise to a rusty brown mush when pressed.",
+        "Very common with birch on acidic soils and can look quite innocent, but do not be tempted to cook it up!"
       ],
       "Hebeloma crustuliniforme": [
-        "Smells strongly of radish, which helps distinguish it from similar pale mushrooms.",
-        "Cap is cream to tan, often slightly slimy, with a pale margin.",
-        "Droplets often form on the gill edges in humid conditions."
+        "As the name suggests, poisonous. Smells distinctly of radish which can help you ID.",
+        "Cream-coloured slimy cap with a pale margin — quite plain looking, which is part of the danger.",
+        "Look out for tiny brown droplets on the gills in wet weather, which is a hallmark of the Hebeloma family."
       ],
       "Rhodocollybia butyracea": [
-        "Cap has a distinctly greasy or buttery feel, especially when moist.",
-        "Colours fade from reddish-brown to buff as it dries.",
-        "Very common in conifer litter and also occurs in broadleaf woods."
+        "The name comes from the cap which has a buttery or greasy feel to it.",
+        "It can vary quite considerably in appearance but always has a darker umbo (a raised, darker central point on a mushroom cap).",
+        "Extremely common in conifer needles and broadleaf litter but sadly not a great edible."
       ],
-      "Geastrum triplex": [
-        "Opens from a sphere into a star shape with 4-8 thick, fleshy rays.",
-        "A distinctive collar or saucer forms around the central spore sac.",
-        "Fruits in leaf litter under broadleaf trees, often beech, in autumn."
+      "Geastrum michelianum": [
+        "The bit in the middle is the spore sac and is called the endoperidium.",
+        "The Collared Earthstar is the largest in the UK and also one of the most common.",
+        "The scientific name of the genus comes from ancient Greek, where ‘geo‘ means Earth, ‘aster‘ means Star."
       ],
       "Amanita fulva": [
-        "Cap is smooth tawny-orange with a distinctly striate margin.",
-        "Lacks a ring on the stem but emerges from a prominent white volva.",
-        "Edible but easily confused with dangerous Amanita species."
+        "A smooth tawny-orange cap with a beautifully grooved margin.",
+        "The stem is key to a successful ID of the Tawny Grisette. Unlike other Amanitas it tapers towards the cap and has no ring.",
+        "Edible after cooking, but the Amanita family also contains the Death Cap and the Destroying Angel, so one for experienced foragers only."
       ],
       "Cuphophyllus virgineus": [
-        "Pure white waxcap with a silky, slightly greasy cap surface.",
-        "Gills are thick, waxy, and run down the stem.",
-        "Indicator species for unimproved, species-rich grasslands."
+        "Fabulously white when young but starts to turn ivory or grey as it ages.",
+        "The thick, waxy gills run a short way down the stem (decurrent).",
+        "Like most Waxcaps it is an indicator of undisturbed grassland, with chalky pastures and ancient lawns being the ideal habitat."
       ],
       "Suillellus luridus": [
-        "Flesh instantly stains deep blue when cut, then fades to yellow.",
-        "Has a distinctive red net pattern on the yellow stem.",
-        "Edible when thoroughly cooked but causes stomach upsets if undercooked."
+        "Slice the flesh and watch it instantly turn deep blue-black, almost like ink soaking into paper.",
+        "Has a striking red net pattern on a yellow stem, like a lattice of veins running down it.",
+        "Like all Boletes it has pores instead of gills. The Lurid’s pores start yellow but turn to a deep red as it ages."
       ],
       "Cortinarius violaceus": [
-        "One of the most striking fungi, entirely dark violet to almost black.",
-        "Very rare in the UK and listed as a UK BAP Priority Species.",
-        "Found in birch and beech woods on acidic soils in autumn."
+        "Entirely dark violet, almost black — one of the most striking fungi you can hope to meet in British woods.",
+        "Very rare here and listed as a UK Biodiversity Action Plan priority species so please admire and photograph, but do not disturb.",
+        "Found in old birch and beech woods on acidic soils, if you’re lucky enough to find one!"
       ],
       "Chalciporus piperatus": [
-        "Tastes intensely peppery and has been used as a spice when dried.",
-        "Small bolete with cinnamon to rusty brown cap and reddish pores.",
-        "Often found near Fly Agaric, sharing mycorrhizal partners with birch and pine."
+        "Tastes intensely peppery and can be dried and used as a spice in cooking.",
+        "A small bolete with a cinnamon-brown cap and rusty-coloured pores. Yellow flesh if cut down the middle.",
+        "Often found growing near Fly Agaric as the two share mycorrhizal partners with birch and pine."
       ]
     };
 
