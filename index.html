@@ -367,6 +367,33 @@
       color: var(--ink-2);
     }
 
+    /* Countdown bar that fills left-to-right while the fact is shown */
+    .fact-box .fact-progress {
+      position: absolute;
+      left: 6px;
+      right: 6px;
+      top: 4px;
+      height: 3px;
+      background: #386e53;
+      border-radius: 2px;
+      transform: scaleX(0);
+      transform-origin: left center;
+      pointer-events: none;
+    }
+
+    .fact-box.visible .fact-progress.run {
+      animation: factProgressFill var(--fact-duration, 5000ms) linear forwards;
+    }
+
+    @keyframes factProgressFill {
+      from { transform: scaleX(0); }
+      to   { transform: scaleX(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .fact-box .fact-progress { display: none; }
+    }
+
     @media (max-width:520px) {
       .fact-box {
         padding: 14px 16px;
@@ -376,6 +403,11 @@
 
       .fact-box .fact-body {
         font-size: .95rem;
+      }
+
+      .fact-box .fact-progress {
+        left: 5px;
+        right: 5px;
       }
     }
 
@@ -1036,7 +1068,7 @@
           same species.
           Per 10 questions, Beginners get 3 <em>New Photos</em> uses, Novices get 2 and Intermediates/Experts get 1.</p>
         <p>iNaturalist is a wonderful citizen-science website, but not all observations are guaranteed to be correct. Smell, feel and habitat of fungi are key to a successful ID, which you cannot do through a photo alone.
-          This quiz is intended to be a fun learning tool so should be treated as more of a guide than gospel. Try Teaching Mode to learn more!</p>
+          This quiz is intended to be a fun learning tool so should be treated as more of a guide than gospel. Try Teaching Mode to learn more.</p>
         <p>You can review all of your answers and the observations at the end. Good luck!</p>
       </div>
 
@@ -1113,6 +1145,7 @@
           <button type="button" id="factCloseBtn" class="fact-close" aria-label="Dismiss fact">&#x2715;</button>
         </div>
         <p id="factText" class="fact-body"></p>
+        <span id="factProgress" class="fact-progress" aria-hidden="true"></span>
       </div>
     </section>
 
@@ -1190,6 +1223,7 @@
     const factBox = $('#factBox'), factText = $('#factText');
     const factLabel = $('#factBox .fact-label');
     const factCloseBtn = $('#factCloseBtn');
+    const factProgress = $('#factProgress');
     const diffButtons = [...document.querySelectorAll('#difficultyRow .diff-btn')];
     const lenButtons = [...document.querySelectorAll('#lengthRow .len-btn')];
 
@@ -1735,7 +1769,7 @@
       ],
       "Russula ochroleuca": [
         "This yellow or pale ochre capped mushroom is the most common Russula in the UK.",
-        "Like most brittlegills, the gills will break off easily when you run your thumb over them.",
+        "Like all brittlegills, the gills snap cleanly like chalk which is very satisfying to test gently with your thumb.",
         "Whilst this mushroom is edible it can be confused with the Geranium Brittlegill which is also yellow and toxic."
       ],
       "Sarcoscypha austriaca": [
@@ -1845,6 +1879,10 @@
         clearTimeout(state.factTimer);
         state.factTimer = null;
       }
+      if (factProgress) {
+        factProgress.classList.remove('run');
+        factProgress.style.removeProperty('--fact-duration');
+      }
       if (!factBox) return;
       factBox.classList.remove('visible');
       factBox.setAttribute('aria-hidden', 'true');
@@ -1868,9 +1906,18 @@
       }
 
       const words = fact.split(' ').length;
-      const msPerWord = 400;
+      const msPerWord = 250;
       const baseTime = 1000;
       const displayDuration = baseTime + (words * msPerWord);
+
+      if (factProgress) {
+        // Restart the CSS animation: drop the class, force a reflow, set the
+        // duration variable, then re-add the class so it runs from full width.
+        factProgress.classList.remove('run');
+        void factProgress.offsetWidth;
+        factProgress.style.setProperty('--fact-duration', `${displayDuration}ms`);
+        factProgress.classList.add('run');
+      }
 
       state.factTimer = setTimeout(() => {
         hideFact();
