@@ -1,11 +1,11 @@
 {
     "name": "Fungidentification",
     "short_name": "FungiID",
-    "description": "A fun fungi identification quiz game with 140+ UK mushroom species",
+    "description": "A field quiz of British fungi: name the species from real iNaturalist photos",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#f5e6d3",
-    "theme_color": "#8b6f47",
+    "background_color": "#F1EFE6",
+    "theme_color": "#1F3326",
     "orientation": "portrait",
     "icons": [
         {
