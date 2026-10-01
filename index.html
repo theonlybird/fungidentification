@@ -75,6 +75,46 @@
       color: var(--muted)
     }
 
+    @media (max-width: 520px) {
+      body {
+        padding: 10px;
+      }
+
+      .game {
+        padding: 18px 14px;
+        border-radius: 16px;
+      }
+
+      .header {
+        margin-bottom: 18px;
+      }
+
+      h1 {
+        font-size: clamp(1.45rem, 6.6vw, 2.25rem);
+        overflow-wrap: anywhere;
+      }
+
+      .hud {
+        flex-wrap: nowrap;
+        gap: 10px;
+        margin: 8px 0 12px;
+      }
+
+      .hud .box {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 6px 10px;
+      }
+
+      .hud .label {
+        font-size: .8rem;
+      }
+
+      .hud .value {
+        font-size: 1.2rem;
+      }
+    }
+
     /* HUD (hidden on landing; side-by-side on mobile) */
     .hud {
       display: none;
@@ -302,31 +342,32 @@
       opacity: .95;
     }
 
-    /* Mushroom fact card */
+    /* Mushroom fact card — sits in the page flow under the answers so it never covers them */
     .fact-box {
-      position: fixed;
-      left: 50%;
-      bottom: 20px;
-      transform: translate(-50%, 120%);
-      opacity: 0;
-      transition: transform .35s ease, opacity .35s ease;
+      position: relative;
+      display: none;
+      margin: 16px auto 0;
       background: rgba(255, 248, 240, .96);
       border: 1px solid var(--ring);
       border-radius: 16px;
-      box-shadow: 0 14px 30px rgba(61, 41, 20, .28);
+      box-shadow: 0 10px 24px rgba(61, 41, 20, .16);
       padding: 16px 18px;
-      max-width: min(90vw, 420px);
+      max-width: min(100%, 520px);
       color: var(--ink-2);
-      z-index: 950;
-      pointer-events: none;
-      visibility: hidden;
     }
 
     .fact-box.visible {
-      transform: translate(-50%, 0);
-      opacity: 1;
-      pointer-events: auto;
-      visibility: visible;
+      display: block;
+      animation: factIn .35s ease both;
+    }
+
+    @keyframes factIn {
+      from { transform: translateY(12px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .fact-box.visible { animation: none; }
     }
 
     .fact-box .fact-header {
@@ -397,7 +438,6 @@
     @media (max-width:520px) {
       .fact-box {
         padding: 14px 16px;
-        bottom: 14px;
         border-radius: 14px;
       }
 
@@ -969,13 +1009,50 @@
     }
 
     .is-entering {
-      animation: slide-in-down 0.3s ease-in forwards;
-      /* Start with content hidden to prevent flash */
-      visibility: hidden;
+      animation: slide-in-down 0.3s ease-out both;
     }
 
-    .is-entering.visible {
-      visibility: visible;
+    @media (prefers-reduced-motion: reduce) {
+      .is-exiting,
+      .is-entering {
+        animation: none;
+      }
+    }
+
+    #game {
+      position: relative;
+    }
+
+    .game-loading {
+      position: absolute;
+      top: 140px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 600;
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+
+    .game-loading[hidden] {
+      display: none;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: .45; }
+      50% { opacity: 1; }
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn.btn-muted {
+      background: var(--muted);
+      box-shadow: none;
     }
 
     /* --- Results Difficulty Pill --- */
@@ -1089,24 +1166,24 @@
       <!-- Scientific Mode toggle -->
       <div class="difficulty" id="scientificRow" style="margin-top:0; align-items:center;">
         <label class="switch">
-          <input type="checkbox" id="scientificToggle">
+          <input type="checkbox" id="scientificToggle" aria-labelledby="sciToggleTitle" aria-describedby="sciToggleDesc">
           <span class="slider"></span>
         </label>
         <div class="sci-copy">
-          <span class="sci-title">Scientific Mode</span>
-          <span class="sci-desc">Want double points? This mode only shows Latin names in the answers.</span>
+          <span class="sci-title" id="sciToggleTitle">Scientific Mode</span>
+          <span class="sci-desc" id="sciToggleDesc">Want double points? This mode only shows Latin names in the answers.</span>
         </div>
       </div>
 
       <!-- Teaching Mode toggle -->
       <div class="difficulty" id="teachingRow" style="margin-top:0; align-items:center;">
         <label class="switch">
-          <input type="checkbox" id="teachingToggle" checked>
+          <input type="checkbox" id="teachingToggle" checked aria-labelledby="teachToggleTitle" aria-describedby="teachToggleDesc">
           <span class="slider"></span>
         </label>
         <div class="sci-copy">
-          <span class="sci-title">Teaching Mode</span>
-          <span class="sci-desc">A fact will appear about the correct mushroom after each guess (only available on
+          <span class="sci-title" id="teachToggleTitle">Teaching Mode</span>
+          <span class="sci-desc" id="teachToggleDesc">A fact will appear about the correct mushroom after each guess (only available on
             Beginner or Novice).</span>
         </div>
       </div>
@@ -1139,7 +1216,8 @@
 
         <div id="answers" class="answers"></div>
       </div>
-      <div id="factBox" class="fact-box" role="status" aria-live="polite" aria-hidden="true">
+      <div id="gameLoading" class="game-loading" hidden>Foraging for the next fungus…</div>
+      <div id="factBox" class="fact-box" role="status" aria-live="polite">
         <div class="fact-header">
           <span class="fact-label">Mushroom fact</span>
           <button type="button" id="factCloseBtn" class="fact-close" aria-label="Dismiss fact">&#x2715;</button>
@@ -1194,7 +1272,10 @@
     <div class="card">
       <h3>Oops! Something went wrong</h3>
       <p id="errorMsg" style="color:#c9302c; margin:10px 0 16px;">Could not load the first mushroom question.</p>
-      <button id="retryBtn" class="btn">Try again</button>
+      <div class="modal-actions">
+        <button id="retryBtn" class="btn">Try again</button>
+        <button id="errorHomeBtn" class="btn btn-muted">Back to menu</button>
+      </div>
     </div>
   </div>
 
@@ -1240,7 +1321,13 @@
       current: null,
       review: [],
       questionTypeQueue: [],
-      factTimer: null
+      factTimer: null,
+      gameId: 0,            // bumps every new game so stale async work is ignored
+      questionId: 0,        // bumps every question so stale New Photos results are ignored
+      answered: false,
+      loadingNewPhotos: false,
+      next: null,           // { type, promise, gameId } — the prefetched next question
+      retryAction: null
     };
 
     if (factCloseBtn) {
@@ -1250,13 +1337,16 @@
       });
     }
 
-    /* ------------- species (names only; ids resolved at runtime) ------------- */
+    /* ------------- species ------------- */
+    // `id` is the iNaturalist taxon ID used for every photo request. Each one was checked
+    // against iNat in Oct 2026 (name, rank = species, iconic taxon = Fungi). If you add a
+    // species, look its ID up at https://www.inaturalist.org/taxa/<id> before adding it.
     const mushroomSpecies = [
       // AMANITA
       { id: 48715, name: "Fly Agaric", scientific: "Amanita muscaria", genus: "Amanita", category: "Amanita" },
-      { id: 53778, name: "Death Cap", scientific: "Amanita phalloides", genus: "Amanita", category: "Amanita" },
+      { id: 52135, name: "Death Cap", scientific: "Amanita phalloides", genus: "Amanita", category: "Amanita" },
       { id: 67661, name: "The Blusher", scientific: "Amanita rubescens", genus: "Amanita", category: "Amanita" },
-      { id: 49917, name: "Panther Cap", scientific: "Amanita pantherina", genus: "Amanita", category: "Amanita" },
+      { id: 48418, name: "Panther Cap", scientific: "Amanita pantherina", genus: "Amanita", category: "Amanita" },
       { id: 63271, name: "False Death Cap", scientific: "Amanita citrina", genus: "Amanita", category: "Amanita" },
       { id: 58685, name: "Destroying Angel", scientific: "Amanita virosa", genus: "Amanita", category: "Amanita" },
       { id: 350033, name: "Orange Grisette", scientific: "Amanita crocea", genus: "Amanita", category: "Amanita" },
@@ -1266,170 +1356,170 @@
       { id: 118394, name: "Yellow Stainer", scientific: "Agaricus xanthodermus", genus: "Agaricus", category: "Agaricus" },
       { id: 58699, name: "Horse Mushroom", scientific: "Agaricus arvensis", genus: "Agaricus", category: "Agaricus" },
       { id: 58696, name: "Pavement Mushroom", scientific: "Agaricus bitorquis", genus: "Agaricus", category: "Agaricus" },
-      { id: 60506, name: "Scaly Wood Mushroom", scientific: "Agaricus sylvaticus", genus: "Agaricus", category: "Agaricus" },
-      { id: 58646, name: "The Prince", scientific: "Agaricus augustus", genus: "Agaricus", category: "Agaricus" },
+      { id: 480776, name: "Scaly Wood Mushroom", scientific: "Agaricus sylvaticus", genus: "Agaricus", category: "Agaricus" },
+      { id: 49547, name: "The Prince", scientific: "Agaricus augustus", genus: "Agaricus", category: "Agaricus" },
 
       // PLEUROTUS / SARCOMYXA
-      { id: 48530, name: "Oyster Mushroom", scientific: "Pleurotus ostreatus", genus: "Pleurotus", category: "Pleurotus" },
-      { id: 120469, name: "Pale Oyster", scientific: "Pleurotus pulmonarius", genus: "Pleurotus", category: "Pleurotus" },
-      { id: 125425, name: "Veiled Oyster", scientific: "Pleurotus dryinus", genus: "Pleurotus", category: "Pleurotus" },
-      { id: 125683, name: "Golden Oyster", scientific: "Pleurotus citrinopileatus", genus: "Pleurotus", category: "Pleurotus" },
-      { id: 54635, name: "Olive Oysterling", scientific: "Sarcomyxa serotina", genus: "Sarcomyxa", category: "Pleurotus" },
+      { id: 48494, name: "Oyster Mushroom", scientific: "Pleurotus ostreatus", genus: "Pleurotus", category: "Pleurotus" },
+      { id: 136399, name: "Pale Oyster", scientific: "Pleurotus pulmonarius", genus: "Pleurotus", category: "Pleurotus" },
+      { id: 334340, name: "Veiled Oyster", scientific: "Pleurotus dryinus", genus: "Pleurotus", category: "Pleurotus" },
+      { id: 504060, name: "Golden Oyster", scientific: "Pleurotus citrinopileatus", genus: "Pleurotus", category: "Pleurotus" },
+      { id: 63585, name: "Olive Oysterling", scientific: "Sarcomyxa serotina", genus: "Sarcomyxa", category: "Pleurotus" },
 
       // WAXCAPS
       { id: 55245, name: "Scarlet Waxcap", scientific: "Hygrocybe coccinea", genus: "Hygrocybe", category: "Waxcaps" },
       { id: 51869, name: "Crimson Waxcap", scientific: "Hygrocybe punicea", genus: "Hygrocybe", category: "Waxcaps" },
-      { id: 128868, name: "Blackening Waxcap", scientific: "Hygrocybe conica", genus: "Hygrocybe", category: "Waxcaps" },
-      { id: 63475, name: "Parrot Waxcap", scientific: "Gliophorus psittacinus", genus: "Gliophorus", category: "Waxcaps" },
-      { id: 55240, name: "Meadow Waxcap", scientific: "Cuphophyllus pratensis", genus: "Cuphophyllus", category: "Waxcaps" },
+      { id: 51872, name: "Blackening Waxcap", scientific: "Hygrocybe conica", genus: "Hygrocybe", category: "Waxcaps" },
+      { id: 348711, name: "Parrot Waxcap", scientific: "Gliophorus psittacinus", genus: "Gliophorus", category: "Waxcaps" },
+      { id: 361641, name: "Meadow Waxcap", scientific: "Cuphophyllus pratensis", genus: "Cuphophyllus", category: "Waxcaps" },
       { id: 524919, name: "Heath Waxcap", scientific: "Gliophorus laetus", genus: "Gliophorus", category: "Waxcaps" },
 
       // BOLETES
       { id: 48701, name: "Penny Bun (Cep)", scientific: "Boletus edulis", genus: "Boletus", category: "Boletes", altNames: ["porcini", "cep", "king bolete"] },
-      { id: 53903, name: "Bay Bolete", scientific: "Imleria badia", genus: "Imleria", category: "Boletes" },
-      { id: 53478, name: "Slippery Jack", scientific: "Suillus luteus", genus: "Suillus", category: "Boletes" },
+      { id: 510854, name: "Bay Bolete", scientific: "Imleria badia", genus: "Imleria", category: "Boletes" },
+      { id: 53488, name: "Slippery Jack", scientific: "Suillus luteus", genus: "Suillus", category: "Boletes" },
       { id: 63232, name: "Birch Bolete", scientific: "Leccinum scabrum", genus: "Leccinum", category: "Boletes" },
-      { id: 54163, name: "Red Cracking Bolete", scientific: "Xerocomellus chrysenteron", genus: "Xerocomellus", category: "Boletes" },
-      { id: 125740, name: "Suede Bolete", scientific: "Xerocomus subtomentosus", genus: "Xerocomus", category: "Boletes" },
+      { id: 438013, name: "Red Cracking Bolete", scientific: "Xerocomellus chrysenteron", genus: "Xerocomellus", category: "Boletes" },
+      { id: 485374, name: "Suede Bolete", scientific: "Xerocomus subtomentosus", genus: "Xerocomus", category: "Boletes" },
       { id: 63489, name: "Bitter Bolete", scientific: "Tylopilus felleus", genus: "Tylopilus", category: "Boletes" },
-      { id: 553909, name: "Scarletina Bolete", scientific: "Neoboletus luridiformis", genus: "Neoboletus", category: "Boletes", altNames: ["flaming bolete"] },
+      { id: 553907, name: "Scarletina Bolete", scientific: "Neoboletus luridiformis", genus: "Neoboletus", category: "Boletes", altNames: ["flaming bolete"] },
       { id: 343661, name: "Orange Birch Bolete", scientific: "Leccinum versipelle", genus: "Leccinum", category: "Boletes" },
       { id: 179065, name: "Weeping Bolete", scientific: "Suillus granulatus", genus: "Suillus", category: "Boletes" },
 
       // MYCENA
       { id: 63460, name: "Bleeding Fairy Helmet", scientific: "Mycena haematopus", genus: "Mycena", category: "Mycena" },
       { id: 63446, name: "Common Bonnet", scientific: "Mycena galericulata", genus: "Mycena", category: "Mycena" },
-      { id: 63471, name: "Clustered Bonnet", scientific: "Mycena inclinata", genus: "Mycena", category: "Mycena" },
-      { id: 63478, name: "Lilac Bonnet", scientific: "Mycena pura", genus: "Mycena", category: "Mycena" },
+      { id: 63453, name: "Clustered Bonnet", scientific: "Mycena inclinata", genus: "Mycena", category: "Mycena" },
+      { id: 63473, name: "Lilac Bonnet", scientific: "Mycena pura", genus: "Mycena", category: "Mycena" },
       { id: 566411, name: "Saffrondrop Bonnet", scientific: "Mycena crocata", genus: "Mycena", category: "Mycena" },
 
       // RUSSULA
       { id: 194437, name: "Charcoal Burner", scientific: "Russula cyanoxantha", genus: "Russula", category: "Russula" },
-      { id: 56079, name: "The Sickener", scientific: "Russula emetica", genus: "Russula", category: "Russula" },
+      { id: 49449, name: "The Sickener", scientific: "Russula emetica", genus: "Russula", category: "Russula" },
       { id: 49446, name: "Beechwood Sickener", scientific: "Russula nobilis", genus: "Russula", category: "Russula" },
-      { id: 63188, name: "Ochre Brittlegill", scientific: "Russula ochroleuca", genus: "Russula", category: "Russula" },
+      { id: 153459, name: "Ochre Brittlegill", scientific: "Russula ochroleuca", genus: "Russula", category: "Russula" },
       { id: 210270, name: "Purple Brittlegill", scientific: "Russula atropurpurea", genus: "Russula", category: "Russula" },
-      { id: 56081, name: "Greencracked Brittlegill", scientific: "Russula virescens", genus: "Russula", category: "Russula" },
-      { id: 125576, name: "Powdery Brittlegill", scientific: "Russula parazurea", genus: "Russula", category: "Russula" },
-      { id: 416072, name: "Stinking Brittlegill", scientific: "Russula foetens", genus: "Russula", category: "Russula" },
+      { id: 125720, name: "Greencracked Brittlegill", scientific: "Russula virescens", genus: "Russula", category: "Russula" },
+      { id: 122332, name: "Powdery Brittlegill", scientific: "Russula parazurea", genus: "Russula", category: "Russula" },
+      { id: 352283, name: "Stinking Brittlegill", scientific: "Russula foetens", genus: "Russula", category: "Russula" },
 
       // BRACKETS & POLYPORES
-      { id: 47392, name: "Turkey Tail", scientific: "Trametes versicolor", genus: "Trametes", category: "Brackets & Polypores" },
-      { id: 125434, name: "Artist's Bracket", scientific: "Ganoderma applanatum", genus: "Ganoderma", category: "Brackets & Polypores" },
-      { id: 124459, name: "Red-belted Polypore", scientific: "Fomitopsis pinicola", genus: "Fomitopsis", category: "Brackets & Polypores" },
-      { id: 83490, name: "Birch Polypore", scientific: "Fomitopsis betulina", genus: "Fomitopsis", category: "Brackets & Polypores" },
+      { id: 54134, name: "Turkey Tail", scientific: "Trametes versicolor", genus: "Trametes", category: "Brackets & Polypores" },
+      { id: 48473, name: "Artist's Bracket", scientific: "Ganoderma applanatum", genus: "Ganoderma", category: "Brackets & Polypores" },
+      { id: 1098280, name: "Red-belted Polypore", scientific: "Fomitopsis pinicola", genus: "Fomitopsis", category: "Brackets & Polypores" },
+      { id: 775410, name: "Birch Polypore", scientific: "Fomitopsis betulina", genus: "Fomitopsis", category: "Brackets & Polypores" },
       { id: 410641, name: "Lumpy Bracket", scientific: "Trametes gibbosa", genus: "Trametes", category: "Brackets & Polypores" },
       { id: 118038, name: "Smoky Bracket", scientific: "Bjerkandera adusta", genus: "Bjerkandera", category: "Brackets & Polypores" },
-      { id: 47923, name: "Hoof Fungus", scientific: "Fomes fomentarius", genus: "Fomes", category: "Brackets & Polypores" },
-      { id: 55653, name: "Beefsteak Fungus", scientific: "Fistulina hepatica", genus: "Fistulina", category: "Brackets & Polypores" },
-      { id: 55155, name: "Purplepore Bracket", scientific: "Trichaptum abietinum", genus: "Trichaptum", category: "Brackets & Polypores" },
-      { id: 118063, name: "Crimped Gill", scientific: "Plicaturopsis crispa", genus: "Plicaturopsis", category: "Brackets & Polypores" },
-      { id: 55265, name: "Chicken of the Woods", scientific: "Laetiporus sulphureus", genus: "Laetiporus", category: "Brackets & Polypores" },
-      { id: 84613, name: "Hen of the Woods", scientific: "Grifola frondosa", genus: "Grifola", category: "Brackets & Polypores" },
+      { id: 127510, name: "Hoof Fungus", scientific: "Fomes fomentarius", genus: "Fomes", category: "Brackets & Polypores" },
+      { id: 123897, name: "Beefsteak Fungus", scientific: "Fistulina hepatica", genus: "Fistulina", category: "Brackets & Polypores" },
+      { id: 118115, name: "Purplepore Bracket", scientific: "Trichaptum abietinum", genus: "Trichaptum", category: "Brackets & Polypores" },
+      { id: 1503458, name: "Crimped Gill", scientific: "Plicaturopsis crispa", genus: "Plicaturopsis", category: "Brackets & Polypores" },
+      { id: 53713, name: "Chicken of the Woods", scientific: "Laetiporus sulphureus", genus: "Laetiporus", category: "Brackets & Polypores" },
+      { id: 53714, name: "Hen of the Woods", scientific: "Grifola frondosa", genus: "Grifola", category: "Brackets & Polypores" },
       { id: 157989, name: "Giant (Blackening) Polypore", scientific: "Meripilus giganteus", genus: "Meripilus", category: "Brackets & Polypores", altNames: ["giant polypore", "blackening polypore"] },
-      { id: 118078, name: "Dryad's Saddle", scientific: "Cerioporus squamosus", genus: "Cerioporus", category: "Brackets & Polypores", altNames: ["pheasant's back"] },
+      { id: 940028, name: "Dryad's Saddle", scientific: "Cerioporus squamosus", genus: "Cerioporus", category: "Brackets & Polypores", altNames: ["pheasant's back"] },
       { id: 124102, name: "Blushing Bracket", scientific: "Daedaleopsis confragosa", genus: "Daedaleopsis", category: "Brackets & Polypores" },
       { id: 55501, name: "Hairy Curtain Crust", scientific: "Stereum hirsutum", genus: "Stereum", category: "Brackets & Polypores" },
 
       // CHANTERELLES & ALLIES
       { id: 47347, name: "Golden Chanterelle", scientific: "Cantharellus cibarius", genus: "Cantharellus", category: "Chanterelles & Allies" },
-      { id: 175283, name: "Horn of Plenty", scientific: "Craterellus cornucopioides", genus: "Craterellus", category: "Chanterelles & Allies", altNames: ["black trumpet", "trumpet of the dead"] },
+      { id: 48607, name: "Horn of Plenty", scientific: "Craterellus cornucopioides", genus: "Craterellus", category: "Chanterelles & Allies", altNames: ["black trumpet", "trumpet of the dead"] },
       { id: 350511, name: "Winter Chanterelle", scientific: "Craterellus tubaeformis", genus: "Craterellus", category: "Chanterelles & Allies" },
-      { id: 127394, name: "False Chanterelle", scientific: "Hygrophoropsis aurantiaca", genus: "Hygrophoropsis", category: "Chanterelles & Allies" },
-      { id: 58857, name: "Hedgehog Fungus", scientific: "Hydnum repandum", genus: "Hydnum", category: "Chanterelles & Allies" },
-      { id: 124699, name: "Scaly Chanterelle", scientific: "Turbinellus floccosus", genus: "Turbinellus", category: "Chanterelles & Allies" },
+      { id: 63538, name: "False Chanterelle", scientific: "Hygrophoropsis aurantiaca", genus: "Hygrophoropsis", category: "Chanterelles & Allies" },
+      { id: 48641, name: "Hedgehog Fungus", scientific: "Hydnum repandum", genus: "Hydnum", category: "Chanterelles & Allies" },
+      { id: 417398, name: "Scaly Chanterelle", scientific: "Turbinellus floccosus", genus: "Turbinellus", category: "Chanterelles & Allies" },
 
       // FUNNELS & GRASSLAND
-      { id: 123623, name: "Clouded Funnel", scientific: "Clitocybe nebularis", genus: "Clitocybe", category: "Funnels & Grassland" },
-      { id: 119227, name: "Trooping Funnel", scientific: "Infundibulicybe geotropa", genus: "Infundibulicybe", category: "Funnels & Grassland" },
-      { id: 55239, name: "Fairy Ring Champignon", scientific: "Marasmius oreades", genus: "Marasmius", category: "Funnels & Grassland" },
-      { id: 120230, name: "St. George's Mushroom", scientific: "Calocybe gambosa", genus: "Calocybe", category: "Funnels & Grassland" },
-      { id: 125429, name: "Brown Mottlegill", scientific: "Panaeolina foenisecii", genus: "Panaeolina", category: "Inkcaps and LBMs" },
-      { id: 48526, name: "Common Inkcap", scientific: "Coprinopsis atramentaria", genus: "Coprinopsis", category: "Inkcaps and LBMs" },
-      { id: 55453, name: "Magpie Inkcap", scientific: "Coprinopsis picacea", genus: "Coprinopsis", category: "Inkcaps and LBMs" },
+      { id: 63255, name: "Clouded Funnel", scientific: "Clitocybe nebularis", genus: "Clitocybe", category: "Funnels & Grassland" },
+      { id: 451026, name: "Trooping Funnel", scientific: "Infundibulicybe geotropa", genus: "Infundibulicybe", category: "Funnels & Grassland" },
+      { id: 118240, name: "Fairy Ring Champignon", scientific: "Marasmius oreades", genus: "Marasmius", category: "Funnels & Grassland" },
+      { id: 450829, name: "St. George's Mushroom", scientific: "Calocybe gambosa", genus: "Calocybe", category: "Funnels & Grassland" },
+      { id: 902551, name: "Brown Mottlegill", scientific: "Panaeolina foenisecii", genus: "Panaeolina", category: "Inkcaps and LBMs" },
+      { id: 48521, name: "Common Inkcap", scientific: "Coprinopsis atramentaria", genus: "Coprinopsis", category: "Inkcaps and LBMs" },
+      { id: 63224, name: "Magpie Inkcap", scientific: "Coprinopsis picacea", genus: "Coprinopsis", category: "Inkcaps and LBMs" },
       { id: 54025, name: "Liberty Cap", scientific: "Psilocybe semilanceata", genus: "Psilocybe", category: "Inkcaps and LBMs" },
-      { id: 125630, name: "Common Conecap", scientific: "Conocybe tenera", genus: "Conocybe", category: "Inkcaps and LBMs" },
+      { id: 121765, name: "Common Conecap", scientific: "Conocybe tenera", genus: "Conocybe", category: "Inkcaps and LBMs" },
       { id: 56318, name: "Glistening Inkcap", scientific: "Coprinellus micaceus", genus: "Coprinellus", category: "Inkcaps and LBMs" },
-      { id: 47652, name: "Common Puffball", scientific: "Lycoperdon perlatum", genus: "Lycoperdon", category: "Funnels & Grassland" },
-      { id: 54026, name: "Shaggy Inkcap", scientific: "Coprinus comatus", genus: "Coprinus", category: "Funnels & Grassland" },
-      { id: 127636, name: "Shaggy Parasol", scientific: "Chlorophyllum rhacodes", genus: "Chlorophyllum", category: "Funnels & Grassland" },
-      { id: 47468, name: "The Parasol", scientific: "Macrolepiota procera", genus: "Macrolepiota", category: "Funnels & Grassland" },
+      { id: 48443, name: "Common Puffball", scientific: "Lycoperdon perlatum", genus: "Lycoperdon", category: "Funnels & Grassland" },
+      { id: 47392, name: "Shaggy Inkcap", scientific: "Coprinus comatus", genus: "Coprinus", category: "Funnels & Grassland" },
+      { id: 56535, name: "Shaggy Parasol", scientific: "Chlorophyllum rhacodes", genus: "Chlorophyllum", category: "Funnels & Grassland" },
+      { id: 63401, name: "The Parasol", scientific: "Macrolepiota procera", genus: "Macrolepiota", category: "Funnels & Grassland" },
       { id: 921916, name: "Common Funnel", scientific: "Infundibulicybe gibba", genus: "Infundibulicybe", category: "Funnels & Grassland" },
       { id: 841424, name: "Tawny Funnel", scientific: "Paralepista flaccida", genus: "Paralepista", category: "Funnels & Grassland" },
 
       // CUP & OTHER SAPROTROPHS
-      { id: 119945, name: "Orange Peel Fungus", scientific: "Aleuria aurantia", genus: "Aleuria", category: "Cup & other Saprotrophs" },
-      { id: 119224, name: "King Alfred's Cakes", scientific: "Daldinia concentrica", genus: "Daldinia", category: "Cup & other Saprotrophs" },
-      { id: 84740, name: "Scarlet Elfcup", scientific: "Sarcoscypha austriaca", genus: "Sarcoscypha", category: "Cup & other Saprotrophs" },
-      { id: 55655, name: "Yellow Stagshorn", scientific: "Calocera viscosa", genus: "Calocera", category: "Cup & other Saprotrophs" },
-      { id: 117556, name: "Jelly Ear", scientific: "Auricularia auricula-judae", genus: "Auricularia", category: "Cup & other Saprotrophs" },
-      { id: 54743, name: "Yellow Brain", scientific: "Tremella mesenterica", genus: "Tremella", category: "Cup & other Saprotrophs" },
+      { id: 48716, name: "Orange Peel Fungus", scientific: "Aleuria aurantia", genus: "Aleuria", category: "Cup & other Saprotrophs" },
+      { id: 121714, name: "King Alfred's Cakes", scientific: "Daldinia concentrica", genus: "Daldinia", category: "Cup & other Saprotrophs" },
+      { id: 126913, name: "Scarlet Elfcup", scientific: "Sarcoscypha austriaca", genus: "Sarcoscypha", category: "Cup & other Saprotrophs" },
+      { id: 63405, name: "Yellow Stagshorn", scientific: "Calocera viscosa", genus: "Calocera", category: "Cup & other Saprotrophs" },
+      { id: 50813, name: "Jelly Ear", scientific: "Auricularia auricula-judae", genus: "Auricularia", category: "Cup & other Saprotrophs" },
+      { id: 48529, name: "Yellow Brain", scientific: "Tremella mesenterica", genus: "Tremella", category: "Cup & other Saprotrophs" },
 
       // WOODLAND FUNGI
-      { id: 47346, name: "Funeral Bell", scientific: "Galerina marginata", genus: "Galerina", category: "Woodland Fungi" },
-      { id: 56086, name: "False Morel", scientific: "Gyromitra esculenta", genus: "Gyromitra", category: "Woodland Fungi" },
-      { id: 54844, name: "Honey Fungus", scientific: "Armillaria mellea", genus: "Armillaria", category: "Woodland Fungi", altNames: ["honey mushroom"] },
-      { id: 60448, name: "Sheathed Woodtuft", scientific: "Kuehneromyces mutabilis", genus: "Kuehneromyces", category: "Woodland Fungi" },
-      { id: 417180, name: "Common Rustgill", scientific: "Gymnopilus penetrans", genus: "Gymnopilus", category: "Woodland Fungi" },
-      { id: 56021, name: "Velvet Shank", scientific: "Flammulina velutipes", genus: "Flammulina", category: "Woodland Fungi" },
+      { id: 154735, name: "Funeral Bell", scientific: "Galerina marginata", genus: "Galerina", category: "Woodland Fungi" },
+      { id: 85120, name: "False Morel", scientific: "Gyromitra esculenta", genus: "Gyromitra", category: "Woodland Fungi" },
+      { id: 55950, name: "Honey Fungus", scientific: "Armillaria mellea", genus: "Armillaria", category: "Woodland Fungi", altNames: ["honey mushroom"] },
+      { id: 153033, name: "Sheathed Woodtuft", scientific: "Kuehneromyces mutabilis", genus: "Kuehneromyces", category: "Woodland Fungi" },
+      { id: 194304, name: "Common Rustgill", scientific: "Gymnopilus penetrans", genus: "Gymnopilus", category: "Woodland Fungi" },
+      { id: 67594, name: "Velvet Shank", scientific: "Flammulina velutipes", genus: "Flammulina", category: "Woodland Fungi" },
       { id: 481482, name: "Wrinkled Peach", scientific: "Rhodotus palmatus", genus: "Rhodotus", category: "Woodland Fungi" },
       { id: 55964, name: "Porcelain Fungus", scientific: "Mucidula mucida", genus: "Mucidula", category: "Woodland Fungi" },
       { id: 58682, name: "Morel", scientific: "Morchella esculenta", genus: "Morchella", category: "Woodland Fungi" },
       { id: 48767, name: "Sulphur Tuft", scientific: "Hypholoma fasciculare", genus: "Hypholoma", category: "Woodland Fungi" },
-      { id: 63433, name: "Golden Scalycap", scientific: "Pholiota aurivella", genus: "Pholiota", category: "Woodland Fungi" },
+      { id: 124705, name: "Golden Scalycap", scientific: "Pholiota aurivella", genus: "Pholiota", category: "Woodland Fungi" },
 
       // DISTINCTIVE ODDBALLS
-      { id: 53715, name: "Lion's Mane", scientific: "Hericium erinaceus", genus: "Hericium", category: "Distinctive Oddballs" },
-      { id: 57343, name: "Giant Puffball", scientific: "Calvatia gigantea", genus: "Calvatia", category: "Distinctive Oddballs" },
-      { id: 469901, name: "Devil's Fingers", scientific: "Clathrus archeri", genus: "Clathrus", category: "Distinctive Oddballs" },
-      { id: 53764, name: "Dead Man's Fingers", scientific: "Xylaria polymorpha", genus: "Xylaria", category: "Distinctive Oddballs" },
+      { id: 49158, name: "Lion's Mane", scientific: "Hericium erinaceus", genus: "Hericium", category: "Distinctive Oddballs" },
+      { id: 57692, name: "Giant Puffball", scientific: "Calvatia gigantea", genus: "Calvatia", category: "Distinctive Oddballs" },
+      { id: 51135, name: "Devil's Fingers", scientific: "Clathrus archeri", genus: "Clathrus", category: "Distinctive Oddballs" },
+      { id: 58698, name: "Dead Man's Fingers", scientific: "Xylaria polymorpha", genus: "Xylaria", category: "Distinctive Oddballs" },
       { id: 55267, name: "Candlesnuff", scientific: "Xylaria hypoxylon", genus: "Xylaria", category: "Distinctive Oddballs" },
       { id: 63014, name: "Cauliflower Fungus", scientific: "Sparassis crispa", genus: "Sparassis", category: "Distinctive Oddballs" },
       { id: 54594, name: "Stinkhorn", scientific: "Phallus impudicus", genus: "Phallus", category: "Distinctive Oddballs" },
 
       // BLEWITS & LOOKALIKES
-      { id: 119152, name: "Wood Blewit", scientific: "Collybia nuda", genus: "Collybia", category: "Blewits & Lookalikes" },
-      { id: 1039723, name: "Field Blewit", scientific: "Collybia personata", genus: "Collybia", category: "Blewits & Lookalikes" },
-      { id: 417492, name: "Lilac Fibrecap", scientific: "Inocybe lilacina", genus: "Inocybe", category: "Blewits & Lookalikes" },
-      { id: 63509, name: "Amethyst Deceiver", scientific: "Laccaria amethystina", genus: "Laccaria", category: "Blewits & Lookalikes" },
-      { id: 55254, name: "Bruising Webcap", scientific: "Thaxterogaster purpurascens", genus: "Thaxterogaster", category: "Blewits & Lookalikes" },
+      { id: 1525548, name: "Wood Blewit", scientific: "Collybia nuda", genus: "Collybia", category: "Blewits & Lookalikes" },
+      { id: 1525550, name: "Field Blewit", scientific: "Collybia personata", genus: "Collybia", category: "Blewits & Lookalikes" },
+      { id: 1288764, name: "Lilac Fibrecap", scientific: "Inocybe lilacina", genus: "Inocybe", category: "Blewits & Lookalikes" },
+      { id: 55899, name: "Amethyst Deceiver", scientific: "Laccaria amethystina", genus: "Laccaria", category: "Blewits & Lookalikes" },
+      { id: 1438514, name: "Bruising Webcap", scientific: "Thaxterogaster purpurascens", genus: "Thaxterogaster", category: "Blewits & Lookalikes" },
 
       // LACTARIUS category
       { id: 155197, name: "Saffron Milkcap", scientific: "Lactarius deliciosus", genus: "Lactarius", category: "Lactarius" },
       { id: 155080, name: "Oak Milkcap", scientific: "Lactarius quietus", genus: "Lactarius", category: "Lactarius" },
       { id: 351313, name: "Woolly Milkcap", scientific: "Lactarius torminosus", genus: "Lactarius", category: "Lactarius" },
-      { id: 63526, name: "Fleecy Milkcap", scientific: "Lactifluus vellereus", genus: "Lactifluus", category: "Lactarius" },
+      { id: 351324, name: "Fleecy Milkcap", scientific: "Lactifluus vellereus", genus: "Lactifluus", category: "Lactarius" },
       { id: 382886, name: "Ugly Milkcap", scientific: "Lactarius turpis", genus: "Lactarius", category: "Lactarius" },
 
       // === Added species & new categories ===
-      { id: 1039724, name: "White Dapperling", scientific: "Leucoagaricus leucothites", genus: "Leucoagaricus", category: "Amanita" },
-      { id: 1039725, name: "Oak Mazegill", scientific: "Daedalea quercina", genus: "Daedalea", category: "Brackets & Polypores" },
-      { id: 1039726, name: "Common Earthball", scientific: "Scleroderma citrinum", genus: "Scleroderma", category: "Funnels & Grassland" },
-      { id: 1039727, name: "Beech Milkcap", scientific: "Lactarius blennius", genus: "Lactarius", category: "Lactarius" },
-      { id: 1039728, name: "White Knight", scientific: "Tricholoma album", genus: "Tricholoma", category: "Agaricus" },
-      { id: 1039729, name: "Blackening Brittlegill", scientific: "Russula nigricans", genus: "Russula", category: "Russula" },
-      { id: 1039730, name: "Geranium Brittlegill", scientific: "Russula fellea", genus: "Russula", category: "Russula" },
-      { id: 1039731, name: "Burnt Knight", scientific: "Tricholoma ustale", genus: "Tricholoma", category: "Webcaps & Darker" },
-      { id: 1039732, name: "Stocking Webcap", scientific: "Cortinarius torvus", genus: "Cortinarius", category: "Webcaps & Darker" },
-      { id: 1039733, name: "Plums and Custard", scientific: "Tricholomopsis rutilans", genus: "Tricholomopsis", category: "Webcaps & Darker" },
-      { id: 1039734, name: "Dappled Webcap", scientific: "Cortinarius bolaris", genus: "Cortinarius", category: "Webcaps & Darker" },
-      { id: 1039735, name: "Deadly Webcap", scientific: "Cortinarius rubellus", genus: "Cortinarius", category: "Webcaps & Darker" },
-      { id: 1039736, name: "Deadly Fibrecap", scientific: "Inosperma erubescens", genus: "Inosperma", category: "Webcaps & Darker" },
-      { id: 1039737, name: "Dewdrop Mottlegill", scientific: "Panaeolus acuminatus", genus: "Panaeolus", category: "Inkcaps and LBMs" },
+      { id: 1558279, name: "White Dapperling", scientific: "Leucoagaricus leucothites", genus: "Leucoagaricus", category: "Amanita" },
+      { id: 1536892, name: "Oak Mazegill", scientific: "Daedalea quercina", genus: "Daedalea", category: "Brackets & Polypores" },
+      { id: 55927, name: "Common Earthball", scientific: "Scleroderma citrinum", genus: "Scleroderma", category: "Funnels & Grassland" },
+      { id: 382877, name: "Beech Milkcap", scientific: "Lactarius blennius", genus: "Lactarius", category: "Lactarius" },
+      { id: 515020, name: "White Knight", scientific: "Tricholoma album", genus: "Tricholoma", category: "Agaricus" },
+      { id: 194414, name: "Blackening Brittlegill", scientific: "Russula nigricans", genus: "Russula", category: "Russula" },
+      { id: 352281, name: "Geranium Brittlegill", scientific: "Russula fellea", genus: "Russula", category: "Russula" },
+      { id: 118201, name: "Burnt Knight", scientific: "Tricholoma ustale", genus: "Tricholoma", category: "Webcaps & Darker" },
+      { id: 58674, name: "Stocking Webcap", scientific: "Cortinarius torvus", genus: "Cortinarius", category: "Webcaps & Darker" },
+      { id: 63387, name: "Plums and Custard", scientific: "Tricholomopsis rutilans", genus: "Tricholomopsis", category: "Webcaps & Darker" },
+      { id: 203804, name: "Dappled Webcap", scientific: "Cortinarius bolaris", genus: "Cortinarius", category: "Webcaps & Darker" },
+      { id: 500053, name: "Deadly Webcap", scientific: "Cortinarius rubellus", genus: "Cortinarius", category: "Webcaps & Darker" },
+      { id: 1112491, name: "Deadly Fibrecap", scientific: "Inosperma erubescens", genus: "Inosperma", category: "Webcaps & Darker" },
+      { id: 348990, name: "Dewdrop Mottlegill", scientific: "Panaeolus acuminatus", genus: "Panaeolus", category: "Inkcaps and LBMs" },
 
       // === Priority 2: Additional common UK species ===
-      { id: 63508, name: "The Deceiver", scientific: "Laccaria laccata", genus: "Laccaria", category: "Blewits & Lookalikes" },
-      { id: 63434, name: "Shaggy Scalycap", scientific: "Pholiota squarrosa", genus: "Pholiota", category: "Woodland Fungi" },
-      { id: 47351, name: "Brown Rollrim", scientific: "Paxillus involutus", genus: "Paxillus", category: "Woodland Fungi" },
-      { id: 63298, name: "Poison Pie", scientific: "Hebeloma crustuliniforme", genus: "Hebeloma", category: "Woodland Fungi" },
-      { id: 125427, name: "Butter Cap", scientific: "Rhodocollybia butyracea", genus: "Rhodocollybia", category: "Funnels & Grassland" },
-      { id: 63019, name: "Collared Earthstar", scientific: "Geastrum michelianum", genus: "Geastrum", category: "Distinctive Oddballs" },
-      { id: 350032, name: "Tawny Grisette", scientific: "Amanita fulva", genus: "Amanita", category: "Amanita" },
-      { id: 128873, name: "Snowy Waxcap", scientific: "Cuphophyllus virgineus", genus: "Cuphophyllus", category: "Waxcaps" },
-      { id: 553908, name: "Lurid Bolete", scientific: "Suillellus luridus", genus: "Suillellus", category: "Boletes" },
-      { id: 121103, name: "Violet Webcap", scientific: "Cortinarius violaceus", genus: "Cortinarius", category: "Webcaps & Darker" },
-      { id: 48700, name: "Peppery Bolete", scientific: "Chalciporus piperatus", genus: "Chalciporus", category: "Boletes" },
-    ];;
+      { id: 63236, name: "The Deceiver", scientific: "Laccaria laccata", genus: "Laccaria", category: "Blewits & Lookalikes" },
+      { id: 153445, name: "Shaggy Scalycap", scientific: "Pholiota squarrosa", genus: "Pholiota", category: "Woodland Fungi" },
+      { id: 55941, name: "Brown Rollrim", scientific: "Paxillus involutus", genus: "Paxillus", category: "Woodland Fungi" },
+      { id: 194307, name: "Poison Pie", scientific: "Hebeloma crustuliniforme", genus: "Hebeloma", category: "Woodland Fungi" },
+      { id: 118166, name: "Butter Cap", scientific: "Rhodocollybia butyracea", genus: "Rhodocollybia", category: "Funnels & Grassland" },
+      { id: 1085916, name: "Collared Earthstar", scientific: "Geastrum michelianum", genus: "Geastrum", category: "Distinctive Oddballs" },
+      { id: 63027, name: "Tawny Grisette", scientific: "Amanita fulva", genus: "Amanita", category: "Amanita" },
+      { id: 486380, name: "Snowy Waxcap", scientific: "Cuphophyllus virgineus", genus: "Cuphophyllus", category: "Waxcaps" },
+      { id: 824777, name: "Lurid Bolete", scientific: "Suillellus luridus", genus: "Suillellus", category: "Boletes" },
+      { id: 124344, name: "Violet Webcap", scientific: "Cortinarius violaceus", genus: "Cortinarius", category: "Webcaps & Darker" },
+      { id: 147354, name: "Peppery Bolete", scientific: "Chalciporus piperatus", genus: "Chalciporus", category: "Boletes" },
+    ];
 
     const NAME_ALIASES = new Map([
       ["Collybia personata", ["Lepista saeva", "Lepista personata", "Clitocybe saeva", "Tricholoma personatum"]],
@@ -1439,7 +1529,15 @@
       ["Geastrum michelianum", ["Geastrum triplex"]],
       ["Inocybe lilacina", ["Inocybe geophylla", "Inocybe geophylla var. lilacina"]],
       ["Thaxterogaster purpurascens", ["Cortinarius purpurascens", "Phlegmacium purpurascens"]],
-      ["Agaricus sylvaticus", ["Agaricus silvaticus"]]
+      ["Agaricus sylvaticus", ["Agaricus silvaticus"]],
+      // Names iNaturalist currently uses for these species
+      ["Neoboletus luridiformis", ["Neoboletus erythropus"]],
+      ["Plicaturopsis crispa", ["Plicatura crispa"]],
+      ["Panaeolina foenisecii", ["Panaeolus foenisecii"]],
+      ["Leucoagaricus leucothites", ["Leucocoprinus leucothites"]],
+      ["Daedalea quercina", ["Fomitopsis quercina"]],
+      ["Lactifluus vellereus", ["Lactarius vellereus"]],
+      ["Fomitopsis betulina", ["Piptoporus betulinus"]]
     ]);
 
     const speciesList = mushroomSpecies;
@@ -1454,52 +1552,52 @@
     const beginnerSpecies = speciesList.filter(s => beginnerScientificSet.has(s.scientific));
 
     /* -------- NOVICE difficulty: Beginner set + these extras -------- */
-    const noviceExtras = [
-      { id: 53778, name: "Death Cap", scientific: "Amanita phalloides", genus: "Amanita", category: "Amanita" },
-      { id: 58685, name: "Destroying Angel", scientific: "Amanita virosa", genus: "Amanita", category: "Amanita" },
-      { id: 118394, name: "Yellow Stainer", scientific: "Agaricus xanthodermus", genus: "Agaricus", category: "Agaricus" },
-      { id: 58646, name: "The Prince", scientific: "Agaricus augustus", genus: "Agaricus", category: "Agaricus" },
-      { id: 125683, name: "Golden Oyster", scientific: "Pleurotus citrinopileatus", genus: "Pleurotus", category: "Pleurotus" },
-      { id: 51869, name: "Crimson Waxcap", scientific: "Hygrocybe punicea", genus: "Hygrocybe", category: "Waxcaps" },
-      { id: 63475, name: "Parrot Waxcap", scientific: "Gliophorus psittacinus", genus: "Gliophorus", category: "Waxcaps" },
-      { id: 53903, name: "Bay Bolete", scientific: "Imleria badia", genus: "Imleria", category: "Boletes" },
-      { id: 63232, name: "Birch Bolete", scientific: "Leccinum scabrum", genus: "Leccinum", category: "Boletes" },
-      { id: 54163, name: "Red Cracking Bolete", scientific: "Xerocomellus chrysenteron", genus: "Xerocomellus", category: "Boletes" },
-      { id: 63446, name: "Common Bonnet", scientific: "Mycena galericulata", genus: "Mycena", category: "Mycena" },
-      { id: 63471, name: "Clustered Bonnet", scientific: "Mycena inclinata", genus: "Mycena", category: "Mycena" },
-      { id: 194437, name: "Charcoal Burner", scientific: "Russula cyanoxantha", genus: "Russula", category: "Russula" },
-      { id: 49446, name: "Beechwood Sickener", scientific: "Russula nobilis", genus: "Russula", category: "Russula" },
-      { id: 63188, name: "Ochre Brittlegill", scientific: "Russula ochroleuca", genus: "Russula", category: "Russula" },
-      { id: 124459, name: "Red-belted Polypore", scientific: "Fomitopsis pinicola", genus: "Fomitopsis", category: "Brackets & Polypores" },
-      { id: 83490, name: "Birch Polypore", scientific: "Fomitopsis betulina", genus: "Fomitopsis", category: "Brackets & Polypores" },
-      { id: 410641, name: "Lumpy Bracket", scientific: "Trametes gibbosa", genus: "Trametes", category: "Brackets & Polypores" },
-      { id: 55653, name: "Beefsteak Fungus", scientific: "Fistulina hepatica", genus: "Fistulina", category: "Brackets & Polypores" },
-      { id: 157989, name: "Giant (Blackening) Polypore", scientific: "Meripilus giganteus", genus: "Meripilus", category: "Brackets & Polypores" },
-      { id: 118078, name: "Dryad's Saddle", scientific: "Cerioporus squamosus", genus: "Cerioporus", category: "Brackets & Polypores" },
-      { id: 350511, name: "Winter Chanterelle", scientific: "Craterellus tubaeformis", genus: "Craterellus", category: "Chanterelles & Allies" },
-      { id: 127394, name: "False Chanterelle", scientific: "Hygrophoropsis aurantiaca", genus: "Hygrophoropsis", category: "Chanterelles & Allies" },
-      { id: 119227, name: "Trooping Funnel", scientific: "Infundibulicybe geotropa", genus: "Infundibulicybe", category: "Funnels & Grassland" },
-      { id: 120230, name: "St. George's Mushroom", scientific: "Calocybe gambosa", genus: "Calocybe", category: "Funnels & Grassland" },
-      { id: 48526, name: "Common Inkcap", scientific: "Coprinopsis atramentaria", genus: "Coprinopsis", category: "Inkcaps and LBMs" },
-      { id: 55453, name: "Magpie Inkcap", scientific: "Coprinopsis picacea", genus: "Coprinopsis", category: "Inkcaps and LBMs" },
-      { id: 54025, name: "Liberty Cap", scientific: "Psilocybe semilanceata", genus: "Psilocybe", category: "Inkcaps and LBMs" },
-      { id: 119945, name: "Orange Peel Fungus", scientific: "Aleuria aurantia", genus: "Aleuria", category: "Cup & other Saprotrophs" },
-      { id: 119224, name: "King Alfred's Cakes", scientific: "Daldinia concentrica", genus: "Daldinia", category: "Cup & other Saprotrophs" },
-      { id: 117556, name: "Jelly Ear", scientific: "Auricularia auricula-judae", genus: "Auricularia", category: "Cup & other Saprotrophs" },
-      { id: 54743, name: "Yellow Brain", scientific: "Tremella mesenterica", genus: "Tremella", category: "Cup & other Saprotrophs" },
-      { id: 47346, name: "Funeral Bell", scientific: "Galerina marginata", genus: "Galerina", category: "Woodland Fungi" },
-      { id: 56086, name: "False Morel", scientific: "Gyromitra esculenta", genus: "Gyromitra", category: "Woodland Fungi" },
-      { id: 54844, name: "Honey Fungus", scientific: "Armillaria mellea", genus: "Armillaria", category: "Woodland Fungi" },
-      { id: 481482, name: "Wrinkled Peach", scientific: "Rhodotus palmatus", genus: "Rhodotus", category: "Woodland Fungi" },
-      { id: 48767, name: "Sulphur Tuft", scientific: "Hypholoma fasciculare", genus: "Hypholoma", category: "Woodland Fungi" },
-      { id: 57343, name: "Giant Puffball", scientific: "Calvatia gigantea", genus: "Calvatia", category: "Distinctive Oddballs" },
-      { id: 469901, name: "Devil's Fingers", scientific: "Clathrus archeri", genus: "Clathrus", category: "Distinctive Oddballs" },
-      { id: 53764, name: "Dead Man's Fingers", scientific: "Xylaria polymorpha", genus: "Xylaria", category: "Distinctive Oddballs" },
-      { id: 63014, name: "Cauliflower Fungus", scientific: "Sparassis crispa", genus: "Sparassis", category: "Distinctive Oddballs" },
-      { id: 54594, name: "Stinkhorn", scientific: "Phallus impudicus", genus: "Phallus", category: "Distinctive Oddballs" },
-      { id: 119152, name: "Wood Blewit", scientific: "Collybia nuda", genus: "Collybia", category: "Blewits & Lookalikes" },
-      { id: 63509, name: "Amethyst Deceiver", scientific: "Laccaria amethystina", genus: "Laccaria", category: "Blewits & Lookalikes" },
-    ];
+    const noviceExtraScientific = new Set([
+      "Amanita phalloides",
+      "Amanita virosa",
+      "Agaricus xanthodermus",
+      "Agaricus augustus",
+      "Pleurotus citrinopileatus",
+      "Hygrocybe punicea",
+      "Gliophorus psittacinus",
+      "Imleria badia",
+      "Leccinum scabrum",
+      "Xerocomellus chrysenteron",
+      "Mycena galericulata",
+      "Mycena inclinata",
+      "Russula cyanoxantha",
+      "Russula nobilis",
+      "Russula ochroleuca",
+      "Fomitopsis pinicola",
+      "Fomitopsis betulina",
+      "Trametes gibbosa",
+      "Fistulina hepatica",
+      "Meripilus giganteus",
+      "Cerioporus squamosus",
+      "Craterellus tubaeformis",
+      "Hygrophoropsis aurantiaca",
+      "Infundibulicybe geotropa",
+      "Calocybe gambosa",
+      "Coprinopsis atramentaria",
+      "Coprinopsis picacea",
+      "Psilocybe semilanceata",
+      "Aleuria aurantia",
+      "Daldinia concentrica",
+      "Auricularia auricula-judae",
+      "Tremella mesenterica",
+      "Galerina marginata",
+      "Gyromitra esculenta",
+      "Armillaria mellea",
+      "Rhodotus palmatus",
+      "Hypholoma fasciculare",
+      "Calvatia gigantea",
+      "Clathrus archeri",
+      "Xylaria polymorpha",
+      "Sparassis crispa",
+      "Phallus impudicus",
+      "Collybia nuda",
+      "Laccaria amethystina"
+    ]);
 
     const SPECIES_FACTS = {
       "Agaricus augustus": [
@@ -1864,15 +1962,17 @@
       ]
     };
 
-    for (const species of mushroomSpecies) {
+    /* Novice = Beginner + extras (one shared species object per species) */
+    const noviceSpecies = speciesList.filter(s => beginnerScientificSet.has(s.scientific) || noviceExtraScientific.has(s.scientific));
+    const advancedSpecies = speciesList.filter(s => !beginnerScientificSet.has(s.scientific) && s.category !== "Cup & other Saprotrophs");
+    const speciesBySci = new Map(speciesList.map(s => [s.scientific, s]));
+
+    for (const species of speciesList) {
       const facts = SPECIES_FACTS[species.scientific];
       if (facts) species.facts = facts;
     }
 
-    for (const species of noviceExtras) {
-      const facts = SPECIES_FACTS[species.scientific];
-      if (facts) species.facts = facts;
-    }
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     function hideFact() {
       if (state.factTimer) {
@@ -1885,7 +1985,6 @@
       }
       if (!factBox) return;
       factBox.classList.remove('visible');
-      factBox.setAttribute('aria-hidden', 'true');
     }
 
     function showFact(species) {
@@ -1900,7 +1999,6 @@
       if (factLabel) factLabel.textContent = `${species.name.toUpperCase()} FACT`;
       factText.textContent = fact;
       factBox.classList.add('visible');
-      factBox.setAttribute('aria-hidden', 'false');
       if (state.factTimer) {
         clearTimeout(state.factTimer);
       }
@@ -1919,154 +2017,261 @@
         factProgress.classList.add('run');
       }
 
+      // The fact card sits in the page flow below the answers (so it never covers
+      // them); nudge the page just enough for it to be seen.
+      requestAnimationFrame(() => {
+        const r = factBox.getBoundingClientRect();
+        if (r.bottom > window.innerHeight) {
+          factBox.scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });
+        }
+      });
+
       state.factTimer = setTimeout(() => {
         hideFact();
       }, displayDuration);
     }
 
-    /* Novice = Beginner + extras (deduped by id to avoid duplicates) */
-    const noviceSpecies = Array.from(
-      new Map([...beginnerSpecies, ...noviceExtras].map(s => [s.id, s])).values()
-    );
-    const advancedSpecies = speciesList.filter(s => !beginnerScientificSet.has(s.scientific) && s.category !== "Cup & other Saprotrophs");
-
-
     /* ---------------- helpers ---------------- */
-    function equalsWithAliases(guess, target) {
-      const canon = target.trim();
-      const aliases = NAME_ALIASES.get(canon) || [];
-      const allOK = new Set([canon, ...aliases].map(s => s.toLowerCase()));
-      return allOK.has(guess.trim().toLowerCase());
+    function escapeHTML(str) {
+      return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-    const ALLOWED = new Set(['cc0', 'cc-by', 'cc-by-sa', 'cc-by-nd', 'cc-by-nc', 'cc-by-nc-sa', 'cc-by-nc-nd']);
-    const recentObs = new Map();
-    const perPage = 50; // page size for RG queue
-
-    /* ---- RG-only per-species queue with skip-if-empty + persistence (Option D) ---- */
-
-    // Per-user seed for deterministic page offsets (Option B)
-    function getUserSeed() {
-      let s = localStorage.getItem('userSeed');
-      if (!s) { s = String(Math.floor(Math.random() * 2147483647)); localStorage.setItem('userSeed', s); }
-      return s;
-    }
-    function hashStr(str) {
-      // simple FNV-1a 32-bit hash
-      let h = 2166136261;
-      for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = (h * 16777619) >>> 0; }
-      return h >>> 0;
-    }
-    const speciesQueues = new Map(); // scientific -> { page, items: [], exhausted, _loaded:false, _backlog:[] }
-    function getQueue(scientific) {
-      if (!speciesQueues.has(scientific)) {
-        speciesQueues.set(scientific, { page: (1 + (hashStr(getUserSeed() + '|' + scientific) % 8)), items: [], exhausted: false, _loaded: false, _backlog: [] });
+    // localStorage can throw (private mode, blocked storage) — never let that break the game
+    function lsGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+    function lsSet(key, val) { try { localStorage.setItem(key, val); } catch (e) { } }
+    // One-off clean-up of keys written by older versions of the app
+    try {
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const k = localStorage.key(i);
+        if (k && /^(rgQueue:|inatTaxonId:|obsUsed:|userSeed$)/.test(k)) localStorage.removeItem(k);
       }
-      return speciesQueues.get(scientific);
+    } catch (e) { }
+
+    /* ---------------- answer matching (text input) ---------------- */
+    function normName(s) {
+      return String(s || '')
+        .toLowerCase()
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/['’`]/g, '')
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim()
+        .replace(/^the /, '');
     }
-    async function fetchRGPage(taxonId, page, perPage) {
-      const qs = new URLSearchParams({
-        taxon_id: String(taxonId),
-        has: 'photos',
-        quality_grade: 'research',
-        per_page: String(perPage),
-        page: String(page),
-        order: 'desc',
-        order_by: 'observed_on',
-        fields:
-          'results.id,results.uri,results.taxon.id,' +
-          'results.photos.id,results.photos.url,results.photos.medium_url,results.photos.large_url,' +
-          'results.photos.attribution,results.photos.license_code'
-      });
-      const r = await fetch(`https://api.inaturalist.org/v1/observations?${qs}`);
-      if (!r.ok) return [];
-      const j = await r.json();
-      const results = Array.isArray(j.results) ? j.results : [];
-      // Keep only observations with at least 2 allowed-license photos
-      return results.filter(o => {
-        const good = (o.photos || []).filter(p => ALLOWED.has(String(p.license_code || '').toLowerCase()));
-        return good.length >= 2;
-      });
+
+    function candidateNames(species, latinOnly) {
+      const latin = [species.scientific, ...(NAME_ALIASES.get(species.scientific) || [])];
+      if (latinOnly) return latin;
+      const names = [species.name, species.name.replace(/\s*\([^)]*\)\s*/g, ' '), ...(species.altNames || [])];
+      return [...names, ...latin];
     }
-    // Persistence helpers (store compact list of observation IDs per species)
-    const RGQ_MAX = 30;
-    function qKey(scientific) { return `rgQueue:${scientific}`; }
-    function loadPersistedIds(scientific) {
-      try { const raw = localStorage.getItem(qKey(scientific)); return raw ? JSON.parse(raw) : []; }
-      catch (e) { return []; }
+
+    // Best (lowest) edit distance from the guess to any accepted name of a species,
+    // plus the typo allowance for the name it matched.
+    function bestDistance(guess, species, latinOnly) {
+      let best = { dist: Infinity, threshold: 0 };
+      for (const raw of candidateNames(species, latinOnly)) {
+        const name = normName(raw);
+        if (!name) continue;
+        const dist = levenshtein(guess, name);
+        if (dist < best.dist) best = { dist, threshold: Math.max(1, Math.floor(name.length / 4)) };
+      }
+      return best;
     }
-    function saveIds(scientific, ids) {
-      try {
-        const existing = loadPersistedIds(scientific);
-        const merged = Array.from(new Set([...(existing || []), ...ids]));
-        localStorage.setItem(qKey(scientific), JSON.stringify(merged.slice(0, RGQ_MAX)));
-      } catch (e) { }
+
+    // Correct only if the guess is within the typo allowance for the target AND
+    // no other species in the game is a closer match (so "Hygrocybe conica" is
+    // never accepted for "Hygrocybe coccinea", and "Hen of the Woods" is never
+    // accepted for "Chicken of the Woods").
+    function isTextAnswerCorrect(input, target, latinOnly) {
+      const guess = normName(input);
+      if (!guess) return false;
+      const t = bestDistance(guess, target, latinOnly);
+      if (t.dist > t.threshold) return false;
+      for (const other of speciesList) {
+        if (other === target) continue;
+        if (bestDistance(guess, other, latinOnly).dist < t.dist) return false;
+      }
+      return true;
     }
-    async function ensureQueue(scientific, taxonId, minNeeded = 1, attempts = 2) {
-      const q = getQueue(scientific);
-      const recent = recentObs.get(scientific) || new Set();
-      let tries = 0;
-      while (q.items.filter(o => !recent.has(o.id)).length < minNeeded && !q.exhausted && tries < attempts) {
-        const pageItems = await fetchRGPage(taxonId, q.page, perPage);
-        if (!pageItems.length) {
-          if (tries === 0 && q.page > 1) { q.page = 1; tries++; continue; }
-          q.exhausted = true; break;
+
+    /* ---------------- iNaturalist ---------------- */
+    // v2 honours `fields`, so each request is a few KB instead of several MB.
+    const INAT_OBS_API = 'https://api.inaturalist.org/v2/observations';
+    const LICENSES = ['cc0', 'cc-by', 'cc-by-sa', 'cc-by-nd', 'cc-by-nc', 'cc-by-nc-sa', 'cc-by-nc-nd'];
+    const ALLOWED = new Set(LICENSES);
+    const OBS_FIELDS = 'id,uuid,uri,taxon.id,taxon.iconic_taxon_name,photos.id,photos.url,photos.attribution,photos.license_code';
+    const PAGE_SIZE = 20;
+    const MAX_CONCURRENT = 3;
+
+    class InatError extends Error { }
+
+    // Tiny concurrency limiter so prefetching + photo-choice questions don't burst iNat
+    let activeRequests = 0;
+    const requestWaiters = [];
+    async function withSlot(fn) {
+      if (activeRequests >= MAX_CONCURRENT) await new Promise(r => requestWaiters.push(r));
+      activeRequests++;
+      try { return await fn(); }
+      finally {
+        activeRequests--;
+        const next = requestWaiters.shift();
+        if (next) next();
+      }
+    }
+
+    // Fetch with retry + exponential backoff for network errors, 429 and 5xx.
+    // Throws InatError if iNat can't be reached — callers must NOT treat that as "no photos".
+    async function inatFetch(params, retries = 3) {
+      const url = `${INAT_OBS_API}?${new URLSearchParams(params)}`;
+      let delay = 700;
+      for (let attempt = 0; ; attempt++) {
+        let r;
+        try {
+          r = await withSlot(() => fetch(url));
+        } catch (e) {
+          if (attempt >= retries) throw new InatError('Could not reach iNaturalist. Please check your connection.');
+          await sleep(delay); delay *= 2; continue;
         }
-        shuffle(pageItems);
-        // append non-recent first to maximize freshness
-        const fresh = pageItems.filter(o => !recent.has(o.id));
-        const rest = pageItems.filter(o => recent.has(o.id));
-        q.items.push(...fresh, ...rest);
-        // persist IDs for Option D
-        saveIds(scientific, pageItems.map(o => o.id));
-        q.page += 1;
-        tries += 1;
+        if (r.ok) return r.json();
+        if ((r.status === 429 || r.status >= 500) && attempt < retries) {
+          await sleep(delay); delay *= 2; continue;
+        }
+        throw new InatError(r.status === 429
+          ? 'iNaturalist is busy right now. Please wait a moment and try again.'
+          : `iNaturalist returned an error (${r.status}).`);
       }
     }
-    function takeFromQueue(scientific, excludeId = null) {
-      const q = getQueue(scientific);
-      const recent = recentObs.get(scientific) || new Set();
-      const idx = q.items.findIndex(o => o.id !== excludeId && !recent.has(o.id));
-      if (idx !== -1) { const [pick] = q.items.splice(idx, 1); return pick; }
-      // fallback: allow recent if necessary, but still not excludeId
-      const anyIdx = q.items.findIndex(o => o.id !== excludeId);
-      if (anyIdx !== -1) { const [pick] = q.items.splice(anyIdx, 1); return pick; }
-      return null;
+
+    function allowedPhotos(o) {
+      return (o.photos || []).filter(p => p && p.url && ALLOWED.has(String(p.license_code || '').toLowerCase()));
     }
 
-    /* ---- Option A: persistent used observation IDs per species (localStorage) ---- */
-    const USED_MAX = 50; // keep the last ~50 IDs per species
-
-    function usedKey(scientific) {
-      return `obsUsed:${scientific}`;
-    }
+    /* ---- Observations already shown, remembered across visits (by uuid) ---- */
+    const USED_MAX = 50; // per species
+    function usedKey(scientific) { return `obsUsedV2:${scientific}`; }
     function getUsedArray(scientific) {
       try {
-        const raw = localStorage.getItem(usedKey(scientific));
-        if (!raw) return [];
-        const arr = JSON.parse(raw);
-        return Array.isArray(arr) ? arr.filter(x => Number.isInteger(x)) : [];
-      } catch (e) {
-        return [];
-      }
+        const arr = JSON.parse(lsGet(usedKey(scientific)) || '[]');
+        return Array.isArray(arr) ? arr.filter(x => typeof x === 'string') : [];
+      } catch (e) { return []; }
     }
-    function getUsedSet(scientific) {
-      return new Set(getUsedArray(scientific));
-    }
-    function rememberUsed(scientific, id) {
-      if (!id) return;
-      const arr = getUsedArray(scientific);
-      if (!arr.includes(id)) arr.push(id);
+    function rememberUsed(scientific, obs) {
+      if (!obs || !obs.uuid) return;
+      const arr = getUsedArray(scientific).filter(u => u !== obs.uuid);
+      arr.push(obs.uuid);
       while (arr.length > USED_MAX) arr.shift();
-      try { localStorage.setItem(usedKey(scientific), JSON.stringify(arr)); } catch (e) { }
+      lsSet(usedKey(scientific), JSON.stringify(arr));
     }
 
-
+    /* ---- In-session per-species queue of ready-to-use observations ---- */
+    const recentObs = new Map(); // scientific -> Set of obs ids shown this session
     function pushRecent(scientific, id, max = 10) {
       if (!recentObs.has(scientific)) recentObs.set(scientific, new Set());
       const s = recentObs.get(scientific); s.add(id);
       if (s.size > max) { const first = s.values().next().value; s.delete(first); }
     }
+    function markShown(scientific, obs) {
+      if (!obs) return;
+      pushRecent(scientific, obs.id);
+      rememberUsed(scientific, obs);
+    }
+
+    const speciesQueues = new Map(); // scientific -> { items: [], loading: Promise|null, exhausted: bool }
+    function getQueue(scientific) {
+      if (!speciesQueues.has(scientific)) speciesQueues.set(scientific, { items: [], loading: null, exhausted: false });
+      return speciesQueues.get(scientific);
+    }
+
+    async function fetchObsPage(species, excludeUuids) {
+      const params = {
+        taxon_id: String(species.id),
+        quality_grade: 'research',
+        photos: 'true',
+        photo_license: LICENSES.join(','),
+        order_by: 'random',
+        per_page: String(PAGE_SIZE),
+        fields: OBS_FIELDS
+      };
+      if (excludeUuids.length) params.not_id = excludeUuids.join(',');
+      const j = await inatFetch(params);
+      const raw = Array.isArray(j.results) ? j.results : [];
+      // Keep only fungi (a safety net in case a taxon ID is ever wrong) with at least 2 openly-licensed photos
+      const usable = raw.filter(o => o.taxon && o.taxon.iconic_taxon_name === 'Fungi' && allowedPhotos(o).length >= 2);
+      return { usable, complete: raw.length < PAGE_SIZE };
+    }
+
+    function refillQueue(species) {
+      const q = getQueue(species.scientific);
+      if (q.loading) return q.loading;
+      q.loading = (async () => {
+        const have = new Set(q.items.map(o => o.id));
+        const recent = recentObs.get(species.scientific) || new Set();
+        const used = getUsedArray(species.scientific);
+        let res = await fetchObsPage(species, used);
+        // Everything has been seen before: allow repeats rather than run dry
+        if (!res.usable.length && used.length) res = await fetchObsPage(species, []);
+        const page = res.usable;
+        const fresh = page.filter(o => !have.has(o.id) && !recent.has(o.id));
+        const repeats = page.filter(o => !have.has(o.id) && recent.has(o.id));
+        q.items.push(...fresh, ...repeats);
+        // Only give up on a species once we've seen its whole (small) result set
+        if (!page.length && res.complete) q.exhausted = true;
+      })().finally(() => { q.loading = null; });
+      return q.loading;
+    }
+
+    function takeFromQueue(scientific, excludeId = null) {
+      const q = getQueue(scientific);
+      const recent = recentObs.get(scientific) || new Set();
+      let idx = q.items.findIndex(o => o.id !== excludeId && !recent.has(o.id));
+      if (idx === -1) idx = q.items.findIndex(o => o.id !== excludeId);
+      if (idx === -1) return null;
+      return q.items.splice(idx, 1)[0];
+    }
+
+    // Returns an observation, or null if the species genuinely has none to offer.
+    // Throws InatError if iNat can't be reached.
+    async function fetchOneObservation(species, excludeId = null) {
+      let pick = takeFromQueue(species.scientific, excludeId);
+      if (pick) return pick;
+      const q = getQueue(species.scientific);
+      if (q.exhausted) return null;
+      await refillQueue(species);
+      return takeFromQueue(species.scientific, excludeId);
+    }
+
+    function bestPhotoUrls(p) {
+      const med = p.medium_url || (p.url ? p.url.replace('/square.', '/medium.') : null);
+      const lg = p.large_url || (p.url ? p.url.replace('/square.', '/large.') : med);
+      return { med, lg };
+    }
+
+    // Warm the browser cache with exactly the image the <img> will pick, so the
+    // question appears with its photos already decoded. Never blocks for long.
+    function preloadPhoto(p, timeoutMs = 4000) {
+      const { med, lg } = bestPhotoUrls(p);
+      const img = new Image();
+      img.decoding = 'async';
+      img.srcset = `${med} 1x, ${lg} 2x`;
+      img.src = med;
+      const done = (img.decode ? img.decode() : new Promise((res, rej) => { img.onload = res; img.onerror = rej; })).catch(() => { });
+      return Promise.race([done, sleep(timeoutMs)]);
+    }
+
+    function photoTile(p) {
+      const { med, lg } = bestPhotoUrls(p);
+      const name = escapeHTML(cleanAttribution(p.attribution));
+      return `
+        <div class="img-wrap">
+          <img decoding="async" src="${escapeHTML(med)}" srcset="${escapeHTML(med)} 1x, ${escapeHTML(lg)} 2x" alt="Mushroom photo">
+          <div class="credit">
+            <span class="name">(c) ${name}</span>
+            <span class="license-badge">${escapeHTML(formatLicense(p.license_code))}</span>
+          </div>
+        </div>`;
+    }
+
     function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0;[a[i], a[j]] = [a[j], a[i]] } return a; }
     function setScreen(name) {
       Object.values(screens).forEach(s => s.classList.remove('active'));
@@ -2085,100 +2290,21 @@
       return s || 'iNaturalist user';
     }
 
-    async function resolveTaxonId(scientific) {
-      const key = `inatTaxonId:${scientific}`;
-      const cached = localStorage.getItem(key);
-      if (cached) return Number(cached);
-      const url = `https://api.inaturalist.org/v1/taxa?q=${encodeURIComponent(scientific)}&rank=species&is_active=true&per_page=1`;
-      const r = await fetch(url); const j = await r.json();
-      const id = j?.results?.[0]?.id;
-      if (!id) throw new Error(`Could not resolve taxon for ${scientific}`);
-      localStorage.setItem(key, String(id));
-      return id;
-    }
-
-    function bestPhotoUrls(p) {
-      const med = p.medium_url || (p.url ? p.url.replace('/square.', '/medium.') : null);
-      const lg = p.large_url || (p.url ? p.url.replace('/square.', '/large.') : med);
-      return { med, lg };
-    }
-
-
-    async function fetchOneObservation(scientific, excludeId = null) {
-      const taxonId = await resolveTaxonId(scientific);
-      const q = getQueue(scientific);
-
-      // Seed persisted backlog once per session
-      if (!q._loaded) { q._loaded = true; q._backlog = loadPersistedIds(scientific) || []; }
-
-      // Ensure at least one candidate in the queue
-      await ensureQueue(scientific, taxonId, 1, 2);
-
-      // If queue still empty (or only has excluded), try to hydrate a few persisted IDs
-      if ((!q.items.length || (q.items.length === 1 && q.items[0].id === excludeId)) && q._backlog && q._backlog.length) {
-        const idsToHydrate = q._backlog.splice(0, 6);
-        for (const id of idsToHydrate) {
-          try {
-            const qs = new URLSearchParams({
-              id: String(id),
-              fields: 'results.id,results.uri,results.photos.id,results.photos.url,results.photos.medium_url,results.photos.large_url,results.photos.attribution,results.photos.license_code'
-            });
-            const r = await fetch(`https://api.inaturalist.org/v1/observations?${qs}`);
-            if (!r.ok) continue;
-            const j = await r.json();
-            const o = (j.results || [])[0];
-            if (!o) continue;
-            const good = (o.photos || []).filter(p => ALLOWED.has(String(p.license_code || '').toLowerCase()));
-            if (good.length >= 2) q.items.push(o);
-          } catch (e) { }
-        }
-      }
-
-      // Try to take one now
-      let pick = takeFromQueue(scientific, excludeId);
-      if (pick) return pick;
-
-      // One last attempt: fetch one more page
-      await ensureQueue(scientific, taxonId, 1, 1);
-      pick = takeFromQueue(scientific, excludeId);
-      if (pick) return pick;
-
-      // Option B: let caller skip species if empty
-      return null;
-    }
-
-
-    function renderPhotos(observation, species) {
-      imageGrid.innerHTML = '';
-      const good = observation.photos.filter(p => ALLOWED.has(String(p.license_code || '').toLowerCase()));
-      const pick = good.slice(0, 3);
-      const four = pick.length === 3 ? [...pick, pick[0]] :
-        pick.length === 2 ? [...pick, ...pick] :
-          pick.length === 1 ? [pick[0], pick[0], pick[0], pick[0]] : [];
-
-      four.forEach((p) => {
-        const { med, lg } = bestPhotoUrls(p);
-        const name = cleanAttribution(p.attribution);
-        const card = document.createElement('div');
-        card.className = 'img-card';
-        card.innerHTML = `
-          <div class="img-wrap">
-            <img loading="lazy" decoding="async" src="${med}" srcset="${med} 1x, ${lg} 2x" alt="Mushroom photo">
-            <div class="credit">
-              <span class="name">(c) ${name}</span>
-              <span class="license-badge">${formatLicense(p.license_code)}</span>
-            </div>
-          </div>
-        `;
-        imageGrid.appendChild(card);
-      });
+    function renderPhotos(observation) {
+      const good = allowedPhotos(observation).slice(0, 4);
+      // Fill the 2×2 grid without leaving gaps
+      const four = good.length >= 4 ? good :
+        good.length === 3 ? [...good, good[0]] :
+          good.length === 2 ? [...good, ...good] :
+            good.length === 1 ? [good[0], good[0], good[0], good[0]] : [];
+      imageGrid.innerHTML = four.map(p => `<div class="img-card">${photoTile(p)}</div>`).join('');
     }
 
     function renderAnswers(options) {
       answersEl.innerHTML = options.map((sp, i) => {
         const onlyLatin = state.scientificMode === true;
-        const label = onlyLatin ? `<em>${sp.scientific}</em>` : `${sp.name}<small><em>${sp.scientific}</em></small>`;
-        return `<button class="answer" data-i="${i}" data-id="${sp.id}" data-name="${sp.name}" data-sci="${sp.scientific}">${label}</button>`;
+        const label = onlyLatin ? `<em>${escapeHTML(sp.scientific)}</em>` : `${escapeHTML(sp.name)}<small><em>${escapeHTML(sp.scientific)}</em></small>`;
+        return `<button class="answer" data-i="${i}" data-id="${sp.id}">${label}</button>`;
       }).join('');
     }
     function renderReview() {
@@ -2186,27 +2312,26 @@
       if (!tbody) return;
       tbody.innerHTML = state.review.map(row => {
         const links = row.uris.map((u, i) =>
-          `<a href="${u}" target="_blank" rel="noopener">Observation ${i + 1}</a>`
+          `<a href="${escapeHTML(u)}" target="_blank" rel="noopener">Observation ${i + 1}</a>`
         ).join(' &middot; ');
 
         let yourAnswerHtml = '';
         if (typeof row.chose === 'object' && row.chose !== null) {
-          // It's a species object from a photo choice question
           yourAnswerHtml = `
-            <span class="fungus-name">${row.chose.name}</span>
-            <span class="fungus-sci"><em>${row.chose.scientific}</em></span>
+            <span class="fungus-name">${escapeHTML(row.chose.name)}</span>
+            <span class="fungus-sci"><em>${escapeHTML(row.chose.scientific)}</em></span>
           `;
         } else {
-          // It's a string from a classic or text input question
-          yourAnswerHtml = row.chose;
+          // Typed answer from a text input question
+          yourAnswerHtml = escapeHTML(row.chose);
         }
 
         return `
           <tr>
             <td>${row.n}</td>
             <td>
-              <span class="fungus-name">${row.name}</span>
-              <span class="fungus-sci"><em>${row.scientific}</em></span>
+              <span class="fungus-name">${escapeHTML(row.name)}</span>
+              <span class="fungus-sci"><em>${escapeHTML(row.scientific)}</em></span>
             </td>
             <td>${row.correct ? '<span class="badge ok">Correct</span>' : '<span class="badge no">Incorrect</span>'}</td>
             <td>${yourAnswerHtml}</td>
@@ -2218,8 +2343,8 @@
 
     function refreshNewPhotosBtn() {
       const left = state.newPhotosLeft;
-      newBtn.textContent = `New Photos (${left} remaining)`;
-      newBtn.disabled = state.newPhotosUsed || left <= 0;
+      if (!state.loadingNewPhotos) newBtn.textContent = `New Photos (${left} remaining)`;
+      newBtn.disabled = state.answered || state.loadingNewPhotos || state.newPhotosUsed || left <= 0;
     }
 
     // Difficulty-aware New Photos quota (per 10 questions)
@@ -2228,92 +2353,6 @@
       if (difficulty === 'beginner') return units * 3;
       if (difficulty === 'novice') return units * 2;
       return units * 1; // intermediate & expert
-    }
-
-    async function fetchPhotoChoiceData(retryCount = 0) {
-      if (retryCount > 3) {
-        throw new Error("Failed to fetch photo choice data after multiple retries.");
-      }
-      const pool = advancedSpecies.filter(s => s.category !== 'Distinctive Oddballs');
-      const remaining = pool.filter(s => !state.seen.has(s.scientific));
-      const base = remaining.length ? remaining : pool;
-      const correctSpecies = base[Math.floor(Math.random() * base.length)];
-
-      const options = pickOptions(correctSpecies);
-
-      const observationPromises = options.map(species => fetchOneObservation(species.scientific));
-      const observations = await Promise.all(observationPromises);
-
-      const validObservations = observations.every(obs => obs !== null);
-      if (!validObservations || observations.length < 4) {
-        console.error("Could not fetch 4 observations for photo choice question. Retrying...");
-        return fetchPhotoChoiceData(retryCount + 1);
-      }
-
-      const correctIndex = options.findIndex(s => s.id === correctSpecies.id);
-
-      options.forEach((s, i) => {
-        rememberUsed(s.scientific, observations[i].id);
-        pushRecent(s.scientific, observations[i].id);
-      });
-      state.seen.add(correctSpecies.scientific);
-
-      return {
-        correctSpecies,
-        observations,
-        correctIndex,
-        options
-      };
-    }
-
-    function renderPhotoChoiceQuestion(data) {
-      const { correctSpecies, observations, correctIndex } = data;
-
-      const questionName = state.scientificMode ? `<em>${correctSpecies.scientific}</em>` : correctSpecies.name;
-      const plainName = state.scientificMode ? correctSpecies.scientific : correctSpecies.name;
-
-      let questionTemplate;
-      // Handle "The" for common names, otherwise use a/an
-      if (!state.scientificMode && plainName.toLowerCase().startsWith('the ')) {
-        questionTemplate = `Which of these shows ${questionName}?`;
-      } else {
-        const firstLetter = plainName.charAt(0).toLowerCase();
-        const article = ['a', 'e', 'i', 'o', 'u'].includes(firstLetter) ? 'an' : 'a';
-        questionTemplate = `Which of these shows ${article} ${questionName}?`;
-      }
-      $('#questionText').innerHTML = questionTemplate;
-      $('#questionText').style.display = 'block';
-      imageGrid.style.display = 'none';
-      newBtn.style.display = 'none';
-
-      answersEl.innerHTML = '';
-      answersEl.className = 'image-grid';
-
-      observations.forEach((obs, index) => {
-        const photo = obs.photos[0];
-        const { med, lg } = bestPhotoUrls(photo);
-        const name = cleanAttribution(photo.attribution);
-        const card = document.createElement('button');
-        card.className = 'img-card answer';
-        card.dataset.index = index;
-        card.innerHTML = `
-          <div class="img-wrap">
-            <img loading="lazy" decoding="async" src="${med}" srcset="${med} 1x, ${lg} 2x" alt="Mushroom photo">
-            <div class="credit">
-              <span class="name">(c) ${name}</span>
-              <span class="license-badge">${formatLicense(photo.license_code)}</span>
-            </div>
-          </div>
-        `;
-        answersEl.appendChild(card);
-      });
-
-      state.current = {
-        correct: correctSpecies,
-        correctIndex: correctIndex,
-        uris: observations.map(o => o.uri),
-        options: data.options
-      };
     }
 
     function levenshtein(a, b) {
@@ -2334,203 +2373,330 @@
       return matrix[b.length][a.length];
     }
 
-    function renderTextInputQuestion(data) {
-      const { correct, obs } = data;
-      renderPhotos(obs, correct);
-      newBtn.style.display = 'inline-flex';
-      refreshNewPhotosBtn();
-
-      const placeholder = state.scientificMode ? "Enter Latin name..." : "Enter common or Latin name...";
-      answersEl.innerHTML = `
-        <div class="text-input-row">
-          <input type="text" id="textAnswerInput" class="answer text-input" placeholder="${placeholder}">
-          <button id="textAnswerSubmit" class="btn answer">Submit</button>
-        </div>
-      `;
-      answersEl.className = 'answers';
-    }
-
     function pickOptions(correct) {
-      // Determine roster by difficulty for decoy sourcing
-      const roster =
-        (state.difficulty === 'beginner') ? beginnerSpecies :
-          (state.difficulty === 'novice') ? noviceSpecies :
-            speciesList;    // full list for decoys
-
-      const all = roster.filter(s => s !== correct);
-
-      // BEGINNER: restrict whole round to beginner roster
-      if (state.difficulty === 'beginner') {
-        const pool = beginnerSpecies.filter(s => s !== correct);
-        shuffle(pool);
-        return [correct, ...pool.slice(0, 3)].sort(() => Math.random() - .5);
+      // BEGINNER / NOVICE: random decoys from that roster
+      if (state.difficulty === 'beginner' || state.difficulty === 'novice') {
+        const roster = state.difficulty === 'beginner' ? beginnerSpecies : noviceSpecies;
+        const pool = shuffle(roster.filter(s => s !== correct));
+        return shuffle([correct, ...pool.slice(0, 3)]);
       }
 
-      // NOVICE: simple random decoys from novice roster (no category rule)
-      if (state.difficulty === 'novice') {
-        const pool = noviceSpecies.filter(s => s !== correct);
-        shuffle(pool);
-        return [correct, ...pool.slice(0, 3)].sort(() => Math.random() - .5);
-      }
+      // INTERMEDIATE & EXPERT: decoys from the full list
+      const all = speciesList.filter(s => s !== correct);
+      const sameCat = shuffle(all.filter(s => s.category === correct.category));
+      const otherCats = shuffle(all.filter(s => s.category !== correct.category));
 
-      // INTERMEDIATE & EXPERT
-      const sameCat = all.filter(s => s.category === correct.category && s.scientific !== correct.scientific);
-      const otherCats = all.filter(s => s.category !== correct.category);
-      shuffle(sameCat); shuffle(otherCats);
-
-      if (state.difficulty === 'intermediate') {
-        // 2 from same category, 1 from another category
-        const picks = [...sameCat.slice(0, 2), ...otherCats.slice(0, 1)];
-        // Safety fill
-        while (picks.length < 3) {
-          const extra = all.find(s => !picks.includes(s));
-          if (!extra) break;
-          picks.push(extra);
-        }
-        return [correct, ...picks.slice(0, 3)].sort(() => Math.random() - .5);
-      } else {
-        // EXPERT: all 3 decoys from the same category
-        const picks = sameCat.slice(0, 3);
-        // Safety fill
-        if (picks.length < 3) {
-          const extras = all.filter(s => !picks.includes(s));
-          shuffle(extras);
-          picks.push(...extras.slice(0, 3 - picks.length));
-        }
-        return [correct, ...picks.slice(0, 3)].sort(() => Math.random() - .5);
+      // Intermediate: 2 from same category + 1 other; Expert: all 3 from the same category
+      const picks = state.difficulty === 'intermediate'
+        ? [...sameCat.slice(0, 2), ...otherCats.slice(0, 1)]
+        : sameCat.slice(0, 3);
+      if (picks.length < 3) {
+        const extras = shuffle(all.filter(s => !picks.includes(s)));
+        picks.push(...extras.slice(0, 3 - picks.length));
       }
+      return shuffle([correct, ...picks.slice(0, 3)]);
     }
 
-    async function renderNewQuestion() {
-      updateHud();
-      // Clear previous content before fetching new data
-      imageGrid.innerHTML = '';
-      answersEl.innerHTML = '';
+    /* ---------------- question building (fetch) vs showing (render) ---------------- */
+    function nextQuestionType() {
+      if (state.difficulty !== 'expert') return 'classic';
+      return state.questionTypeQueue.pop() || 'classic';
+    }
 
-      // Determine question type
-      if (state.difficulty === 'expert') {
-        if (state.questionTypeQueue.length > 0) {
-          state.questionType = state.questionTypeQueue.pop();
-        } else {
-          console.error("Expert question queue depleted unexpectedly.");
-          state.questionType = 'classic'; // Fallback
+    function questionPool() {
+      let pool = (state.difficulty === 'beginner') ? beginnerSpecies :
+        (state.difficulty === 'novice') ? noviceSpecies :
+          advancedSpecies;
+      if (state.difficulty === 'expert') pool = pool.filter(s => s.category !== 'Distinctive Oddballs');
+      return pool;
+    }
+
+    function pickCorrectSpecies(pool, tried) {
+      const fresh = pool.filter(s => !state.seen.has(s.scientific) && !tried.has(s.scientific));
+      const base = fresh.length ? fresh : pool.filter(s => !tried.has(s.scientific));
+      if (!base.length) return null;
+      return base[Math.floor(Math.random() * base.length)];
+    }
+
+    // Fetches everything a question needs (including decoding its photos) without
+    // touching the DOM, so the next question can be prepared in the background.
+    async function buildQuestion(type) {
+      const tried = new Set();
+      const MAX_SPECIES_TRIES = 6;
+
+      if (type === 'photoChoice') {
+        const pool = advancedSpecies.filter(s => s.category !== 'Distinctive Oddballs');
+        for (let attempt = 0; attempt < MAX_SPECIES_TRIES; attempt++) {
+          const correct = pickCorrectSpecies(pool, tried);
+          if (!correct) break;
+          tried.add(correct.scientific);
+          const options = pickOptions(correct);
+          const observations = await Promise.all(options.map(s => fetchOneObservation(s)));
+          if (observations.some(o => !o)) continue; // a species had nothing usable — pick again
+          state.seen.add(correct.scientific);
+          const photos = observations.map(o => allowedPhotos(o)[0]);
+          options.forEach((s, i) => markShown(s.scientific, observations[i]));
+          await Promise.all(photos.map(p => preloadPhoto(p)));
+          return { type, correct, options, observations, photos, correctIndex: options.indexOf(correct) };
         }
-      } else {
-        state.questionType = 'classic';
+        throw new InatError('Could not find enough photos for this question.');
       }
 
-      // Reset UI elements to a clean state
+      const pool = questionPool();
+      for (let attempt = 0; attempt < MAX_SPECIES_TRIES; attempt++) {
+        const correct = pickCorrectSpecies(pool, tried);
+        if (!correct) break;
+        tried.add(correct.scientific);
+        const obs = await fetchOneObservation(correct);
+        if (!obs) continue; // genuinely no usable observations — try another species
+        state.seen.add(correct.scientific);
+        markShown(correct.scientific, obs);
+        await Promise.all(allowedPhotos(obs).slice(0, 4).map(p => preloadPhoto(p)));
+        const question = { type, correct, obs };
+        if (type === 'classic') question.options = pickOptions(correct);
+        return question;
+      }
+      throw new InatError('Could not find photos for this question.');
+    }
+
+    // Kick off building the following question while the player looks at this one
+    function prefetchNext() {
+      state.next = null;
+      if (state.q + 1 >= state.total) return;
+      const type = nextQuestionType();
+      const gameId = state.gameId;
+      const promise = buildQuestion(type);
+      promise.catch(() => { }); // handled when awaited
+      state.next = { type, promise, gameId };
+    }
+
+    async function takeNextQuestion() {
+      const pending = state.next;
+      state.next = null;
+      if (pending && pending.gameId === state.gameId) {
+        try { return await pending.promise; }
+        catch (e) { return buildQuestion(pending.type); } // one fresh attempt with the same question type
+      }
+      return buildQuestion(nextQuestionType());
+    }
+
+    function showQuestion(question) {
+      state.questionId++;
+      state.questionType = question.type;
+      state.answered = false;
+      state.newPhotosUsed = false;
+      state.loadingNewPhotos = false;
+      updateHud();
+
       $('#questionText').style.display = 'none';
       imageGrid.style.display = 'grid';
       answersEl.className = 'answers';
 
-      // Fetch and render based on type
-      if (state.questionType === 'photoChoice') {
-        const data = await fetchPhotoChoiceData();
-        renderPhotoChoiceQuestion(data);
-      } else {
-        let pool = (state.difficulty === 'beginner') ? beginnerSpecies :
-          (state.difficulty === 'novice') ? noviceSpecies :
-            advancedSpecies;
-        if (state.difficulty === 'expert') {
-          pool = pool.filter(s => s.category !== 'Distinctive Oddballs');
-        }
-        const remaining = pool.filter(s => !state.seen.has(s.scientific));
-        const base = remaining.length ? remaining : pool;
-        const correct = base[Math.floor(Math.random() * base.length)];
-
-        const obs = await fetchOneObservation(correct.scientific);
-        if (!obs) {
-          console.error("Failed to fetch observation, trying again.");
-          return renderNewQuestion(); // Retry if fetch fails
-        }
-
-        state.current = { correct, obsId: obs.id, uris: [obs.uri] };
-        state.seen.add(correct.scientific);
-        state.newPhotosUsed = false;
-
-        if (state.questionType === 'textInput') {
-          renderTextInputQuestion({ correct, obs });
+      if (question.type === 'photoChoice') {
+        const { correct, photos, observations, correctIndex, options } = question;
+        const questionName = state.scientificMode ? `<em>${escapeHTML(correct.scientific)}</em>` : escapeHTML(correct.name);
+        const plainName = state.scientificMode ? correct.scientific : correct.name;
+        let questionTemplate;
+        // Handle "The" for common names, otherwise use a/an
+        if (!state.scientificMode && plainName.toLowerCase().startsWith('the ')) {
+          questionTemplate = `Which of these shows ${questionName}?`;
         } else {
-          newBtn.style.display = 'inline-flex';
-          refreshNewPhotosBtn();
-          renderPhotos(obs, correct);
-          const options = pickOptions(correct);
-          state.current.options = options; // Store options for later
-          renderAnswers(options);
+          const article = 'aeiou'.includes(plainName.charAt(0).toLowerCase()) ? 'an' : 'a';
+          questionTemplate = `Which of these shows ${article} ${questionName}?`;
+        }
+        $('#questionText').innerHTML = questionTemplate;
+        $('#questionText').style.display = 'block';
+        imageGrid.style.display = 'none';
+        imageGrid.innerHTML = '';
+        newBtn.style.display = 'none';
+        answersEl.className = 'image-grid';
+        answersEl.innerHTML = photos.map((p, index) =>
+          `<button class="img-card answer" data-index="${index}">${photoTile(p)}</button>`).join('');
+        state.current = { correct, correctIndex, options, uris: observations.map(o => o.uri) };
+      } else {
+        const { correct, obs } = question;
+        state.current = { correct, obsId: obs.id, uris: [obs.uri], options: question.options };
+        renderPhotos(obs);
+        newBtn.style.display = 'inline-flex';
+        refreshNewPhotosBtn();
+        if (question.type === 'textInput') {
+          const placeholder = state.scientificMode ? "Enter Latin name..." : "Enter common or Latin name...";
+          answersEl.innerHTML = `
+            <div class="text-input-row">
+              <input type="text" id="textAnswerInput" class="answer text-input" placeholder="${placeholder}" autocomplete="off" autocapitalize="off" spellcheck="false">
+              <button id="textAnswerSubmit" class="btn answer">Submit</button>
+            </div>
+          `;
+        } else {
+          renderAnswers(question.options);
         }
       }
+      prefetchNext();
+    }
+
+    /* ---------------- transitions & loading/error states ---------------- */
+    const gameContent = $('#gameContent');
+    const gameLoading = $('#gameLoading');
+
+    function animateOnce(el, cls, ms = 300) {
+      return new Promise(resolve => {
+        if (reduceMotion) { el.classList.add(cls); resolve(); return; }
+        let done = false;
+        const finish = () => { if (done) return; done = true; el.removeEventListener('animationend', onEnd); resolve(); };
+        const onEnd = e => { if (e.target === el) finish(); };
+        el.addEventListener('animationend', onEnd);
+        el.classList.add(cls);
+        setTimeout(finish, ms + 150); // fallback if animationend never fires
+      });
+    }
+
+    async function enterContent() {
+      gameContent.classList.remove('is-exiting');
+      await animateOnce(gameContent, 'is-entering');
+      gameContent.classList.remove('is-entering');
+    }
+
+    function showLoadError(message, retryAction) {
+      $('#errorMsg').textContent = message || 'Could not load the next mushroom. Please try again.';
+      state.retryAction = retryAction;
+      $('#errorModal').classList.add('active');
+    }
+
+    // Move on to the next question (after an answer, or when retrying after an error)
+    async function advance() {
+      const gameId = state.gameId;
+      if (!gameContent.classList.contains('is-exiting')) await animateOnce(gameContent, 'is-exiting');
+      // Only show the loader if the prefetched question isn't ready almost immediately
+      const loaderTimer = setTimeout(() => { if (gameLoading) gameLoading.hidden = false; }, 250);
+      let question;
+      try {
+        question = await takeNextQuestion();
+      } catch (e) {
+        console.error(e);
+        if (gameId !== state.gameId) return;
+        showLoadError(e instanceof InatError ? e.message : 'Could not load the next mushroom. Please try again.', advance);
+        return;
+      } finally {
+        clearTimeout(loaderTimer);
+        if (gameLoading) gameLoading.hidden = true;
+      }
+      if (gameId !== state.gameId || !state.isGameActive) return; // player left the game meanwhile
+      showQuestion(question);
+      await enterContent();
+    }
+
+    function endGame() {
+      state.isGameActive = false;
+      state.next = null;
+      const pointsPerQ = state.scientificMode ? 20 : 10;
+      $('#finalScore').textContent = state.score;
+      $('#finalScoreTotal').textContent = String(state.total * pointsPerQ);
+
+      const diffPill = $('#resultsDifficulty');
+      let pillText = state.difficulty;
+      if (state.scientificMode) {
+        diffPill.classList.add('scientific');
+        pillText += ' &middot; Scientific Mode';
+      } else {
+        diffPill.classList.remove('scientific');
+      }
+      diffPill.innerHTML = pillText;
+
+      setScreen('results');
+      renderReview();
     }
 
     /* Start game */
-    $('#startBtn').addEventListener('click', async () => {
+    async function startGame() {
+      state.gameId++;
       state.isGameActive = true;
       state.score = 0; state.q = 0; state.seen.clear();
       state.review = [];
+      state.next = null;
       state.newPhotosLeft = computeNewPhotoQuota(state.total, state.difficulty);
       qEl.textContent = `0 / ${state.total}`;
 
       state.questionTypeQueue = [];
       if (state.difficulty === 'expert') {
         const numSets = state.total / 10;
-        const classicCount = 3 * numSets;
-        const photoChoiceCount = 3 * numSets;
-        const textInputCount = 4 * numSets;
-        const queue = [
-          ...Array(classicCount).fill('classic'),
-          ...Array(photoChoiceCount).fill('photoChoice'),
-          ...Array(textInputCount).fill('textInput')
-        ];
-        state.questionTypeQueue = shuffle(queue);
+        state.questionTypeQueue = shuffle([
+          ...Array(3 * numSets).fill('classic'),
+          ...Array(3 * numSets).fill('photoChoice'),
+          ...Array(4 * numSets).fill('textInput')
+        ]);
       }
 
+      const gameId = state.gameId;
       setScreen('loading');
+      let question;
       try {
-        await renderNewQuestion();
-        setScreen('game');
-        const gameContent = $('#gameContent');
-        // Use rAF to ensure the animation plays on the first question
-        requestAnimationFrame(() => {
-          gameContent.classList.add('is-entering');
-          requestAnimationFrame(() => {
-            gameContent.classList.add('visible');
-            gameContent.addEventListener('animationend', () => {
-              gameContent.classList.remove('is-entering', 'visible');
-            }, { once: true });
-          });
-        });
+        question = await buildQuestion(nextQuestionType());
       } catch (e) {
-        $('#errorMsg').textContent = 'Could not load the first mushroom question. Please try again.';
-        $('#errorModal').classList.add('active');
+        console.error(e);
+        if (gameId !== state.gameId) return;
+        state.isGameActive = false;
+        showLoadError(e instanceof InatError ? e.message : 'Could not load the first mushroom question. Please try again.', startGame);
+        return;
       }
-    });
+      if (gameId !== state.gameId) return;
+      gameContent.classList.remove('is-exiting', 'is-entering');
+      showQuestion(question);
+      setScreen('game');
+      await enterContent();
+    }
+
+    $('#startBtn').addEventListener('click', startGame);
 
     $('#retryBtn').addEventListener('click', () => {
       $('#errorModal').classList.remove('active');
+      const action = state.retryAction;
+      state.retryAction = null;
+      if (action) action(); else setScreen('start');
+    });
+
+    $('#errorHomeBtn').addEventListener('click', () => {
+      $('#errorModal').classList.remove('active');
+      state.retryAction = null;
+      state.isGameActive = false;
+      state.gameId++; // abandon anything still loading
+      state.next = null;
+      gameContent.classList.remove('is-exiting', 'is-entering');
       setScreen('start');
     });
 
     newBtn.addEventListener('click', async () => {
-      if (state.newPhotosUsed || state.newPhotosLeft <= 0) return;
+      if (state.answered || state.loadingNewPhotos || state.newPhotosUsed || state.newPhotosLeft <= 0) return;
+      const questionId = state.questionId;
+      const correct = state.current.correct;
 
-      newBtn.disabled = true;
-      const obs = await fetchOneObservation(state.current.correct.scientific, state.current.obsId);
+      state.loadingNewPhotos = true;
+      newBtn.textContent = 'Loading new photos…';
+      refreshNewPhotosBtn();
+      let obs = null;
+      try {
+        obs = await fetchOneObservation(correct, state.current.obsId);
+        if (obs) await Promise.all(allowedPhotos(obs).slice(0, 4).map(p => preloadPhoto(p)));
+      } catch (e) {
+        console.error(e);
+      }
+      // Ignore the result if the player has answered or moved on in the meantime
+      if (questionId !== state.questionId) return;
+      state.loadingNewPhotos = false;
 
-      if (obs) {
-        renderPhotos(obs, state.current.correct);
+      if (obs && !state.answered) {
+        renderPhotos(obs);
         state.current.obsId = obs.id;
         if (!state.current.uris.includes(obs.uri)) state.current.uris.push(obs.uri);
         state.newPhotosUsed = true;
         state.newPhotosLeft--;
-        pushRecent(state.current.correct.scientific, obs.id);
-        rememberUsed(state.current.correct.scientific, obs.id);
+        markShown(correct.scientific, obs);
       }
-
       refreshNewPhotosBtn();
     });
 
     answersEl.addEventListener('click', e => {
       const btn = e.target.closest('.answer'); if (!btn) return;
+      if (!state.isGameActive || state.answered || !state.current) return;
 
       let wasCorrect = false;
       let chose = '';
@@ -2552,8 +2718,6 @@
           const correctBtn = buttons.find(b => Number(b.dataset.id) === state.current.correct.id);
           if (correctBtn) correctBtn.classList.add('correct');
         }
-        pushRecent(state.current.correct.scientific, state.current.obsId);
-        rememberUsed(state.current.correct.scientific, state.current.obsId);
 
       } else if (state.questionType === 'photoChoice') {
         const buttons = [...answersEl.querySelectorAll('.answer')];
@@ -2561,7 +2725,6 @@
         const chosenIndex = Number(btn.dataset.index);
         wasCorrect = chosenIndex === state.current.correctIndex;
         chose = state.current.options[chosenIndex]; // Store the full species object
-        uris = state.current.uris;
 
         if (wasCorrect) {
           btn.classList.add('correct');
@@ -2577,52 +2740,7 @@
         if (!userInput) return;
 
         chose = userInput;
-        const userInputLower = userInput.toLowerCase();
-        const correctCommon = state.current.correct.name.toLowerCase();
-        const correctScientific = state.current.correct.scientific.toLowerCase();
-
-        if (state.scientificMode) {
-          const userInputLower = userInput.toLowerCase();
-          const correctScientific = state.current.correct.scientific;
-          const scientificNames = [correctScientific, ...(NAME_ALIASES.get(correctScientific) || [])];
-
-          wasCorrect = false;
-          for (const name of scientificNames) {
-            const nameLower = name.toLowerCase();
-            const dist = levenshtein(userInputLower, nameLower);
-            const threshold = Math.max(1, Math.floor(nameLower.length / 4));
-            if (dist <= threshold) {
-              wasCorrect = true;
-              break;
-            }
-          }
-        } else {
-          // First, check if the input is an exact match for another species' common name.
-          const isOtherSpecies = speciesList.some(s =>
-            s.name.toLowerCase() === userInputLower && s.name.toLowerCase() !== correctCommon
-          );
-
-          if (isOtherSpecies) {
-            wasCorrect = false;
-          } else {
-            // If not, proceed with the Levenshtein check for typos.
-            const distCommon = levenshtein(userInputLower, correctCommon);
-            const thresholdCommon = Math.max(1, Math.floor(correctCommon.length / 4));
-            wasCorrect = (distCommon <= thresholdCommon) || equalsWithAliases(userInput, state.current.correct.scientific);
-
-            if (!wasCorrect && state.current.correct.altNames) {
-              for (const altName of state.current.correct.altNames) {
-                const altNameLower = altName.toLowerCase();
-                const distAlt = levenshtein(userInputLower, altNameLower);
-                const thresholdAlt = Math.max(1, Math.floor(altNameLower.length / 4));
-                if (distAlt <= thresholdAlt) {
-                  wasCorrect = true;
-                  break;
-                }
-              }
-            }
-          }
-        }
+        wasCorrect = isTextAnswerCorrect(userInput, state.current.correct, state.scientificMode);
 
         const correctAnswer = state.scientificMode
           ? state.current.correct.scientific
@@ -2632,10 +2750,11 @@
         btn.disabled = true;
         inputEl.value = correctAnswer;
         inputEl.classList.add(wasCorrect ? 'correct' : 'incorrect');
-        pushRecent(state.current.correct.scientific, state.current.obsId);
-        rememberUsed(state.current.correct.scientific, state.current.obsId);
         timeout = 1000;
       }
+
+      state.answered = true;
+      refreshNewPhotosBtn();
 
       if (wasCorrect) {
         state.score += state.scientificMode ? 20 : 10;
@@ -2658,71 +2777,31 @@
 
       state.q++;
       const isLast = state.q >= state.total;
+      const gameId = state.gameId;
 
-      if (isLast) {
-        setTimeout(() => {
-          const pointsPerQ = state.scientificMode ? 20 : 10;
-          $('#finalScore').textContent = state.score;
-          $('#finalScoreTotal').textContent = String(state.total * pointsPerQ);
-
-          const diffPill = $('#resultsDifficulty');
-          let pillText = state.difficulty;
-          if (state.scientificMode) {
-            diffPill.classList.add('scientific');
-            pillText += ' &middot; Scientific Mode';
-          } else {
-            diffPill.classList.remove('scientific');
-          }
-          diffPill.innerHTML = pillText;
-
-          setScreen('results');
-          renderReview();
-        }, timeout);
-      } else {
-        // Use timeout to allow correct/incorrect styles to be seen
-        setTimeout(() => {
-          const gameContent = $('#gameContent');
-          gameContent.classList.add('is-exiting');
-
-          gameContent.addEventListener('animationend', async function onExit() {
-            gameContent.removeEventListener('animationend', onExit);
-
-            // 1. Render the new content
-            await renderNewQuestion();
-
-            // 2. Animate the new content in
-            gameContent.classList.remove('is-exiting');
-            gameContent.classList.add('is-entering');
-
-            // Use requestAnimationFrame to ensure the 'visible' class is applied after 'is-entering'
-            requestAnimationFrame(() => {
-              gameContent.classList.add('visible');
-            });
-
-            // 3. Clean up classes after the enter animation finishes
-            gameContent.addEventListener('animationend', function onEnter() {
-              gameContent.removeEventListener('animationend', onEnter);
-              gameContent.classList.remove('is-entering', 'visible');
-            }, { once: true });
-
-          }, { once: true });
-        }, timeout);
-      }
+      // Pause so the correct/incorrect styles can be seen
+      setTimeout(() => {
+        if (gameId !== state.gameId) return;
+        if (isLast) endGame(); else advance();
+      }, timeout);
     });
 
 
-    // Keyboard shortcuts for Expert mode
+    // Keyboard shortcuts for Expert mode (only while a question is on screen)
     document.addEventListener('keydown', (e) => {
       if (!state.isGameActive || state.difficulty !== 'expert') return;
+      if (!screens.game.classList.contains('active') || document.querySelector('.modal.active')) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
       const key = e.key.toLowerCase();
       const active = document.activeElement;
+      const typing = active && active.id === 'textAnswerInput';
 
       if (state.questionType === 'textInput' && key === 'enter') {
         const submit = $('#textAnswerSubmit');
         if (submit && !submit.disabled) { e.preventDefault(); submit.click(); }
-      } else if (key === 'n' && active && active.id !== 'textAnswerInput') {
+      } else if (key === 'n' && !typing) {
         if (newBtn.style.display !== 'none' && !newBtn.disabled) newBtn.click();
-      } else if (state.questionType === 'photoChoice' && ['1', '2', '3', '4'].includes(key) && active && active.id !== 'textAnswerInput') {
+      } else if (state.questionType === 'photoChoice' && ['1', '2', '3', '4'].includes(key) && !typing) {
         const idx = Number(key) - 1;
         const btn = answersEl.querySelector(`.answer[data-index="${idx}"]`);
         if (btn && !btn.disabled) btn.click();
